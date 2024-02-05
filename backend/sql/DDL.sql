@@ -6,14 +6,15 @@ CREATE TABLE Department(
 CREATE TABLE Medicine (
     Name VARCHAR(100),
     Instructions TEXT NOT NULL,
-    Descreption TEXT NOT NULL,
-    PRIMARY KEY(Name)
+    Description TEXT NOT NULL,
+    Expiration_Date DATE Not NULL,
+    PRIMRY KEY(Name)
 );
 
 CREATE TABLE Insurance (
     ID VARCHAR(100),
     Company VARCHAR(100) NOT NULL,
-    Price VARCHAR(100) NOT NULL,
+    Price_Coverage FLOAT NOT NULL,
     Purchase_Date DATE NOT NULL,
     Expiration_Date DATE NOT NULL,
     Property TEXT NOT NULL,
@@ -24,10 +25,11 @@ CREATE TABLE Administrator (
     ID VARCHAR(100),
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
-    Gender VARCHAR(20) NOT NULL,
+    Sex VARCHAR(20) NOT NULL,
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100) NOT NULL,
+    Phone_Number VARCHAR(100) NULL,
+    Email VARCHAR(100) NOT NULL,
     PRIMARY KEY(ID)
 );
 
@@ -37,10 +39,11 @@ CREATE TABLE Patient (
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
     Insurance_ID VARCHAR(100) NOT NULL,
-    Gender VARCHAR(20) NOT NULL,
+    Sex VARCHAR(20) NOT NULL,
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100) NOT NULL,
+    Phone_Number VARCHAR(100) NULL,
+    Email VARCHAR(100) NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
 );
@@ -61,12 +64,13 @@ CREATE TABLE Physician (
     password VARCHAR(200) NOT NULL,
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
-    Gender VARCHAR(20) NOT NULL,
+    Sex VARCHAR(20) NOT NULL,
     Department VARCHAR(20) NOT NULL,
     Title VARCHAR(20) NOT NULL,
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100) NOT NULL,
+    Phone_Number VARCHAR(100) NULL,
+    Email VARCHAR(100) NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Department) REFERENCES Department(Name)
 );
