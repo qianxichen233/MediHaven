@@ -31,7 +31,7 @@ CREATE TABLE Administrator (
     Phone_Number VARCHAR(100) NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Pub_key VARCHAR(1000) NOT NULL,
-    Magic VARCHAR(100) NOT NULL,
+    Magic BLOB NOT NULL,
     PRIMARY KEY(ID)
 );
 
@@ -74,7 +74,7 @@ CREATE TABLE Physician (
     Phone_Number VARCHAR(100) NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Pub_key VARCHAR(1000) NOT NULL,
-    Magic VARCHAR(100) NOT NULL,
+    Magic BLOB NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Department) REFERENCES Department(Name)
 );
@@ -107,6 +107,8 @@ CREATE TABLE register_code (
 
 CREATE TABLE mykeys (
     key_ID INT NOT NULL AUTO_INCREMENT,
-    ekey BINARY NOT NULL,
+    key_type VARCHAR(20),
+    ekey BLOB NOT NULL,
+    nonce BLOB NOT NULL,
     PRIMARY KEY(key_id)
 );

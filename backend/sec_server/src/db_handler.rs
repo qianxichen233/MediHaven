@@ -48,10 +48,37 @@
 //     }
 // }
 
-use odbc_api::{ Connection, ConnectionOptions, Cursor, Environment, IntoParameter };
+use odbc_api::{
+    Connection,
+    ConnectionOptions,
+    Cursor,
+    Environment,
+    IntoParameter,
+    parameter::{ Blob, BlobRead },
+    buffers::TextRowSet,
+    ResultSetMetadata,
+};
+
+use chacha20poly1305::{
+    aead::{
+        Aead,
+        AeadCore,
+        KeyInit,
+        OsRng,
+        generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
+    },
+    consts::{ B0, B1 },
+    ChaCha20Poly1305,
+};
+
 use anyhow::Error;
 use std::collections::HashMap;
 use lazy_static::lazy_static;
+
+use std::{ ffi::CStr, io, path::PathBuf };
+
+type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
+type NonceType = GenericArray<u8, UInt<UInt<UInt<UInt<UTerm, B1>, B1>, B0>, B0>>;
 
 lazy_static! {
     static ref MYENV: Environment = Environment::new().unwrap();
@@ -60,7 +87,7 @@ lazy_static! {
 pub struct DBHandler<'a> {
     // env: Environment,
     connection: Connection<'a>,
-    MAC_Key: Option<Vec<u8>>,
+    MAC_Key: KeyType,
 }
 pub enum DBVALUE {
     StringVal(String),
@@ -77,28 +104,75 @@ impl DBHandler<'_> {
                 connection_string,
                 ConnectionOptions::default()
             )?,
-            MAC_Key: None,
+            MAC_Key: GenericArray::default(),
         })
     }
 
-    // fn create_param(&self, fields: &HashMap<&str, &DBVALUE>) -> ()
+    pub fn init(&mut self, root_key: &KeyType) -> Result<(), Error> {
+        let sql = "SELECT ekey, nonce FROM mykeys WHERE key_type='int' LIMIT 1;";
 
-    pub fn init(&self) -> Result<(), Error> {
-        // self.env = Some(Environment::new()?);
+        let cipher = ChaCha20Poly1305::new(&root_key);
 
-        // let connection_string =
-        //     "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven;UID=root;PWD=";
+        if let Some(mut cursor) = self.connection.execute(&sql, ())? {
+            let headline: Vec<String> = cursor.column_names()?.collect::<Result<_, _>>()?;
+            println!("{:?}", headline);
 
-        // self.connection = Some(
-        //     self.env.connect_with_connection_string(
-        //         connection_string,
-        //         ConnectionOptions::default()
-        //     )?
-        // );
+            // Use schema in cursor to initialize a text buffer large enough to hold the largest
+            // possible strings for each column up to an upper limit of 4KiB.
+            let mut buffers = TextRowSet::for_cursor(5000, &mut cursor, Some(4096))?;
+            // Bind the buffer to the cursor. It is now being filled with every call to fetch.
+            let mut row_set_cursor = cursor.bind_buffer(&mut buffers)?;
 
-        /*
-        to-do: get MAC Key
-        */
+            // Iterate over batches
+            while let Some(batch) = row_set_cursor.fetch()? {
+                // Within a batch, iterate over every row
+                for row_index in 0..batch.num_rows() {
+                    // Within a row iterate over every column
+                    let record: Vec<&[u8]> = (0..batch.num_cols())
+                        .map(|col_index| { batch.at(col_index, row_index).unwrap_or(&[]) })
+                        .collect();
+
+                    let mut nonce: NonceType = GenericArray::default();
+                    nonce.copy_from_slice(&record[1][..]);
+                    let key_vec = cipher
+                        .decrypt(&nonce, record[0].as_ref())
+                        .expect("decrypt key error")
+                        .to_vec();
+
+                    println!("int key: {:?}", key_vec);
+                    self.MAC_Key.copy_from_slice(&key_vec[..]);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    // fn generate_magic(&self, )
+
+    pub fn store_key(&self, key: &[u8], nonce: &[u8], key_type: &str) -> Result<(), Error> {
+        let sql = "INSERT INTO mykeys(key_type, ekey, nonce) VALUES (?, ?, ?)";
+
+        let cursor_key = std::io::Cursor::new(key);
+        let key_buf = io::BufReader::new(cursor_key);
+        let mut blob_key = BlobRead::with_upper_bound(key_buf, 1000);
+
+        let cursor_nonce = std::io::Cursor::new(nonce);
+        let nonce_buf = io::BufReader::new(cursor_nonce);
+        let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
+
+        let params = (
+            &key_type.into_parameter(),
+            &mut blob_key.as_blob_param(),
+            &mut blob_nonce.as_blob_param(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
 
         Ok(())
     }
