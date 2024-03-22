@@ -1,0 +1,27 @@
+import grpc
+from . import mediheaven_pb2
+from . import mediheaven_pb2_grpc
+
+
+class GRPC_API_Client:
+    def __init__(self) -> None:
+        self.channel = grpc.insecure_channel("localhost:50051")
+
+    def register(self, request):
+        stub = mediheaven_pb2_grpc.AccountStub(self.channel)
+        request = mediheaven_pb2.RegisterRequest(**request)
+        response = stub.register(request)
+        return response
+
+    def test(self):
+        # Create a stub (client) for the service
+        stub = mediheaven_pb2_grpc.CodeStub(self.channel)
+        # Create a request message
+        request = mediheaven_pb2.CodeRequest(AccountType="admin", signature="test")
+        # Call the remote method
+        response = stub.getCode(request)
+        # Print the response
+        print(f"Response: {response.code}, {response.successful}")
+
+
+GRPC_API = GRPC_API_Client()
