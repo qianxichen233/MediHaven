@@ -30,7 +30,7 @@ CREATE TABLE Administrator (
     Date_Of_Birth DATE NOT NULL,
     Phone_Number VARCHAR(100) NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
-    Pub_key BINARY NOT NULL,
+    Pub_key VARCHAR(1000) NOT NULL,
     Magic VARCHAR(100) NOT NULL,
     PRIMARY KEY(ID)
 );
@@ -73,7 +73,7 @@ CREATE TABLE Physician (
     Date_Of_Birth DATE NOT NULL,
     Phone_Number VARCHAR(100) NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
-    Pub_key BINARY NOT NULL,
+    Pub_key VARCHAR(1000) NOT NULL,
     Magic VARCHAR(100) NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Department) REFERENCES Department(Name)
