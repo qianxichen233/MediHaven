@@ -10,6 +10,11 @@ path = "src/main.rs"
 [[bin]]
 name = "init-key"
 path = "src/init_key.rs"
+
+[[bin]]
+name = "sign-test"
+path = "src/sign.rs"
+
 # [[bin]]
 # name = "mediheaven-client"
 # path = "src/client.rs"
@@ -33,6 +38,10 @@ pem = "3.0.3"
 chacha20poly1305 = "0.10.1"
 generic-array = "1.0.0"
 sha256 = "1.5.0"
+rsa = { version = "0.9.6", features = ["pem", "std", "u64_digit", "sha2"] }
+openssl = "0.10.64"
+rand = "0.8.5"
+base64 = "0.22.0"
 
 [build-dependencies]
 tonic-build = "0.11.0"

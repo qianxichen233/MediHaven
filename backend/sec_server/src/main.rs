@@ -1,4 +1,5 @@
 use sec_server::db_handler;
+use sec_server::mycrypto::MyCrypto;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -114,11 +115,19 @@ impl Account for AccountService {
         &self,
         request: Request<LoginRequest>
     ) -> Result<Response<LoginResponse>, Status> {
+        let failed_msg = Response::new(LoginResponse {
+            successful: false,
+            pub_key: String::new(),
+        });
         println!("got message: {:?}", request);
 
         let req = request.into_inner();
         match MY_DB_HANDLER.get_admin(&req.email) {
             Ok(result) => {
+                if !MyCrypto::verify_signature(&req.signature, &result["Pub_key"], &req.email) {
+                    return Ok(failed_msg);
+                }
+
                 let reply = LoginResponse {
                     successful: true,
                     pub_key: result["Pub_key"].clone(),
@@ -128,15 +137,9 @@ impl Account for AccountService {
             }
             Err(err) => {
                 eprintln!("Error: {}", err);
+                return Ok(failed_msg);
             }
         }
-
-        Ok(
-            Response::new(LoginResponse {
-                successful: false,
-                pub_key: String::new(),
-            })
-        )
     }
 }
 

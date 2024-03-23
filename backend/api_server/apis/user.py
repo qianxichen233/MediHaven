@@ -32,7 +32,11 @@ class register(Resource):
     def post(self):
         args = self.parser.parse_args()
 
-        print(GRPC_API.register(args))
+        response = GRPC_API.register(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        print(response)
 
         return jsonify({"message": f"success!"})
 
@@ -47,7 +51,11 @@ class login(Resource):
     def post(self):
         args = self.parser.parse_args()
 
-        print(GRPC_API.login(args))
+        response = GRPC_API.login(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        print(response)
 
         return jsonify({"message": f"success!"})
 
