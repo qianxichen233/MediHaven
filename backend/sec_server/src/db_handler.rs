@@ -1,3 +1,5 @@
+use crate::constants::MAGIC_KEYS;
+
 use odbc_api::{
     Connection,
     ConnectionOptions,
@@ -21,7 +23,7 @@ use chacha20poly1305::{
     ChaCha20Poly1305,
 };
 
-use anyhow::Error;
+use anyhow::{ anyhow, Error };
 use std::{ collections::HashMap };
 use lazy_static::lazy_static;
 
@@ -36,12 +38,14 @@ lazy_static! {
 }
 
 pub struct DBHandler<'a> {
+    // to-do: make this thread safe
     connection: Connection<'a>,
     MAC_Key: KeyType,
 }
 pub enum DBVALUE {
     StringVal(String),
     IntVal(i32),
+    BlobVal(Vec<u8>),
 }
 
 unsafe impl Send for DBHandler<'_> {}
@@ -108,6 +112,34 @@ impl DBHandler<'_> {
         Ok(())
     }
 
+    fn execute_query(
+        &self,
+        sql: &str,
+        params: impl odbc_api::ParameterCollectionRef
+    ) -> Result<HashMap<String, Vec<u8>>, Error> {
+        let mut result: HashMap<String, Vec<u8>> = HashMap::new();
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let headline: Vec<String> = cursor.column_names()?.collect::<Result<_, _>>()?;
+
+            let mut buffers = TextRowSet::for_cursor(5000, &mut cursor, Some(4096))?;
+            let mut row_set_cursor = cursor.bind_buffer(&mut buffers)?;
+            while let Some(batch) = row_set_cursor.fetch()? {
+                for row_index in 0..batch.num_rows() {
+                    let record: Vec<&[u8]> = (0..batch.num_cols())
+                        .map(|col_index| { batch.at(col_index, row_index).unwrap_or(&[]) })
+                        .collect();
+
+                    for (index, val) in headline.iter().enumerate() {
+                        result.insert(val.clone(), record[index].to_vec());
+                    }
+                }
+            }
+        }
+
+        return Ok(result);
+    }
+
     fn generate_magic(
         &self,
         keys: &Vec<&str>,
@@ -131,6 +163,39 @@ impl DBHandler<'_> {
         let blob = BlobRead::with_upper_bound(buf, 1000);
 
         return Ok(blob);
+    }
+
+    fn verify_magic(
+        &self,
+        keys: &Vec<&str>,
+        fields: &HashMap<String, Vec<u8>>
+    ) -> Result<bool, chacha20poly1305::Error> {
+        let mut plaintext = String::new();
+        for &key in keys {
+            match &String::from_utf8(fields[key].clone()) {
+                Ok(value) => {
+                    plaintext += value;
+                }
+                Err(_) => {
+                    return Ok(false);
+                }
+            }
+        }
+
+        let hash = digest(plaintext).into_bytes();
+        let cipher = ChaCha20Poly1305::new(&self.MAC_Key);
+
+        let (nonce_vec, ciphertext) = fields["Magic"].split_at(12);
+        let mut nonce: NonceType = GenericArray::default();
+        nonce.copy_from_slice(&nonce_vec[..]);
+
+        let plaintext = cipher.decrypt(&nonce, ciphertext.as_ref())?;
+
+        if hash != plaintext {
+            return Ok(false);
+        }
+
+        return Ok(true);
     }
 
     pub fn store_key(&self, key: &[u8], nonce: &[u8], key_type: &str) -> Result<(), Error> {
@@ -164,18 +229,9 @@ impl DBHandler<'_> {
         let sql =
             "INSERT INTO Administrator(First_Name, Last_Name, Sex, Age, Date_Of_Birth, Phone_Number, Email, Pub_key, Magic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        let keys = vec![
-            "First_Name",
-            "Last_Name",
-            "Sex",
-            "Age",
-            "Date_Of_Birth",
-            "Phone_Number",
-            "Email",
-            "Pub_key"
-        ];
-
-        let mut magic = self.generate_magic(&keys, &fields).expect("generate magic failed");
+        let mut magic = self
+            .generate_magic(&MAGIC_KEYS["Administrator"], &fields)
+            .expect("generate magic failed");
 
         let params = (
             &fields["First_Name"].into_parameter(),
@@ -199,5 +255,31 @@ impl DBHandler<'_> {
         }
 
         Ok(())
+    }
+
+    pub fn get_admin(&self, email: &str) -> Result<HashMap<String, String>, Error> {
+        let sql = "SELECT * FROM Administrator WHERE Email = ?";
+        let data = self.execute_query(&sql, (&email.into_parameter(),))?;
+        let mut result = HashMap::new();
+
+        match self.verify_magic(&MAGIC_KEYS["Administrator"], &data) {
+            Ok(val) => {
+                if !val {
+                    return Err(anyhow!("integrity check failed!"));
+                }
+            }
+            Err(_) => {
+                return Err(anyhow!("integrity check failed!"));
+            }
+        }
+
+        for (key, value) in data {
+            if key == "Magic" {
+                continue;
+            }
+            result.insert(key, String::from_utf8(value)?);
+        }
+
+        return Ok(result);
     }
 }

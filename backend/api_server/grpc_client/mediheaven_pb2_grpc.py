@@ -4,8 +4,6 @@ import grpc
 
 from . import mediheaven_pb2 as mediheaven__pb2
 
-# import mediheaven_pb2 as mediheaven__pb2
-
 
 class CodeStub(object):
     """Missing associated documentation comment in .proto file."""

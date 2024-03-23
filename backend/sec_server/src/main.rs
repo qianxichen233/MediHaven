@@ -1,6 +1,7 @@
-mod db_handler;
+use sec_server::db_handler;
 
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 use tonic::{ transport::Server, Request, Response, Status };
 use lazy_static::lazy_static;
@@ -37,6 +38,9 @@ lazy_static! {
         handler.init(&root_key).expect("root key initialization failed!");
         handler
     };
+
+    // global hashmap serves as the cache of the public key
+    static ref PUBKEY_CACHE: Mutex<HashMap<&'static str, &'static str>> = Mutex::new(HashMap::new());
 }
 
 #[derive(Debug, Default)]
@@ -113,13 +117,26 @@ impl Account for AccountService {
         println!("got message: {:?}", request);
 
         let req = request.into_inner();
+        match MY_DB_HANDLER.get_admin(&req.email) {
+            Ok(result) => {
+                let reply = LoginResponse {
+                    successful: true,
+                    pub_key: result["Pub_key"].clone(),
+                };
 
-        let reply = LoginResponse {
-            successful: true,
-            pub_key: String::from("test"),
-        };
+                return Ok(Response::new(reply));
+            }
+            Err(err) => {
+                eprintln!("Error: {}", err);
+            }
+        }
 
-        Ok(Response::new(reply))
+        Ok(
+            Response::new(LoginResponse {
+                successful: false,
+                pub_key: String::new(),
+            })
+        )
     }
 }
 

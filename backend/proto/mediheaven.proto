@@ -13,7 +13,7 @@ service Account {
 
 /*Service Code*/
 message CodeRequest {
-    string AccountType = 1;
+    string email = 1;
     string signature = 2;
     string expiration_date = 3;
 }
@@ -44,6 +44,7 @@ message SuccessResponse {
 message LoginRequest {
     string email = 1;
     string signature = 2;
+    string type = 3;
 }
 
 message LoginResponse {

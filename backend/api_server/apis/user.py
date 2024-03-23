@@ -37,4 +37,20 @@ class register(Resource):
         return jsonify({"message": f"success!"})
 
 
+class login(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument("email", type=str, help="Email address", required=True)
+        self.parser.add_argument("type", type=str, help="Account Type", required=True)
+        self.parser.add_argument("signature", type=str, help="signature", required=True)
+
+    def post(self):
+        args = self.parser.parse_args()
+
+        print(GRPC_API.login(args))
+
+        return jsonify({"message": f"success!"})
+
+
 api.add_resource(register, "/register")
+api.add_resource(login, "/login")

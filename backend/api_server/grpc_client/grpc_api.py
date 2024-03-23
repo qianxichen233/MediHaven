@@ -13,6 +13,12 @@ class GRPC_API_Client:
         response = stub.register(request)
         return response
 
+    def login(self, request):
+        stub = mediheaven_pb2_grpc.AccountStub(self.channel)
+        request = mediheaven_pb2.LoginRequest(**request)
+        response = stub.Login(request)
+        return response
+
     def test(self):
         # Create a stub (client) for the service
         stub = mediheaven_pb2_grpc.CodeStub(self.channel)
