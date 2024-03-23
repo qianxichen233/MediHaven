@@ -64,12 +64,63 @@ impl Code for CodeService {
 
         let req = request.into_inner();
 
-        let reply = CodeResponse {
-            successful: true,
-            code: String::from("example"),
-        };
+        let failed_msg = Response::new(CodeResponse {
+            successful: false,
+            code: String::from(""),
+        });
 
-        Ok(Response::new(reply))
+        if !myutils::verify_timestamp(&req.timestamp, 120) {
+            return Ok(failed_msg);
+        }
+
+        let signature_plaintext = (
+            object! {
+            email: req.email.clone(),
+            account_type: req.account_type.clone(),
+            timestamp: req.timestamp.clone()
+        }
+        ).dump();
+        println!("{:?}", signature_plaintext);
+
+        let cache = PUBKEY_CACHE.lock().unwrap();
+
+        let mut cache_key = String::from(req.account_type.clone());
+        cache_key += "_";
+        cache_key += &req.email;
+
+        if cache.contains_key(&cache_key) {
+            if
+                !MyCrypto::verify_signature(
+                    &req.signature,
+                    &cache[&cache_key],
+                    &signature_plaintext
+                )
+            {
+                println!("signature fail");
+                return Ok(failed_msg);
+            }
+
+            let code = myutils::generate_code();
+
+            let mut fields: HashMap<&str, &str> = HashMap::new();
+            fields.insert("CODE", &code);
+            fields.insert("Account_type", &req.account_type);
+            fields.insert("Expiration_Date", &req.expiration_date);
+
+            if let Err(err) = MY_DB_HANDLER.add_code(&fields) {
+                eprintln!("Error: {}", err);
+                return Ok(failed_msg);
+            }
+
+            let success_msg = Response::new(CodeResponse {
+                successful: true,
+                code,
+            });
+
+            return Ok(success_msg);
+        }
+
+        Ok(failed_msg)
     }
 }
 
@@ -126,7 +177,7 @@ impl Account for AccountService {
 
         let req = request.into_inner();
 
-        if !myutils::verify_timestamp(&req.timestamp, 10) {
+        if !myutils::verify_timestamp(&req.timestamp, 120) {
             return Ok(failed_msg);
         }
 

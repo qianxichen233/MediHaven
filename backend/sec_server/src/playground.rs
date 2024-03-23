@@ -39,10 +39,14 @@ fn main() {
     // Sign
     let email = "qc815@nyu.edu";
     let timestamp = "2024-03-23 20:10:00";
+    let account_type = "admin";
 
-    let data = object! {
+    let data =
+        object! {
         email: email,
+        account_type: account_type,
         timestamp: timestamp
+        
     };
     // let signature_vec = base64
     //     ::decode(

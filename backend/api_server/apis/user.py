@@ -1,5 +1,6 @@
 from flask import Flask, Blueprint, jsonify
 from flask_restful import Api, Resource, reqparse
+from datetime import datetime, timedelta
 
 from grpc_client.grpc_api import GRPC_API
 
@@ -63,5 +64,31 @@ class login(Resource):
         return jsonify({"message": f"success!"})
 
 
+class code(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument("email", type=str, help="Email address", required=True)
+        self.parser.add_argument(
+            "account_type", type=str, help="Account Type", required=True
+        )
+        self.parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
+        self.parser.add_argument("signature", type=str, help="signature", required=True)
+
+    def post(self):
+        args = self.parser.parse_args()
+
+        current_time = datetime.now()
+        future_time = current_time + timedelta(weeks=1)
+        timestamp_str = future_time.strftime("%Y-%m-%d %H:%M:%S")
+        args.expiration_date = timestamp_str
+
+        response = GRPC_API.get_code(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        return jsonify({"code": response.code})
+
+
 api.add_resource(register, "/register")
 api.add_resource(login, "/login")
+api.add_resource(code, "/code")

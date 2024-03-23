@@ -244,10 +244,8 @@ impl DBHandler<'_> {
             &fields["Pub_key"].into_parameter(),
             &mut magic.as_blob_param(),
         );
-        println!("in db handler: {:?}", fields);
 
         if let Some(mut cursor) = self.connection.execute(&sql, params)? {
-            println!("success!");
             let mut row = cursor.next_row()?.unwrap();
             let mut buf: Vec<u8> = Vec::new();
             row.get_text(1, &mut buf)?;
@@ -258,7 +256,6 @@ impl DBHandler<'_> {
     }
 
     pub fn get_admin(&self, email: &str) -> Result<HashMap<String, String>, Error> {
-        println!("get admin");
         let sql = "SELECT * FROM Administrator WHERE Email = ?";
         let data = self.execute_query(&sql, (&email.into_parameter(),))?;
         let mut result = HashMap::new();
@@ -282,5 +279,30 @@ impl DBHandler<'_> {
         }
 
         return Ok(result);
+    }
+
+    pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        let sql =
+            "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Magic) VALUES (?, ?, ?, ?)";
+
+        let mut magic = self
+            .generate_magic(&MAGIC_KEYS["register_code"], &fields)
+            .expect("generate magic failed");
+
+        let params = (
+            &fields["CODE"].into_parameter(),
+            &fields["Account_type"].into_parameter(),
+            &fields["Expiration_Date"].into_parameter(),
+            &mut magic.as_blob_param(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
     }
 }

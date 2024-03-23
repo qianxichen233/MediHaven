@@ -99,6 +99,7 @@ CREATE TABLE register_code (
     CODE VARCHAR(100),
     Account_type  VARCHAR(20) NOT NULL,
     Expiration_Date DATE NOT NULL,
+    Magic BLOB NOT NULL,
     PRIMARY KEY(CODE),
     CHECK (
         Account_type IN ("admin", "physician")
