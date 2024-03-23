@@ -1,53 +1,3 @@
-// fn create_insert_sql(table: &str, fields: &Vec<&str>) -> String {
-//     let sql = String::from("INSERT INTO ");
-//     let val = String::from("");
-//     sql += table + "(";
-//     for (index, field) in fields.iter().enumerate() {
-//         sql += field;
-//         val += "?";
-//         if index != fields.len() - 1 {
-//             sql += ", ";
-//             val += ", ";
-//         }
-//     }
-//     sql += ") VALUES (" + val + ")";
-//     return sql;
-// }
-
-// fn create_select_sql(table: &str, fields: &Vec<&str>) -> String {
-//     let sql = String::from("SELECT FROM ");
-//     let val = String::from("");
-//     sql += table + "(";
-//     for (index, field) in fields.iter().enumerate() {
-//         sql += field;
-//         val += "?";
-//         if index != fields.len() - 1 {
-//             sql += ", ";
-//             val += ", ";
-//         }
-//     }
-//     sql += ") VALUES (" + val + ")";
-//     return sql;
-// }
-
-// struct DB_Table {
-//     table: &str,
-//     fields: &Vec<&str>,
-//     insert_sql: &str,
-//     select_sql: &str
-// }
-
-// impl DB_Table {
-//     pub fn new(table: &str, fields: &Vec<&str>) -> Self {
-//         Self {
-//             table,
-//             fields,
-//             insert_sql: create_insert_sql(table, fields)
-
-//         }
-//     }
-// }
-
 use odbc_api::{
     Connection,
     ConnectionOptions,
@@ -72,7 +22,7 @@ use chacha20poly1305::{
 };
 
 use anyhow::Error;
-use std::{ collections::HashMap, default };
+use std::{ collections::HashMap };
 use lazy_static::lazy_static;
 
 use std::io;
@@ -86,7 +36,6 @@ lazy_static! {
 }
 
 pub struct DBHandler<'a> {
-    // env: Environment,
     connection: Connection<'a>,
     MAC_Key: KeyType,
 }
@@ -239,20 +188,6 @@ impl DBHandler<'_> {
             &fields["Pub_key"].into_parameter(),
             &mut magic.as_blob_param(),
         );
-
-        // let get_ordered_values = |keys: &[&str], map: &HashMap<&str, &DBVALUE>| -> Vec<&DBVALUE> {
-        //     let mut values = Vec::with_capacity(keys.len());
-        //     for key in keys {
-        //         if let Some(&value) = map.get(key) {
-        //             values.push(value);
-        //         }
-        //     }
-        //     values
-        // };
-
-        // let params = get_ordered_values(&keys, fields).into_iter().collect_tuple().unwrap();
-
-        // let params = (&fields["First_Name"].into_parameter(), &fields["First_Name"].into_parameter(), &fields["First_Name"].into_parameter(), &fields["First_Name"].into_parameter(), &fields["First_Name"].into_parameter(), &fields["First_Name"].into_parameter());
         println!("in db handler: {:?}", fields);
 
         if let Some(mut cursor) = self.connection.execute(&sql, params)? {

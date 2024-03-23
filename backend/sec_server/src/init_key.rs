@@ -42,7 +42,7 @@ fn create_mykey(
     let vec_u8: Vec<u8> = key.to_vec();
     println!("{:?}: {:?}", key_type, vec_u8);
     let cipher = ChaCha20Poly1305::new(&root_key);
-    let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng); // 96-bits; unique per message
+    let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
     let ciphertext = cipher.encrypt(&nonce, vec_u8.as_slice())?;
 
     if let Err(err) = handler.store_key(&ciphertext, &nonce.to_vec(), key_type) {

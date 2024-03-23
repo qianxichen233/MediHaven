@@ -6,15 +6,8 @@ use tonic::{ transport::Server, Request, Response, Status };
 use lazy_static::lazy_static;
 
 use chacha20poly1305::{
-    aead::{
-        Aead,
-        AeadCore,
-        KeyInit,
-        OsRng,
-        generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
-    },
+    aead::generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
     consts::{ B0, B1 },
-    ChaCha20Poly1305,
 };
 use std::fs;
 
@@ -41,7 +34,7 @@ lazy_static! {
         let mut root_key: KeyType = GenericArray::default();
         root_key.copy_from_slice(&data[..]);
 
-        handler.init(&root_key);
+        handler.init(&root_key).expect("root key initialization failed!");
         handler
     };
 }
@@ -102,7 +95,6 @@ impl Account for AccountService {
         fields.insert("Phone_Number", &req.phone_number);
         fields.insert("Email", &req.email);
         fields.insert("Pub_key", &req.pub_key);
-        fields.insert("Magic", "magic!");
 
         if let Err(err) = MY_DB_HANDLER.register_admin(&fields) {
             eprintln!("Error: {}", err);
