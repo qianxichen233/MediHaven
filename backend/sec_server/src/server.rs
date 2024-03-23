@@ -3,6 +3,22 @@ mod db_handler;
 use std::collections::HashMap;
 
 use tonic::{ transport::Server, Request, Response, Status };
+use lazy_static::lazy_static;
+
+use chacha20poly1305::{
+    aead::{
+        Aead,
+        AeadCore,
+        KeyInit,
+        OsRng,
+        generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
+    },
+    consts::{ B0, B1 },
+    ChaCha20Poly1305,
+};
+use std::fs;
+
+type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
 
 use mediheaven::code_server::{ Code, CodeServer };
 use mediheaven::{ CodeRequest, CodeResponse };
@@ -14,11 +30,29 @@ pub mod mediheaven {
     tonic::include_proto!("mediheaven");
 }
 
+lazy_static! {
+    static ref MY_DB_HANDLER: db_handler::DBHandler<'static> = {
+        let mut handler = db_handler::DBHandler::new().unwrap();
+
+        // currently read from file directly
+        // to-do: replace with shamir's secret sharing algorithm to get the root key
+        let data = fs::read("./root_key.bin").expect("root key does not exist!");
+
+        let mut root_key: KeyType = GenericArray::default();
+        root_key.copy_from_slice(&data[..]);
+
+        handler.init(&root_key);
+        handler
+    };
+}
+
 #[derive(Debug, Default)]
 pub struct CodeService {}
 
 #[derive(Debug, Default)]
-pub struct AccountService {}
+pub struct AccountService {
+    // MyDBHhandler: db_handler::DBHandler<'a>,
+}
 
 #[tonic::async_trait]
 impl Code for CodeService {
@@ -70,8 +104,7 @@ impl Account for AccountService {
         fields.insert("Pub_key", &req.pub_key);
         fields.insert("Magic", "magic!");
 
-        let handler = db_handler::DBHandler::new().unwrap();
-        if let Err(err) = handler.register_admin(&fields) {
+        if let Err(err) = MY_DB_HANDLER.register_admin(&fields) {
             eprintln!("Error: {}", err);
         }
         let reply = SuccessResponse {

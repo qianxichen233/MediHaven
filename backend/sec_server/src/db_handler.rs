@@ -72,10 +72,11 @@ use chacha20poly1305::{
 };
 
 use anyhow::Error;
-use std::collections::HashMap;
+use std::{ collections::HashMap, default };
 use lazy_static::lazy_static;
 
-use std::{ ffi::CStr, io, path::PathBuf };
+use std::io;
+use sha256::digest;
 
 type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
 type NonceType = GenericArray<u8, UInt<UInt<UInt<UInt<UTerm, B1>, B1>, B0>, B0>>;
@@ -92,6 +93,16 @@ pub struct DBHandler<'a> {
 pub enum DBVALUE {
     StringVal(String),
     IntVal(i32),
+}
+
+unsafe impl Send for DBHandler<'_> {}
+
+unsafe impl Sync for DBHandler<'_> {}
+
+impl Default for DBHandler<'_> {
+    fn default() -> Self {
+        Self::new().unwrap()
+    }
 }
 
 impl DBHandler<'_> {
@@ -148,7 +159,30 @@ impl DBHandler<'_> {
         Ok(())
     }
 
-    // fn generate_magic(&self, )
+    fn generate_magic(
+        &self,
+        keys: &Vec<&str>,
+        fields: &HashMap<&str, &str>
+    ) -> Result<impl Blob, chacha20poly1305::Error> {
+        let mut plaintext = String::new();
+        for key in keys {
+            plaintext += fields[key];
+        }
+        let hash = digest(plaintext).into_bytes();
+
+        let cipher = ChaCha20Poly1305::new(&self.MAC_Key);
+        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng); // 96-bits; unique per message
+        let ciphertext = cipher.encrypt(&nonce, hash.as_slice())?;
+
+        let mut magic = nonce.to_vec();
+        magic.extend(&ciphertext);
+
+        let cursor = std::io::Cursor::new(magic);
+        let buf = io::BufReader::new(cursor);
+        let blob = BlobRead::with_upper_bound(buf, 1000);
+
+        return Ok(blob);
+    }
 
     pub fn store_key(&self, key: &[u8], nonce: &[u8], key_type: &str) -> Result<(), Error> {
         let sql = "INSERT INTO mykeys(key_type, ekey, nonce) VALUES (?, ?, ?)";
@@ -189,9 +223,10 @@ impl DBHandler<'_> {
             "Date_Of_Birth",
             "Phone_Number",
             "Email",
-            "Pub_key",
-            "Magic"
+            "Pub_key"
         ];
+
+        let mut magic = self.generate_magic(&keys, &fields).expect("generate magic failed");
 
         let params = (
             &fields["First_Name"].into_parameter(),
@@ -202,7 +237,7 @@ impl DBHandler<'_> {
             &fields["Phone_Number"].into_parameter(),
             &fields["Email"].into_parameter(),
             &fields["Pub_key"].into_parameter(),
-            &fields["Magic"].into_parameter(),
+            &mut magic.as_blob_param(),
         );
 
         // let get_ordered_values = |keys: &[&str], map: &HashMap<&str, &DBVALUE>| -> Vec<&DBVALUE> {

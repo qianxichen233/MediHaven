@@ -8,8 +8,8 @@ name = "server"
 path = "src/server.rs"
 
 [[bin]]
-name = "encrypt-test"
-path = "src/encrypt.rs"
+name = "init-key"
+path = "src/init_key.rs"
 # [[bin]]
 # name = "mediheaven-client"
 # path = "src/client.rs"
@@ -32,6 +32,7 @@ lazy_static = "1.4.0"
 pem = "3.0.3"
 chacha20poly1305 = "0.10.1"
 generic-array = "1.0.0"
+sha256 = "1.5.0"
 
 [build-dependencies]
 tonic-build = "0.11.0"

@@ -55,17 +55,17 @@ fn create_mykey(
 fn main() -> Result<(), chacha20poly1305::Error> {
     let root_key = get_root_key("root_key.bin").expect("read root key error!");
 
-    let mut handler = db_handler::DBHandler::new().unwrap();
-    handler.init(&root_key);
+    let handler = db_handler::DBHandler::new().unwrap();
+    // handler.init(&root_key);
 
-    // create_mykey(&handler, root_key, "int").expect("creating key failed!");
+    create_mykey(&handler, root_key, "int").expect("creating key failed!");
 
-    // for _ in 0..4 {
-    //     create_mykey(&handler, root_key, "data").expect("creating key failed!");
-    //     // let plaintext = cipher.decrypt(&nonce, ciphertext.as_ref())?;
-    //     // println!("{:?}", plaintext.to_vec());
-    //     // assert_eq!(&plaintext, b"plaintext message");
-    // }
+    for _ in 0..4 {
+        create_mykey(&handler, root_key, "data").expect("creating key failed!");
+        // let plaintext = cipher.decrypt(&nonce, ciphertext.as_ref())?;
+        // println!("{:?}", plaintext.to_vec());
+        // assert_eq!(&plaintext, b"plaintext message");
+    }
 
     Ok(())
 }
