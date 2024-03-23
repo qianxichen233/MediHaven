@@ -1,5 +1,7 @@
+use json::object;
 use sec_server::db_handler;
 use sec_server::mycrypto::MyCrypto;
+use sec_server::myutils;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -41,7 +43,7 @@ lazy_static! {
     };
 
     // global hashmap serves as the cache of the public key
-    static ref PUBKEY_CACHE: Mutex<HashMap<&'static str, &'static str>> = Mutex::new(HashMap::new());
+    static ref PUBKEY_CACHE: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
 }
 
 #[derive(Debug, Default)]
@@ -80,13 +82,13 @@ impl Account for AccountService {
         let req = request.into_inner();
         println!("got request: {:?}", req);
 
-        let failed = SuccessResponse {
+        let failed = Response::new(SuccessResponse {
             successful: false,
-        };
+        });
 
         // to-do: check for real code
         if req.code != "dev" {
-            return Ok(Response::new(failed));
+            return Ok(failed);
         }
 
         let age = req.age.to_string();
@@ -103,12 +105,13 @@ impl Account for AccountService {
 
         if let Err(err) = MY_DB_HANDLER.register_admin(&fields) {
             eprintln!("Error: {}", err);
+            return Ok(failed);
         }
-        let reply = SuccessResponse {
+        let success = SuccessResponse {
             successful: true,
         };
 
-        Ok(Response::new(reply))
+        Ok(Response::new(success))
     }
 
     async fn login(
@@ -122,11 +125,55 @@ impl Account for AccountService {
         println!("got message: {:?}", request);
 
         let req = request.into_inner();
+
+        if !myutils::verify_timestamp(&req.timestamp, 10) {
+            return Ok(failed_msg);
+        }
+
+        let mut cache_key = String::from(req.account_type);
+        cache_key += "_";
+        cache_key += &req.email;
+
+        let mut cache = PUBKEY_CACHE.lock().unwrap();
+
+        let signature_plaintext = (
+            object! {
+            email: req.email.clone(),
+            timestamp: req.timestamp.clone()
+        }
+        ).dump();
+
+        if cache.contains_key(&cache_key) {
+            if
+                !MyCrypto::verify_signature(
+                    &req.signature,
+                    &cache[&cache_key],
+                    &signature_plaintext
+                )
+            {
+                return Ok(failed_msg);
+            }
+
+            let reply = LoginResponse {
+                successful: true,
+                pub_key: cache[&cache_key].clone(),
+            };
+
+            return Ok(Response::new(reply));
+        }
+
         match MY_DB_HANDLER.get_admin(&req.email) {
             Ok(result) => {
-                if !MyCrypto::verify_signature(&req.signature, &result["Pub_key"], &req.email) {
+                if
+                    !MyCrypto::verify_signature(
+                        &req.signature,
+                        &result["Pub_key"],
+                        &signature_plaintext
+                    )
+                {
                     return Ok(failed_msg);
                 }
+                cache.insert(cache_key, result["Pub_key"].clone());
 
                 let reply = LoginResponse {
                     successful: true,
@@ -149,16 +196,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let code_service = CodeService::default();
     let account_service = AccountService::default();
 
-    // tokio::spawn(async move {
-    //     Server::builder()
-    //         .add_service(CodeServer::new(code_service))
-    //         .serve(addr)
-    //         .await
-    //         .unwrap();
-    // });
-
-    // Server::builder().add_service(CodeServer::new(code_service)).serve(addr).await?;
-    Server::builder().add_service(AccountServer::new(account_service)).serve(addr).await?;
+    Server::builder()
+        .add_service(AccountServer::new(account_service))
+        .add_service(CodeServer::new(code_service))
+        .serve(addr).await?;
 
     Ok(())
 }

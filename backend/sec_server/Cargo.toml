@@ -23,6 +23,10 @@ path = "src/sign.rs"
 name = "connect_db_sample"
 path = "src/connect_db_sample.rs"
 
+[[bin]]
+name = "play"
+path = "src/playground.rs"
+
 [dependencies]
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
 prost = "0.12"
@@ -42,6 +46,8 @@ rsa = { version = "0.9.6", features = ["pem", "std", "u64_digit", "sha2"] }
 openssl = "0.10.64"
 rand = "0.8.5"
 base64 = "0.22.0"
+json = "0.12.4"
+chrono = "0.4.35"
 
 [build-dependencies]
 tonic-build = "0.11.0"

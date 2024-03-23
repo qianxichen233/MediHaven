@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10mediheaven.proto\x12\nmediheaven\"H\n\x0b\x43odeRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"0\n\x0c\x43odeResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\"\xbb\x01\n\x0fRegisterRequest\x12\x0c\n\x04\x43ode\x18\x01 \x01(\t\x12\x0c\n\x04Type\x18\x02 \x01(\t\x12\x12\n\nFirst_Name\x18\x03 \x01(\t\x12\x11\n\tLast_Name\x18\x04 \x01(\t\x12\x0b\n\x03Sex\x18\x05 \x01(\t\x12\x0b\n\x03\x41ge\x18\x06 \x01(\x05\x12\x15\n\rDate_Of_Birth\x18\x07 \x01(\t\x12\x14\n\x0cPhone_Number\x18\x08 \x01(\t\x12\r\n\x05\x45mail\x18\t \x01(\t\x12\x0f\n\x07Pub_key\x18\n \x01(\t\"%\n\x0fSuccessResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\">\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\"4\n\rLoginResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0f\n\x07pub_key\x18\x02 \x01(\t2D\n\x04\x43ode\x12<\n\x07getCode\x12\x17.mediheaven.CodeRequest\x1a\x18.mediheaven.CodeResponse2\x8d\x01\n\x07\x41\x63\x63ount\x12\x44\n\x08register\x12\x1b.mediheaven.RegisterRequest\x1a\x1b.mediheaven.SuccessResponse\x12<\n\x05Login\x12\x18.mediheaven.LoginRequest\x1a\x19.mediheaven.LoginResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10mediheaven.proto\x12\nmediheaven\"q\n\x0b\x43odeRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"0\n\x0c\x43odeResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\"\xbb\x01\n\x0fRegisterRequest\x12\x0c\n\x04\x43ode\x18\x01 \x01(\t\x12\x0c\n\x04Type\x18\x02 \x01(\t\x12\x12\n\nFirst_Name\x18\x03 \x01(\t\x12\x11\n\tLast_Name\x18\x04 \x01(\t\x12\x0b\n\x03Sex\x18\x05 \x01(\t\x12\x0b\n\x03\x41ge\x18\x06 \x01(\x05\x12\x15\n\rDate_Of_Birth\x18\x07 \x01(\t\x12\x14\n\x0cPhone_Number\x18\x08 \x01(\t\x12\r\n\x05\x45mail\x18\t \x01(\t\x12\x0f\n\x07Pub_key\x18\n \x01(\t\"%\n\x0fSuccessResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\"Y\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x04 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x03 \x01(\t\"4\n\rLoginResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0f\n\x07pub_key\x18\x02 \x01(\t2D\n\x04\x43ode\x12<\n\x07getCode\x12\x17.mediheaven.CodeRequest\x1a\x18.mediheaven.CodeResponse2\x8d\x01\n\x07\x41\x63\x63ount\x12\x44\n\x08register\x12\x1b.mediheaven.RegisterRequest\x1a\x1b.mediheaven.SuccessResponse\x12<\n\x05Login\x12\x18.mediheaven.LoginRequest\x1a\x19.mediheaven.LoginResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,19 +22,19 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'mediheaven_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_CODEREQUEST']._serialized_start=32
-  _globals['_CODEREQUEST']._serialized_end=104
-  _globals['_CODERESPONSE']._serialized_start=106
-  _globals['_CODERESPONSE']._serialized_end=154
-  _globals['_REGISTERREQUEST']._serialized_start=157
-  _globals['_REGISTERREQUEST']._serialized_end=344
-  _globals['_SUCCESSRESPONSE']._serialized_start=346
-  _globals['_SUCCESSRESPONSE']._serialized_end=383
-  _globals['_LOGINREQUEST']._serialized_start=385
-  _globals['_LOGINREQUEST']._serialized_end=447
-  _globals['_LOGINRESPONSE']._serialized_start=449
-  _globals['_LOGINRESPONSE']._serialized_end=501
-  _globals['_CODE']._serialized_start=503
-  _globals['_CODE']._serialized_end=571
-  _globals['_ACCOUNT']._serialized_start=574
-  _globals['_ACCOUNT']._serialized_end=715
+  _globals['_CODEREQUEST']._serialized_end=145
+  _globals['_CODERESPONSE']._serialized_start=147
+  _globals['_CODERESPONSE']._serialized_end=195
+  _globals['_REGISTERREQUEST']._serialized_start=198
+  _globals['_REGISTERREQUEST']._serialized_end=385
+  _globals['_SUCCESSRESPONSE']._serialized_start=387
+  _globals['_SUCCESSRESPONSE']._serialized_end=424
+  _globals['_LOGINREQUEST']._serialized_start=426
+  _globals['_LOGINREQUEST']._serialized_end=515
+  _globals['_LOGINRESPONSE']._serialized_start=517
+  _globals['_LOGINRESPONSE']._serialized_end=569
+  _globals['_CODE']._serialized_start=571
+  _globals['_CODE']._serialized_end=639
+  _globals['_ACCOUNT']._serialized_start=642
+  _globals['_ACCOUNT']._serialized_end=783
 # @@protoc_insertion_point(module_scope)

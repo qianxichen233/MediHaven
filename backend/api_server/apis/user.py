@@ -45,7 +45,10 @@ class login(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument("email", type=str, help="Email address", required=True)
-        self.parser.add_argument("type", type=str, help="Account Type", required=True)
+        self.parser.add_argument(
+            "account_type", type=str, help="Account Type", required=True
+        )
+        self.parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
         self.parser.add_argument("signature", type=str, help="signature", required=True)
 
     def post(self):

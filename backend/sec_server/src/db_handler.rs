@@ -258,6 +258,7 @@ impl DBHandler<'_> {
     }
 
     pub fn get_admin(&self, email: &str) -> Result<HashMap<String, String>, Error> {
+        println!("get admin");
         let sql = "SELECT * FROM Administrator WHERE Email = ?";
         let data = self.execute_query(&sql, (&email.into_parameter(),))?;
         let mut result = HashMap::new();
