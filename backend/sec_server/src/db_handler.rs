@@ -87,6 +87,8 @@ impl DBHandler<'_> {
             // Bind the buffer to the cursor. It is now being filled with every call to fetch.
             let mut row_set_cursor = cursor.bind_buffer(&mut buffers)?;
 
+            let mut found_key = false;
+
             // Iterate over batches
             while let Some(batch) = row_set_cursor.fetch()? {
                 // Within a batch, iterate over every row
@@ -105,7 +107,12 @@ impl DBHandler<'_> {
 
                     println!("int key: {:?}", key_vec);
                     self.MAC_Key.copy_from_slice(&key_vec[..]);
+                    found_key = true;
                 }
+            }
+
+            if !found_key {
+                return Err(anyhow!("integrity key not found!"));
             }
         }
 
