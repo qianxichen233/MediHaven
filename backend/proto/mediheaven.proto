@@ -1,0 +1,56 @@
+syntax = "proto3";
+package mediheaven;
+
+service Code {
+    rpc getCode (CodeRequest) returns (CodeResponse);
+}
+
+service Account {
+    rpc register (RegisterRequest) returns (SuccessResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+}
+
+
+/*Service Code*/
+message CodeRequest {
+    string email = 1;
+    string account_type = 4;
+    string timestamp = 5;
+    string signature = 2;
+    string expiration_date = 3;
+}
+
+message CodeResponse {
+    bool successful = 1;
+    string code = 2;
+}
+
+/*Service Account*/
+message RegisterRequest {
+    string Code = 1;
+    string Type = 2;
+    string First_Name = 3;
+    string Last_Name = 4;
+    string Sex = 5;
+    int32 Age = 6;
+    string Date_Of_Birth = 7;
+    string Phone_Number = 8;
+    string Email = 9;
+    string Pub_key = 10;
+}
+
+message SuccessResponse {
+    bool successful = 1;
+}
+
+message LoginRequest {
+    string email = 1;
+    string timestamp = 4;
+    string signature = 2;
+    string account_type = 3;
+}
+
+message LoginResponse {
+    bool successful = 1;
+    string pub_key = 2;
+}

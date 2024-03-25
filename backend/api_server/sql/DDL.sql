@@ -8,11 +8,11 @@ CREATE TABLE Medicine (
     Instructions TEXT NOT NULL,
     Description TEXT NOT NULL,
     Expiration_Date DATE Not NULL,
-    PRIMRY KEY(Name)
+    PRIMARY KEY(Name)
 );
 
 CREATE TABLE Insurance (
-    ID VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
     Company VARCHAR(100) NOT NULL,
     Price_Coverage FLOAT NOT NULL,
     Purchase_Date DATE NOT NULL,
@@ -22,23 +22,25 @@ CREATE TABLE Insurance (
 );
 
 CREATE TABLE Administrator (
-    ID VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
     Sex VARCHAR(20) NOT NULL,
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
     Phone_Number VARCHAR(100) NULL,
-    Email VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Pub_key VARCHAR(1000) NOT NULL,
+    Magic BLOB NOT NULL,
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE Patient (
-    ID VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
     SSN VARCHAR(20) NOT NULL,
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
-    Insurance_ID VARCHAR(100) NOT NULL,
+    Insurance_ID INT NOT NULL,
     Sex VARCHAR(20) NOT NULL,
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
@@ -50,7 +52,7 @@ CREATE TABLE Patient (
 
 
 CREATE TABLE Medicine_Treat (
-    ID VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
     Medicine_Name VARCHAR(100) NOT NULL,
     Production_Date DATE NOT NULL,
     Expiration_Date DATE NOT NULL,
@@ -59,7 +61,7 @@ CREATE TABLE Medicine_Treat (
 );
 
 CREATE TABLE Physician (
-    ID VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
     SSN VARCHAR(20) NOT NULL,
     password VARCHAR(200) NOT NULL,
     First_Name VARCHAR(100) NOT NULL,
@@ -70,17 +72,19 @@ CREATE TABLE Physician (
     Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
     Phone_Number VARCHAR(100) NULL,
-    Email VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Pub_key VARCHAR(1000) NOT NULL,
+    Magic BLOB NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Department) REFERENCES Department(Name)
 );
 
 CREATE TABLE Medical_Record (
-    ID VARCHAR(100),
-    Patient_ID VARCHAR(100) NOT NULL,
-    Physician_ID VARCHAR(100) NOT NULL,
-    Medicine_ID VARCHAR(100) NOT NULL,
-    Insurance_ID VARCHAR(100) NOT NULL,
+    ID INT NOT NULL AUTO_INCREMENT,
+    Patient_ID INT NOT NULL,
+    Physician_ID INT NOT NULL,
+    Medicine_ID INT NOT NULL,
+    Insurance_ID INT NOT NULL,
     Complete_Date DATE NOT NULL,
     Encounter_Summary TEXT NOT NULL,
     Diagnosis TEXT NOT NULL,
@@ -91,4 +95,21 @@ CREATE TABLE Medical_Record (
     FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
 );
 
+CREATE TABLE register_code (
+    CODE VARCHAR(100),
+    Account_type  VARCHAR(20) NOT NULL,
+    Expiration_Date DATE NOT NULL,
+    Magic BLOB NOT NULL,
+    PRIMARY KEY(CODE),
+    CHECK (
+        Account_type IN ("admin", "physician")
+    )
+);
 
+CREATE TABLE mykeys (
+    key_ID INT NOT NULL AUTO_INCREMENT,
+    key_type VARCHAR(20),
+    ekey BLOB NOT NULL,
+    nonce BLOB NOT NULL,
+    PRIMARY KEY(key_id)
+);
