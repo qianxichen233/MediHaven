@@ -3,6 +3,8 @@ package mediheaven;
 
 service Code {
     rpc getCode (CodeRequest) returns (CodeResponse);
+    rpc delCode (CodeDelRequest) returns (SuccessResponse);
+    rpc listCode (CodeListRequest) returns (CodeListResponse);
 }
 
 service Account {
@@ -23,12 +25,37 @@ message CodeRequest {
 message CodeResponse {
     bool successful = 1;
     string code = 2;
+    optional string msg = 3;
+}
+
+message CodeDelRequest {
+    string email = 1;
+    string code = 2;
+    string timestamp = 3;
+    string signature = 4;
+}
+
+message CodeListRequest {
+    string email = 1;
+    string timestamp = 2;
+    string signature = 3;
+}
+
+message CodeListResponse {
+    repeated CodeMessage codes = 1;
+    optional string msg = 2;
+}
+
+message CodeMessage {
+    string account_type = 1;
+    string code = 2;
+    string expiration_date = 3;
 }
 
 /*Service Account*/
 message RegisterRequest {
     string Code = 1;
-    string Type = 2;
+    string Account_Type = 2;
     string First_Name = 3;
     string Last_Name = 4;
     string Sex = 5;
@@ -41,6 +68,7 @@ message RegisterRequest {
 
 message SuccessResponse {
     bool successful = 1;
+    optional string msg = 2;
 }
 
 message LoginRequest {
@@ -53,4 +81,5 @@ message LoginRequest {
 message LoginResponse {
     bool successful = 1;
     string pub_key = 2;
+    optional string msg = 3;
 }

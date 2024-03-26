@@ -2,6 +2,8 @@ from flask import Flask, Blueprint, jsonify
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 
+import inspect
+
 from grpc_client.grpc_api import GRPC_API
 
 user_api = Blueprint("user_api", __name__)
@@ -12,7 +14,9 @@ class register(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument("Code", type=str, help="Register Code", required=True)
-        self.parser.add_argument("Type", type=str, help="Account Type", required=True)
+        self.parser.add_argument(
+            "Account_Type", type=str, help="Account Type", required=True
+        )
         self.parser.add_argument(
             "First_Name", type=str, help="First Name", required=True
         )
@@ -50,36 +54,79 @@ class login(Resource):
             "account_type", type=str, help="Account Type", required=True
         )
         self.parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
-        self.parser.add_argument("signature", type=str, help="signature", required=True)
+        self.parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
 
     def post(self):
         args = self.parser.parse_args()
+        args.signature = args["X-Signature"]
+        del args["X-Signature"]
 
         response = GRPC_API.login(args)
         if not response.successful:
             return jsonify({"message": f"failed!"})
-
-        print(response)
 
         return jsonify({"message": f"success!"})
 
 
 class code(Resource):
     def __init__(self):
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument("email", type=str, help="Email address", required=True)
-        self.parser.add_argument(
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
+            "email", type=str, help="Email address", required=True
+        )
+        self.post_parser.add_argument(
             "account_type", type=str, help="Account Type", required=True
         )
-        self.parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
-        self.parser.add_argument("signature", type=str, help="signature", required=True)
+        self.post_parser.add_argument(
+            "timestamp", type=str, help="Timestamp", required=True
+        )
+        self.post_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
+        self.delete_parser = reqparse.RequestParser()
+        self.delete_parser.add_argument(
+            "email", type=str, help="Email address", required=True
+        )
+        self.delete_parser.add_argument(
+            "code", type=str, help="Code to be deleted", required=True
+        )
+        self.delete_parser.add_argument(
+            "timestamp", type=str, help="Timestamp", required=True
+        )
+        self.delete_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "email", type=str, help="Email address", required=True, location="args"
+        )
+        self.get_parser.add_argument(
+            "timestamp", type=str, help="Timestamp", required=True, location="args"
+        )
+        self.get_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
+    def get_args(self):
+        caller = inspect.stack()[1].function
+        args = getattr(self, caller + "_parser").parse_args()
+        if hasattr(args, "signature"):
+            args.signature = args["X-Signature"]
+            del args["X-Signature"]
+        return args
 
     def post(self):
-        args = self.parser.parse_args()
+        args = self.get_args()
+        args.signature = args["X-Signature"]
+        del args["X-Signature"]
 
         current_time = datetime.now()
         future_time = current_time + timedelta(weeks=1)
-        timestamp_str = future_time.strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_str = future_time.strftime("%Y-%m-%d")
         args.expiration_date = timestamp_str
 
         response = GRPC_API.get_code(args)
@@ -87,6 +134,28 @@ class code(Resource):
             return jsonify({"message": f"failed!"})
 
         return jsonify({"code": response.code})
+
+    def delete(self):
+        args = self.get_args()
+        pass
+
+    def get(self):
+        args = self.get_args()
+        args.signature = args["X-Signature"]
+        del args["X-Signature"]
+
+        response = GRPC_API.listCode(args)
+        result = []
+        for code in response.codes:
+            result.append(
+                {
+                    "code": code.code,
+                    "account_type": code.account_type,
+                    "expiration_date": code.expiration_date,
+                }
+            )
+
+        return jsonify({"codes": result})
 
 
 api.add_resource(register, "/register")

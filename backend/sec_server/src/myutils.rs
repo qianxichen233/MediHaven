@@ -20,6 +20,10 @@ pub fn verify_timestamp(timestamp_str: &str, expire: i64) -> bool {
     return duration.num_minutes() <= expire;
 }
 
+pub fn verify_date(date: &str) -> bool {
+    return verify_timestamp(&(date.to_owned() + " 23:59:59"), 0);
+}
+
 pub fn generate_code() -> String {
     const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let mut rng = rand::thread_rng();

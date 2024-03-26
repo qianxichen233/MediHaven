@@ -18,10 +18,19 @@ use std::fs;
 type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
 
 use mediheaven::code_server::{ Code, CodeServer };
-use mediheaven::{ CodeRequest, CodeResponse };
+use mediheaven::{
+    CodeRequest,
+    CodeResponse,
+    CodeDelRequest,
+    CodeListRequest,
+    CodeListResponse,
+    CodeMessage,
+};
 
 use mediheaven::account_server::{ Account, AccountServer };
 use mediheaven::{ RegisterRequest, SuccessResponse, LoginRequest, LoginResponse };
+
+const TIMESTAMP_EXPIRE: i64 = 525600; // one year for debugging purpose
 
 pub mod mediheaven {
     tonic::include_proto!("mediheaven");
@@ -67,9 +76,10 @@ impl Code for CodeService {
         let failed_msg = Response::new(CodeResponse {
             successful: false,
             code: String::from(""),
+            msg: None,
         });
 
-        if !myutils::verify_timestamp(&req.timestamp, 120) {
+        if !myutils::verify_timestamp(&req.timestamp, TIMESTAMP_EXPIRE) {
             return Ok(failed_msg);
         }
 
@@ -106,6 +116,7 @@ impl Code for CodeService {
             fields.insert("CODE", &code);
             fields.insert("Account_type", &req.account_type);
             fields.insert("Expiration_Date", &req.expiration_date);
+            fields.insert("Issuer", &req.email);
 
             if let Err(err) = MY_DB_HANDLER.add_code(&fields) {
                 eprintln!("Error: {}", err);
@@ -115,12 +126,74 @@ impl Code for CodeService {
             let success_msg = Response::new(CodeResponse {
                 successful: true,
                 code,
+                msg: None,
             });
 
             return Ok(success_msg);
         }
 
         Ok(failed_msg)
+    }
+
+    async fn del_code(
+        &self,
+        request: Request<CodeDelRequest>
+    ) -> Result<Response<SuccessResponse>, Status> {
+        todo!()
+    }
+
+    async fn list_code(
+        &self,
+        request: Request<CodeListRequest>
+    ) -> Result<Response<CodeListResponse>, Status> {
+        let req = request.into_inner();
+        let failed_msg = Response::new(CodeListResponse {
+            codes: Vec::new(),
+            msg: None,
+        });
+
+        let signature_plaintext = (
+            object! {
+            email: req.email.clone(),
+            timestamp: req.timestamp.clone()
+        }
+        ).dump();
+
+        let cache = PUBKEY_CACHE.lock().unwrap();
+
+        let mut cache_key = String::from("admin_");
+        cache_key += &req.email;
+
+        if !cache.contains_key(&cache_key) {
+            return Ok(failed_msg);
+        }
+
+        if !MyCrypto::verify_signature(&req.signature, &cache[&cache_key], &signature_plaintext) {
+            println!("signature fail");
+            return Ok(failed_msg);
+        }
+
+        match MY_DB_HANDLER.get_code(&req.email) {
+            Ok(result) => {
+                let reply = CodeListResponse {
+                    codes: result
+                        .iter()
+                        .map(|mycode| CodeMessage {
+                            code: mycode.code.clone(),
+                            account_type: mycode.Account_type.clone(),
+                            expiration_date: mycode.Expiration_Date.clone(),
+                        })
+                        .collect(),
+                    msg: None,
+                };
+
+                return Ok(Response::new(reply));
+            }
+            Err(err) => {
+                println!("{:?}", err);
+                return Ok(failed_msg);
+            }
+        }
     }
 }
 
@@ -135,11 +208,23 @@ impl Account for AccountService {
 
         let failed = Response::new(SuccessResponse {
             successful: false,
+            msg: None,
         });
 
-        // to-do: check for real code
-        if req.code != "dev" {
-            return Ok(failed);
+        if
+            req.code != "dev" // dev environment only
+        {
+            match MY_DB_HANDLER.verify_code(&req.code, &req.account_type) {
+                Ok(res) => {
+                    if !res {
+                        return Ok(failed);
+                    }
+                }
+                Err(err) => {
+                    println!("{:?}", err);
+                    return Ok(failed);
+                }
+            }
         }
 
         let age = req.age.to_string();
@@ -158,8 +243,10 @@ impl Account for AccountService {
             eprintln!("Error: {}", err);
             return Ok(failed);
         }
+        MY_DB_HANDLER.delete_code(&req.code).expect("delete code failed!");
         let success = SuccessResponse {
             successful: true,
+            msg: None,
         };
 
         Ok(Response::new(success))
@@ -172,12 +259,13 @@ impl Account for AccountService {
         let failed_msg = Response::new(LoginResponse {
             successful: false,
             pub_key: String::new(),
+            msg: None,
         });
         println!("got message: {:?}", request);
 
         let req = request.into_inner();
 
-        if !myutils::verify_timestamp(&req.timestamp, 120) {
+        if !myutils::verify_timestamp(&req.timestamp, TIMESTAMP_EXPIRE) {
             return Ok(failed_msg);
         }
 
@@ -208,6 +296,7 @@ impl Account for AccountService {
             let reply = LoginResponse {
                 successful: true,
                 pub_key: cache[&cache_key].clone(),
+                msg: None,
             };
 
             return Ok(Response::new(reply));
@@ -215,6 +304,11 @@ impl Account for AccountService {
 
         match MY_DB_HANDLER.get_admin(&req.email) {
             Ok(result) => {
+                if result == None {
+                    return Ok(failed_msg);
+                }
+                let result = result.unwrap();
+
                 if
                     !MyCrypto::verify_signature(
                         &req.signature,
@@ -229,6 +323,7 @@ impl Account for AccountService {
                 let reply = LoginResponse {
                     successful: true,
                     pub_key: result["Pub_key"].clone(),
+                    msg: None,
                 };
 
                 return Ok(Response::new(reply));

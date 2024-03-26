@@ -1,4 +1,6 @@
 use crate::constants::MAGIC_KEYS;
+use crate::myutils;
+use crate::mytypes::codeType;
 
 use odbc_api::{
     Connection,
@@ -24,7 +26,7 @@ use chacha20poly1305::{
 };
 
 use anyhow::{ anyhow, Error };
-use std::{ collections::HashMap };
+use std::collections::HashMap;
 use lazy_static::lazy_static;
 
 use std::io;
@@ -119,11 +121,11 @@ impl DBHandler<'_> {
         Ok(())
     }
 
-    fn execute_query(
+    fn select_one(
         &self,
         sql: &str,
         params: impl odbc_api::ParameterCollectionRef
-    ) -> Result<HashMap<String, Vec<u8>>, Error> {
+    ) -> Result<Option<HashMap<String, Vec<u8>>>, Error> {
         let mut result: HashMap<String, Vec<u8>> = HashMap::new();
 
         if let Some(mut cursor) = self.connection.execute(&sql, params)? {
@@ -131,6 +133,7 @@ impl DBHandler<'_> {
 
             let mut buffers = TextRowSet::for_cursor(5000, &mut cursor, Some(4096))?;
             let mut row_set_cursor = cursor.bind_buffer(&mut buffers)?;
+            let mut found = false;
             while let Some(batch) = row_set_cursor.fetch()? {
                 for row_index in 0..batch.num_rows() {
                     let record: Vec<&[u8]> = (0..batch.num_cols())
@@ -138,12 +141,44 @@ impl DBHandler<'_> {
                         .collect();
 
                     for (index, val) in headline.iter().enumerate() {
+                        found = true;
                         result.insert(val.clone(), record[index].to_vec());
                     }
                 }
             }
-        }
 
+            if !found {
+                return Ok(None);
+            }
+        }
+        return Ok(Some(result));
+    }
+
+    fn select_many(
+        &self,
+        sql: &str,
+        params: impl odbc_api::ParameterCollectionRef
+    ) -> Result<Vec<Vec<Vec<u8>>>, Error> {
+        let mut result: Vec<Vec<Vec<u8>>> = Vec::new();
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut buffers = TextRowSet::for_cursor(5000, &mut cursor, Some(4096))?;
+            let mut row_set_cursor = cursor.bind_buffer(&mut buffers)?;
+
+            while let Some(batch) = row_set_cursor.fetch()? {
+                for row_index in 0..batch.num_rows() {
+                    let record: Vec<&[u8]> = (0..batch.num_cols())
+                        .map(|col_index| { batch.at(col_index, row_index).unwrap_or(&[]) })
+                        .collect();
+
+                    result.push(Vec::new());
+                    let top = result.len() - 1;
+                    for item in record.iter() {
+                        result[top].push(item.to_vec());
+                    }
+                }
+            }
+        }
         return Ok(result);
     }
 
@@ -262,9 +297,15 @@ impl DBHandler<'_> {
         Ok(())
     }
 
-    pub fn get_admin(&self, email: &str) -> Result<HashMap<String, String>, Error> {
+    pub fn get_admin(&self, email: &str) -> Result<Option<HashMap<String, String>>, Error> {
         let sql = "SELECT * FROM Administrator WHERE Email = ?";
-        let data = self.execute_query(&sql, (&email.into_parameter(),))?;
+        let data = self.select_one(&sql, (&email.into_parameter(),))?;
+        if data == None {
+            return Ok(None);
+        }
+
+        let data = data.unwrap();
+
         let mut result = HashMap::new();
 
         match self.verify_magic(&MAGIC_KEYS["Administrator"], &data) {
@@ -285,12 +326,12 @@ impl DBHandler<'_> {
             result.insert(key, String::from_utf8(value)?);
         }
 
-        return Ok(result);
+        return Ok(Some(result));
     }
 
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
         let sql =
-            "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Magic) VALUES (?, ?, ?, ?)";
+            "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Issuer, Magic) VALUES (?, ?, ?, ?, ?)";
 
         let mut magic = self
             .generate_magic(&MAGIC_KEYS["register_code"], &fields)
@@ -300,6 +341,7 @@ impl DBHandler<'_> {
             &fields["CODE"].into_parameter(),
             &fields["Account_type"].into_parameter(),
             &fields["Expiration_Date"].into_parameter(),
+            &fields["Issuer"].into_parameter(),
             &mut magic.as_blob_param(),
         );
 
@@ -311,5 +353,57 @@ impl DBHandler<'_> {
         }
 
         Ok(())
+    }
+
+    pub fn verify_code(&self, code: &str, account_type: &str) -> Result<bool, Error> {
+        let sql =
+            "SELECT CODE, Account_type, Expiration_Date, Issuer, Magic FROM register_code where CODE = ? LIMIT 1";
+        let data = self.select_one(&sql, (&code.into_parameter(),))?;
+        if data == None {
+            return Ok(false);
+        }
+        let data = data.unwrap();
+
+        match self.verify_magic(&MAGIC_KEYS["register_code"], &data) {
+            Ok(val) => {
+                if !val {
+                    return Err(anyhow!("integrity check failed!"));
+                }
+            }
+            Err(_) => {
+                return Err(anyhow!("integrity check failed!"));
+            }
+        }
+
+        if String::from_utf8(data["Account_type"].clone())? != account_type {
+            return Ok(false);
+        }
+
+        return Ok(myutils::verify_date(&String::from_utf8(data["Expiration_Date"].clone())?));
+    }
+
+    pub fn delete_code(&self, code: &str) -> Result<bool, Error> {
+        let sql = "DELETE FROM register_code WHERE CODE = ?";
+
+        self.connection.execute(&sql, (&code.into_parameter(),))?;
+
+        return Ok(true);
+    }
+
+    pub fn get_code(&self, email: &str) -> Result<Vec<codeType>, Error> {
+        let mut result: Vec<codeType> = Vec::new();
+        let sql = "SELECT CODE, Account_type, Expiration_Date FROM register_code WHERE Issuer = ?";
+        let codes = self.select_many(sql, &email.into_parameter())?;
+
+        for code_raw in codes.iter() {
+            let code = codeType {
+                code: String::from_utf8(code_raw[0].clone())?,
+                Account_type: String::from_utf8(code_raw[1].clone())?,
+                Expiration_Date: String::from_utf8(code_raw[2].clone())?,
+            };
+            result.push(code);
+        }
+
+        return Ok(result);
     }
 }

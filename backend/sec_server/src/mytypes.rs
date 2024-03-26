@@ -1,4 +1,5 @@
-enum DB_VALUE {
-    StringVal(String),
-    IntVal(i32),
+pub struct codeType {
+    pub code: String,
+    pub Account_type: String,
+    pub Expiration_Date: String,
 }

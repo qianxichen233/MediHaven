@@ -18,7 +18,8 @@ lazy_static! {
         map.insert("register_code",
                     vec!["CODE",
                         "Account_type",
-                        "Expiration_Date"]
+                        "Expiration_Date",
+                        "Issuer"]
         );
         
         map
