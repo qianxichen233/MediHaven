@@ -85,6 +85,7 @@ impl Code for CodeService {
 
         let signature_plaintext = (
             object! {
+            endpoint: "POST code",
             email: req.email.clone(),
             account_type: req.account_type.clone(),
             timestamp: req.timestamp.clone()
@@ -154,6 +155,7 @@ impl Code for CodeService {
 
         let signature_plaintext = (
             object! {
+            endpoint: "GET code",
             email: req.email.clone(),
             timestamp: req.timestamp.clone()
         }
@@ -277,6 +279,7 @@ impl Account for AccountService {
 
         let signature_plaintext = (
             object! {
+            endpoint: "POST login",
             email: req.email.clone(),
             timestamp: req.timestamp.clone()
         }
