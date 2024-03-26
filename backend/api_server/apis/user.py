@@ -114,15 +114,13 @@ class code(Resource):
     def get_args(self):
         caller = inspect.stack()[1].function
         args = getattr(self, caller + "_parser").parse_args()
-        if hasattr(args, "signature"):
+        if hasattr(args, "X-Signature"):
             args.signature = args["X-Signature"]
             del args["X-Signature"]
         return args
 
     def post(self):
         args = self.get_args()
-        args.signature = args["X-Signature"]
-        del args["X-Signature"]
 
         current_time = datetime.now()
         future_time = current_time + timedelta(weeks=1)
@@ -137,12 +135,17 @@ class code(Resource):
 
     def delete(self):
         args = self.get_args()
-        pass
+        print(args)
+
+        response = GRPC_API.delCode(args)
+
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        return jsonify({"message": "success!"})
 
     def get(self):
         args = self.get_args()
-        args.signature = args["X-Signature"]
-        del args["X-Signature"]
 
         response = GRPC_API.listCode(args)
         result = []

@@ -26,7 +26,10 @@ class GRPC_API_Client:
         return response
 
     def delCode(self, request):
-        pass
+        stub = mediheaven_pb2_grpc.CodeStub(self.channel)
+        request = mediheaven_pb2.CodeDelRequest(**request)
+        response = stub.delCode(request)
+        return response
 
     def listCode(self, request):
         stub = mediheaven_pb2_grpc.CodeStub(self.channel)

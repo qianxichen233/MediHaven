@@ -29,15 +29,17 @@ fn main() {
     let verifying_key = signing_key.verifying_key();
 
     // Sign
-    let endpoint = "POST login";
+    let endpoint = "DELETE code";
     let email = "qc815@nyu.edu";
     let timestamp = "2024-03-25 20:10:00";
+    let code = "RPIsRwnq6DZWq0FXUBswKOjbl667q4CFDrY71skAhF4gFvfE60uGV19QddwWaGH6";
     let account_type = "admin";
 
     let data =
         object! {
         endpoint: endpoint,
         email: email,
+        code: code,
         // account_type: account_type,
         timestamp: timestamp
         

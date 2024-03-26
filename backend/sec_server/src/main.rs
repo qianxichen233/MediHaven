@@ -140,7 +140,51 @@ impl Code for CodeService {
         &self,
         request: Request<CodeDelRequest>
     ) -> Result<Response<SuccessResponse>, Status> {
-        todo!()
+        let req = request.into_inner();
+        let failed_msg = Response::new(SuccessResponse {
+            successful: false,
+            msg: None,
+        });
+
+        if !myutils::verify_timestamp(&req.timestamp, TIMESTAMP_EXPIRE) {
+            return Ok(failed_msg);
+        }
+
+        let signature_plaintext = (
+            object! {
+            endpoint: "DELETE code",
+            email: req.email.clone(),
+            code: req.code.clone(),
+            timestamp: req.timestamp.clone()
+        }
+        ).dump();
+
+        let cache = PUBKEY_CACHE.lock().unwrap();
+
+        let mut cache_key = String::from("admin_");
+        cache_key += &req.email;
+
+        if !cache.contains_key(&cache_key) {
+            return Ok(failed_msg);
+        }
+
+        if !MyCrypto::verify_signature(&req.signature, &cache[&cache_key], &signature_plaintext) {
+            println!("signature fail");
+            return Ok(failed_msg);
+        }
+
+        match MY_DB_HANDLER.delete_code(&req.code) {
+            Ok(res) => {
+                if !res {
+                    return Ok(failed_msg);
+                }
+                return Ok(Response::new(SuccessResponse { successful: true, msg: None }));
+            }
+            Err(err) => {
+                println!("{:?}", err);
+                return Ok(failed_msg);
+            }
+        }
     }
 
     async fn list_code(
@@ -152,6 +196,10 @@ impl Code for CodeService {
             codes: Vec::new(),
             msg: None,
         });
+
+        if !myutils::verify_timestamp(&req.timestamp, TIMESTAMP_EXPIRE) {
+            return Ok(failed_msg);
+        }
 
         let signature_plaintext = (
             object! {
