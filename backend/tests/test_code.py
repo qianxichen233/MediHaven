@@ -109,3 +109,20 @@ def test_del_code(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing delting an non existing registration code
+def test_del_code_non_existing(api_url):
+    data = {
+        "email": "qc815@nyu.edu",
+        "code": "non-existing",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "pvQzpBQR6zw1HOE3sgXGiSZpuofgZj0F61fIfF8kZ0FbnRyomCl8jhmMC3RRbO3+scHSKbfoJxfbEeO8v/BgzRUF96MThfq2/f4i+BKC0HCzcivE+u6O5XLrWNW2lW/PylwPJuG1skzdHASZvD3ftRb6YKhLZok7SWSzvPQSl3G53LtSoUvxE6UYapDjR1gabMvU4FpTkyiuCSAYhA2iHguX28Kf59jOlgwp+IKeZa8ZMI6XcnlbzcbnQn/8ctnSv7BBebwuQHjScBkvYoL1c31OBm9rM4wgxBv1A0QGT2JW271rY73aMe+8oYTRabY+bqRpzJb9lSsrOEaPTh2rHA=="
+    }
+
+    response = requests.delete(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
