@@ -51,3 +51,52 @@ def test_patient_register(api_url):
 
     # response should be successful
     assert response.status_code == 200
+
+# this test is used for testing getting patient information
+def test_patient_get(api_url):
+    params = {
+        'SSN': '111-22-3333',
+        "timestamp": "2024-03-25 20:10:00",
+        "issuer_email": "qc815@nyu.edu"
+    }
+
+    headers = {
+        "X-Signature": "uCKKZTK89ElO2wr2iZnmOHDLm9IWvcE0L6OJRHg/ALUg3HC+yGZ024Zh9Ur9aulzPkapW+77wn1igubAD9J9mOjWqRbmXHg+wEyp2xAscSzLyRutL9sA5f3yKk2nrSWjYjwMWf1RWBkKMbMSvu2d/Hz6ncjkfVds2AoB4WS6Ylud5XOlGh53pPhVclOkgMm0XNE9gcAy4MKaHhH68lNqa4bAMbqWv74lF7zPI9hRNFvRHdaTAh0jMZv+g2AWoJ0jKzgp8EsuRZ92AyXv2DNZz6eVcelpBN6Ju8isi70vgadIvkanGUrpqtcpR0QzH5VsbakSNof9I9w6paltED48mw=="
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should be successful
+    assert response.status_code == 200
+
+    content = response.json()
+
+    # should have a patient
+    assert content != None
+
+    # SSN should match
+    assert content["patient"]["SSN"] == "111-22-3333"
+
+    # try another one
+    params = {
+        'SSN': '666-66-6666',
+        "timestamp": "2024-03-25 20:10:00",
+        "issuer_email": "qc815@nyu.edu"
+    }
+
+    headers = {
+        "X-Signature": "pUjX7zDEHhHK/JiwfT9c8BGvTPX4W45IGCRPMmlvBB+W+6lIL2iTFy+wm+haWXB8CZoK4zA0LjBd2mpqduo8ap5QO/y4rQs0QrNeP+sbzstXhrD41o1qIBYWZVhqBZWEtOKOSfDhFRVIuw0RQzH0WAOGTU2PMtC23JsCx6vW4J82XLPfdr4jozLRs/APVMC39Bq4K1LaKE27D3ABHSHDTnjO63i5ur6cg+fYzWaqCbenb5OaKxQpaqu4ISw0p+/ISsko7cqoEaW9nk4dOd5+X6nmm28SDx185BOUmunBw7cTL9/RAfmMnQIqS4/YVCZ8c2/cQtGQ8fiLwl95i3dlew=="
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should be successful
+    assert response.status_code == 200
+
+    content = response.json()
+
+    # should have a patient
+    assert content != None
+
+    # SSN should match
+    assert content["patient"]["SSN"] == "666-66-6666"
