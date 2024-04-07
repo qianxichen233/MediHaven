@@ -104,8 +104,8 @@ message PatientRequest {
     string Insurance_ID = 4;
     string Sex = 5;
     string Date_Of_Birth = 6;
-    optional string Phone_Number = 7;
-    optional string Email = 8;
+    string Phone_Number = 7;
+    string Email = 8;
 
     Auth auth = 9; 
 }

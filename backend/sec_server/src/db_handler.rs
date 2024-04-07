@@ -1,6 +1,8 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
 use crate::mytypes::codeType;
+use openssl::encrypt;
+use rand::Rng;
 
 use odbc_api::{
     Connection,
@@ -8,7 +10,7 @@ use odbc_api::{
     Cursor,
     Environment,
     IntoParameter,
-    parameter::{ Blob, BlobRead },
+    parameter::{ Blob, BlobRead, BlobParam },
     buffers::TextRowSet,
     ResultSetMetadata,
 };
@@ -43,6 +45,7 @@ pub struct DBHandler<'a> {
     // to-do: make this thread safe
     connection: Connection<'a>,
     MAC_key: KeyType,
+    ENC_Key: Vec<(u64, KeyType)>,
 }
 pub enum DBVALUE {
     StringVal(String),
@@ -71,11 +74,12 @@ impl DBHandler<'_> {
                 ConnectionOptions::default()
             )?,
             MAC_key: GenericArray::default(),
+            ENC_Key: Vec::new(),
         })
     }
 
     pub fn init(&mut self, root_key: &KeyType) -> Result<(), Error> {
-        let sql = "SELECT ekey, nonce FROM mykeys WHERE key_type='int' LIMIT 1;";
+        let sql = "SELECT ekey, nonce, key_type, Key_ID FROM mykeys;";
 
         let cipher = ChaCha20Poly1305::new(&root_key);
 
@@ -106,10 +110,20 @@ impl DBHandler<'_> {
                         .decrypt(&nonce, record[0].as_ref())
                         .expect("decrypt key error")
                         .to_vec();
-
-                    println!("int key: {:?}", key_vec);
-                    self.MAC_key.copy_from_slice(&key_vec[..]);
-                    found_key = true;
+                    let key_type = String::from_utf8(record[2].to_vec())?;
+                    if key_type == "int" {
+                        println!("int key: {:?}", key_vec);
+                        self.MAC_key.copy_from_slice(&key_vec[..]);
+                        found_key = true;
+                    } else {
+                        println!("data key: {:?}", key_vec);
+                        let mut key: KeyType = GenericArray::default();
+                        key.copy_from_slice(&key_vec[..]);
+                        self.ENC_Key.push((
+                            String::from_utf8(record[3].to_vec())?.parse::<u64>()?,
+                            key,
+                        ));
+                    }
                 }
             }
 
@@ -238,6 +252,33 @@ impl DBHandler<'_> {
         }
 
         return Ok(true);
+    }
+
+    fn encrypt_data(
+        &self,
+        data: &HashMap<&str, &str>
+    ) -> (u64, NonceType, HashMap<String, Vec<u8>>) {
+        let mut result: HashMap<String, Vec<u8>> = HashMap::new();
+        let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
+        let cipher = ChaCha20Poly1305::new(&enc_key);
+        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+
+        for (key, value) in data.iter() {
+            let ciphertext = cipher.encrypt(&nonce, value.as_bytes().to_vec().as_slice()).unwrap();
+            result.insert(key.clone().into(), ciphertext);
+        }
+
+        return (id, nonce, result);
+    }
+
+    fn encrypt_coumn(&self, data: &str, cipher: &ChaCha20Poly1305, nonce: &NonceType) -> impl Blob {
+        let ciphertext = cipher.encrypt(&nonce, data.as_bytes().to_vec().as_slice()).unwrap();
+
+        let cursor = std::io::Cursor::new(ciphertext);
+        let buf = io::BufReader::new(cursor);
+        let blob = BlobRead::with_upper_bound(buf, 10000);
+
+        return blob;
     }
 
     pub fn store_key(&self, key: &[u8], nonce: &[u8], key_type: &str) -> Result<(), Error> {
@@ -390,6 +431,48 @@ impl DBHandler<'_> {
         }
 
         return Ok(Some(result));
+    }
+
+    pub fn add_patient(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        let sql =
+            "INSERT INTO Patient(SSN, First_Name, Last_Name, Insurance_ID, Sex, Date_Of_Birth, Phone_Number, Email, nonce, Key_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
+        let cipher = ChaCha20Poly1305::new(&enc_key);
+        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+
+        let mut first_name = self.encrypt_coumn(fields["First_Name"], &cipher, &nonce);
+        let mut last_name = self.encrypt_coumn(fields["Last_Name"], &cipher, &nonce);
+        let mut sex = self.encrypt_coumn(fields["Sex"], &cipher, &nonce);
+        let mut date_of_birth = self.encrypt_coumn(fields["Date_Of_Birth"], &cipher, &nonce);
+        let mut phone_number = self.encrypt_coumn(fields["Phone_Number"], &cipher, &nonce);
+        let mut email = self.encrypt_coumn(fields["Email"], &cipher, &nonce);
+
+        let cursor_nonce = std::io::Cursor::new(nonce);
+        let nonce_buf = io::BufReader::new(cursor_nonce);
+        let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
+
+        let params = (
+            &fields["SSN"].into_parameter(),
+            &mut first_name.as_blob_param(),
+            &mut last_name.as_blob_param(),
+            &fields["Insurance_ID"].into_parameter(),
+            &mut sex.as_blob_param(),
+            &mut date_of_birth.as_blob_param(),
+            &mut phone_number.as_blob_param(),
+            &mut email.as_blob_param(),
+            &mut blob_nonce.as_blob_param(),
+            &id.to_string().into_parameter(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
     }
 
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {

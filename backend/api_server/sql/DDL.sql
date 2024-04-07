@@ -1,3 +1,11 @@
+CREATE TABLE mykeys (
+    key_ID INT NOT NULL AUTO_INCREMENT,
+    key_type VARCHAR(20),
+    ekey BLOB NOT NULL,
+    nonce BLOB NOT NULL,
+    PRIMARY KEY(key_id)
+);
+
 CREATE TABLE Department(
     Name VARCHAR(50),
     PRIMARY KEY(Name)
@@ -40,15 +48,18 @@ CREATE TABLE Administrator (
 CREATE TABLE Patient (
     ID INT NOT NULL AUTO_INCREMENT,
     SSN VARCHAR(20) NOT NULL UNIQUE,
-    First_Name VARCHAR(100) NOT NULL,
-    Last_Name VARCHAR(100) NOT NULL,
+    First_Name BLOB NOT NULL,
+    Last_Name BLOB NOT NULL,
     Insurance_ID INT NOT NULL,
-    Sex VARCHAR(20) NOT NULL,
-    Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100),
-    Email VARCHAR(100),
+    Sex BLOB NOT NULL,
+    Date_Of_Birth BLOB NOT NULL,
+    Phone_Number BLOB,
+    Email BLOB,
+    nonce BLOB NOT NULL,
+    Key_ID INT NOT NULL,
     PRIMARY KEY(ID),
-    FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
+    FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID),
+    FOREIGN KEY(Key_ID) REFERENCES mykeys(Key_ID)
 );
 
 CREATE TABLE Physician (
@@ -71,21 +82,27 @@ CREATE TABLE Medical_Record (
     ID INT NOT NULL AUTO_INCREMENT,
     Patient_ID INT NOT NULL,
     Physician_ID INT NOT NULL,
-    Complete_Date DATETIME NOT NULL,
-    Encounter_Summary TEXT,
-    Diagnosis TEXT,
+    Complete_Date BLOB NOT NULL,
+    Encounter_Summary BLOB,
+    Diagnosis BLOB,
+    nonce BLOB NOT NULL,
+    Key_ID INT NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Patient_ID) REFERENCES Patient(ID),
-    FOREIGN KEY(Physician_ID) REFERENCES Physician(ID)
+    FOREIGN KEY(Physician_ID) REFERENCES Physician(ID),
+    FOREIGN KEY(Key_ID) REFERENCES mykeys(Key_ID)
 );
 
 CREATE TABLE Medicine_Treat (
     ID INT NOT NULL AUTO_INCREMENT,
     Medicine_Name VARCHAR(100) NOT NULL,
     Record_ID INT NOT NULL,
+    nonce BLOB NOT NULL,
+    Key_ID INT NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name),
-    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID)
+    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID),
+    FOREIGN KEY(Key_ID) REFERENCES mykeys(Key_ID)
 );
 
 CREATE TABLE register_code (
@@ -99,12 +116,4 @@ CREATE TABLE register_code (
     CHECK (
         Account_type IN ("admin", "physician")
     )
-);
-
-CREATE TABLE mykeys (
-    key_ID INT NOT NULL AUTO_INCREMENT,
-    key_type VARCHAR(20),
-    ekey BLOB NOT NULL,
-    nonce BLOB NOT NULL,
-    PRIMARY KEY(key_id)
 );

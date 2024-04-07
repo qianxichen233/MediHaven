@@ -217,6 +217,64 @@ impl Account for AccountService {
             msg: None,
         });
 
-        Ok(failed_msg)
+        let req = request.into_inner();
+        println!("got message: {:?}", req);
+        match req.auth {
+            Some(auth) => {
+                let plaintext = (
+                    object! {
+                    endpoint: "POST patient",
+                    SSN: req.ssn.clone(),
+                    First_Name: req.first_name.clone(),
+                    Last_Name: req.last_name.clone(),
+                    Sex: req.sex.clone(),
+                    Date_Of_Birth: req.date_of_birth.clone(),
+                    Phone_Number: req.phone_number.clone(),
+                    Email: req.email.clone(),
+                    Insurance_ID: req.insurance_id.clone(),
+                    issuer_email: auth.issuer_email.clone(),
+                    timestamp: auth.timestamp.clone()
+                }
+                ).dump();
+
+                if
+                    !myutils::verify_auth(
+                        &auth.issuer_email,
+                        "physician",
+                        &plaintext,
+                        &auth.signature,
+                        &auth.timestamp
+                    )
+                {
+                    println!("signature failed");
+                    return Ok(failed_msg);
+                }
+            }
+            None => {
+                return Ok(failed_msg);
+            }
+        }
+
+        let mut fields: HashMap<&str, &str> = HashMap::new();
+        fields.insert("SSN", &req.ssn);
+        fields.insert("First_Name", &req.first_name);
+        fields.insert("Last_Name", &req.last_name);
+        fields.insert("Sex", &req.sex);
+        fields.insert("Insurance_ID", &req.insurance_id);
+        fields.insert("Date_Of_Birth", &req.date_of_birth);
+        fields.insert("Phone_Number", &req.phone_number);
+        fields.insert("Email", &req.email);
+
+        if let Err(err) = globals::get_my_db_handler().add_patient(&fields) {
+            eprintln!("Error: {}", err);
+            return Ok(failed_msg);
+        }
+
+        let reply = SuccessResponse {
+            successful: true,
+            msg: None,
+        };
+
+        return Ok(Response::new(reply));
     }
 }

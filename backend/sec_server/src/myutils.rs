@@ -1,6 +1,9 @@
 use chrono::{ DateTime, Local, NaiveDateTime };
 use rand::Rng;
 
+use crate::globals;
+use crate::mycrypto::MyCrypto;
+
 pub fn verify_timestamp(timestamp_str: &str, expire: i64) -> bool {
     let timestamp;
 
@@ -34,4 +37,34 @@ pub fn generate_code() -> String {
         })
         .collect();
     code
+}
+
+pub fn verify_auth(
+    issuer: &str,
+    acc_type: &str,
+    plaintext: &str,
+    signature: &str,
+    timestamp: &str
+) -> bool {
+    if !verify_timestamp(timestamp, globals::TIMESTAMP_EXPIRE) {
+        return false;
+    }
+
+    let mut cache_key = String::from(acc_type);
+    cache_key += "_";
+    cache_key += &issuer;
+    println!("{:}", cache_key);
+
+    let cache = globals::get_pubkey_cache().lock().unwrap();
+
+    if cache.contains_key(&cache_key) {
+        if !MyCrypto::verify_signature(signature, &cache[&cache_key], plaintext) {
+            return false;
+        }
+
+        return true;
+    }
+
+    println!("signer not logged in!");
+    return false;
 }

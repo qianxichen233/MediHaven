@@ -171,7 +171,36 @@ class code(Resource):
 
         return jsonify({"codes": result})
 
+class patient(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument("SSN", type=str, help="SSN", required=True)
+        self.parser.add_argument("First_Name", type=str, help="First Name", required=True)
+        self.parser.add_argument("Last_Name", type=str, help="Last Name", required=True)
+        self.parser.add_argument("Insurance_ID", type=str, help="Insurance ID", required=True)
+        self.parser.add_argument("Sex", type=str, help="Sex", required=True)
+        self.parser.add_argument("Date_Of_Birth", type=str, help="Date Of Birth", required=True)
+        self.parser.add_argument("Phone_Number", type=str, help="Phone Number", required=True)
+        self.parser.add_argument("Email", type=str, help="Email", required=True)
+
+        self.parser.add_argument("issuer_email", type=str, help="issuer email", required=True)
+        self.parser.add_argument("timestamp", type=str, help="timestamp", required=True)
+        self.parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
+    def post(self):
+        args = self.parser.parse_args()
+        args.signature = args["X-Signature"]
+        del args["X-Signature"]
+
+        response = GRPC_API.patient(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        return jsonify({"message": f"success!"})
 
 api.add_resource(register, "/register")
 api.add_resource(login, "/login")
 api.add_resource(code, "/code")
+api.add_resource(patient, "/patient")

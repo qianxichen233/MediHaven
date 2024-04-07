@@ -6,6 +6,15 @@ from . import mediheaven_pb2_grpc
 class GRPC_API_Client:
     def __init__(self) -> None:
         self.channel = grpc.insecure_channel("localhost:50051")
+    
+    def getAuth(self, request):
+        auth = mediheaven_pb2.Auth(issuer_email=request["issuer_email"], timestamp=request["timestamp"], signature=request["signature"])
+
+        del request["issuer_email"]
+        del request["timestamp"]
+        del request["signature"]
+
+        return auth
 
     def register(self, request):
         stub = mediheaven_pb2_grpc.AccountStub(self.channel)
@@ -17,6 +26,13 @@ class GRPC_API_Client:
         stub = mediheaven_pb2_grpc.AccountStub(self.channel)
         request = mediheaven_pb2.LoginRequest(**request)
         response = stub.Login(request)
+        return response
+    
+    def patient(self, request):
+        stub = mediheaven_pb2_grpc.AccountStub(self.channel)
+        auth = self.getAuth(request)
+        request = mediheaven_pb2.PatientRequest(**request, auth=auth)
+        response = stub.patient(request)
         return response
 
     def get_code(self, request):

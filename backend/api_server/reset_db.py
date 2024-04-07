@@ -27,6 +27,7 @@ def execute_sql_file(sql_file, conn):
     except Exception as e:
         print("Error executing SQL script:", e)
         conn.rollback()
+        exit(1)
 
 
 conn = pyodbc.connect(
