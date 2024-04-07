@@ -360,6 +360,38 @@ impl DBHandler<'_> {
         Ok(())
     }
 
+    pub fn get_physician(&self, email: &str) -> Result<Option<HashMap<String, String>>, Error> {
+        let sql = "SELECT * FROM Physician WHERE Email = ?";
+        let data = self.select_one(&sql, (&email.into_parameter(),))?;
+        if data == None {
+            return Ok(None);
+        }
+
+        let data = data.unwrap();
+
+        let mut result = HashMap::new();
+
+        match self.verify_magic(&MAGIC_KEYS["Physician"], &data) {
+            Ok(val) => {
+                if !val {
+                    return Err(anyhow!("integrity check failed!"));
+                }
+            }
+            Err(_) => {
+                return Err(anyhow!("integrity check failed!"));
+            }
+        }
+
+        for (key, value) in data {
+            if key == "Magic" {
+                continue;
+            }
+            result.insert(key, String::from_utf8(value)?);
+        }
+
+        return Ok(Some(result));
+    }
+
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
         let sql =
             "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Issuer, Magic) VALUES (?, ?, ?, ?, ?)";

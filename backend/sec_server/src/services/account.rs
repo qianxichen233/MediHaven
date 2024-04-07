@@ -105,7 +105,7 @@ impl Account for AccountService {
             return Ok(failed_msg);
         }
 
-        let mut cache_key = String::from(req.account_type);
+        let mut cache_key = req.account_type.clone();
         cache_key += "_";
         cache_key += &req.email;
 
@@ -139,37 +139,73 @@ impl Account for AccountService {
             return Ok(Response::new(reply));
         }
 
-        match globals::get_my_db_handler().get_admin(&req.email) {
-            Ok(result) => {
-                if result == None {
+        if req.account_type == "admin" {
+            match globals::get_my_db_handler().get_admin(&req.email) {
+                Ok(result) => {
+                    if result == None {
+                        return Ok(failed_msg);
+                    }
+                    let result = result.unwrap();
+
+                    if
+                        !MyCrypto::verify_signature(
+                            &req.signature,
+                            &result["Pub_key"],
+                            &signature_plaintext
+                        )
+                    {
+                        return Ok(failed_msg);
+                    }
+                    cache.insert(cache_key, result["Pub_key"].clone());
+
+                    let reply = LoginResponse {
+                        successful: true,
+                        pub_key: result["Pub_key"].clone(),
+                        msg: None,
+                    };
+
+                    return Ok(Response::new(reply));
+                }
+                Err(err) => {
+                    eprintln!("Error: {}", err);
                     return Ok(failed_msg);
                 }
-                let result = result.unwrap();
-
-                if
-                    !MyCrypto::verify_signature(
-                        &req.signature,
-                        &result["Pub_key"],
-                        &signature_plaintext
-                    )
-                {
-                    return Ok(failed_msg);
-                }
-                cache.insert(cache_key, result["Pub_key"].clone());
-
-                let reply = LoginResponse {
-                    successful: true,
-                    pub_key: result["Pub_key"].clone(),
-                    msg: None,
-                };
-
-                return Ok(Response::new(reply));
             }
-            Err(err) => {
-                eprintln!("Error: {}", err);
-                return Ok(failed_msg);
+        } else if req.account_type == "physician" {
+            match globals::get_my_db_handler().get_physician(&req.email) {
+                Ok(result) => {
+                    if result == None {
+                        return Ok(failed_msg);
+                    }
+                    let result = result.unwrap();
+
+                    if
+                        !MyCrypto::verify_signature(
+                            &req.signature,
+                            &result["Pub_key"],
+                            &signature_plaintext
+                        )
+                    {
+                        return Ok(failed_msg);
+                    }
+                    cache.insert(cache_key, result["Pub_key"].clone());
+
+                    let reply = LoginResponse {
+                        successful: true,
+                        pub_key: result["Pub_key"].clone(),
+                        msg: None,
+                    };
+
+                    return Ok(Response::new(reply));
+                }
+                Err(err) => {
+                    eprintln!("Error: {}", err);
+                    return Ok(failed_msg);
+                }
             }
         }
+
+        return Ok(failed_msg);
     }
 
     async fn patient(

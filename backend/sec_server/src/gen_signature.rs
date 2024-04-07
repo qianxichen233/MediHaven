@@ -28,25 +28,28 @@ fn main() {
     let signing_key = SigningKey::<Sha256>::new(private_key);
     let verifying_key = signing_key.verifying_key();
 
-    // Sign
-    let endpoint = "DELETE code";
-    let email = "qc815@nyu.edu";
-    let timestamp = "2024-03-25 20:10:00";
-    let code = "RPIsRwnq6DZWq0FXUBswKOjbl667q4CFDrY71skAhF4gFvfE60uGV19QddwWaGH6";
-    let account_type = "admin";
+    let plaintext = read_file_to_string("./ig_plaintext.json").expect("error");
 
-    let data =
-        object! {
-        endpoint: endpoint,
-        email: email,
-        code: code,
-        // account_type: account_type,
-        timestamp: timestamp
-        
-    };
+    // Sign
+    // let endpoint = "DELETE code";
+    // let email = "qc815@nyu.edu";
+    // let timestamp = "2024-03-25 20:10:00";
+    // let code = "RPIsRwnq6DZWq0FXUBswKOjbl667q4CFDrY71skAhF4gFvfE60uGV19QddwWaGH6";
+    // let account_type = "admin";
+
+    // let data =
+    //     object! {
+    //     endpoint: endpoint,
+    //     email: email,
+    //     code: code,
+    //     // account_type: account_type,
+    //     timestamp: timestamp
+
+    // };
+    let data = json::parse(&plaintext).unwrap();
 
     let signature = signing_key.sign_with_rng(&mut rng, data.dump().as_bytes());
-    println!("signature: {:?}", base64::encode(&signature.to_vec()));
+    println!("{:}", base64::encode(&signature.to_vec()));
 
     verifying_key.verify(data.dump().as_bytes(), &signature).expect("failed to verify");
 }
