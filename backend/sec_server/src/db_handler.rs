@@ -329,6 +329,37 @@ impl DBHandler<'_> {
         return Ok(Some(result));
     }
 
+    pub fn register_physician(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        let sql =
+            "INSERT INTO Physician(First_Name, Last_Name, Sex, Department, Title, Date_Of_Birth, Phone_Number, Email, Pub_key, Magic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        let mut magic = self
+            .generate_magic(&MAGIC_KEYS["Physician"], &fields)
+            .expect("generate magic failed");
+
+        let params = (
+            &fields["First_Name"].into_parameter(),
+            &fields["Last_Name"].into_parameter(),
+            &fields["Sex"].into_parameter(),
+            &fields["Department"].into_parameter(),
+            &fields["Title"].into_parameter(),
+            &fields["Date_Of_Birth"].into_parameter(),
+            &fields["Phone_Number"].into_parameter(),
+            &fields["Email"].into_parameter(),
+            &fields["Pub_key"].into_parameter(),
+            &mut magic.as_blob_param(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
+    }
+
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
         let sql =
             "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Issuer, Magic) VALUES (?, ?, ?, ?, ?)";

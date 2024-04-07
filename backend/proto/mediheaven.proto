@@ -75,6 +75,8 @@ message RegisterRequest {
     string Phone_Number = 8;
     string Email = 9;
     string Pub_key = 10;
+    string Title = 11;
+    string Department = 12;
 }
 
 message SuccessResponse {

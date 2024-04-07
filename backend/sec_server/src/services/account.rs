@@ -44,22 +44,41 @@ impl Account for AccountService {
             }
         }
 
-        let age = req.age.to_string();
+        if req.account_type == "admin" {
+            let age = req.age.to_string();
 
-        let mut fields: HashMap<&str, &str> = HashMap::new();
-        fields.insert("First_Name", &req.first_name);
-        fields.insert("Last_Name", &req.last_name);
-        fields.insert("Sex", &req.sex);
-        fields.insert("Age", &age);
-        fields.insert("Date_Of_Birth", &req.date_of_birth);
-        fields.insert("Phone_Number", &req.phone_number);
-        fields.insert("Email", &req.email);
-        fields.insert("Pub_key", &req.pub_key);
+            let mut fields: HashMap<&str, &str> = HashMap::new();
+            fields.insert("First_Name", &req.first_name);
+            fields.insert("Last_Name", &req.last_name);
+            fields.insert("Sex", &req.sex);
+            fields.insert("Age", &age);
+            fields.insert("Date_Of_Birth", &req.date_of_birth);
+            fields.insert("Phone_Number", &req.phone_number);
+            fields.insert("Email", &req.email);
+            fields.insert("Pub_key", &req.pub_key);
 
-        if let Err(err) = globals::get_my_db_handler().register_admin(&fields) {
-            eprintln!("Error: {}", err);
-            return Ok(failed);
+            if let Err(err) = globals::get_my_db_handler().register_admin(&fields) {
+                eprintln!("Error: {}", err);
+                return Ok(failed);
+            }
+        } else if req.account_type == "physician" {
+            let mut fields: HashMap<&str, &str> = HashMap::new();
+            fields.insert("First_Name", &req.first_name);
+            fields.insert("Last_Name", &req.last_name);
+            fields.insert("Sex", &req.sex);
+            fields.insert("Title", &req.title);
+            fields.insert("Date_Of_Birth", &req.date_of_birth);
+            fields.insert("Phone_Number", &req.phone_number);
+            fields.insert("Email", &req.email);
+            fields.insert("Pub_key", &req.pub_key);
+            fields.insert("Department", &req.department);
+
+            if let Err(err) = globals::get_my_db_handler().register_physician(&fields) {
+                eprintln!("Error: {}", err);
+                return Ok(failed);
+            }
         }
+
         globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
         let success = SuccessResponse {
             successful: true,

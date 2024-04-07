@@ -22,7 +22,7 @@ class register(Resource):
         )
         self.parser.add_argument("Last_Name", type=str, help="Last Name", required=True)
         self.parser.add_argument("Sex", type=str, help="Sex", required=True)
-        self.parser.add_argument("Age", type=int, help="Age", required=True)
+        self.parser.add_argument("Age", type=int, help="Age", required=False)
         self.parser.add_argument(
             "Date_Of_Birth", type=str, help="Date Of Birth", required=True
         )
@@ -33,9 +33,20 @@ class register(Resource):
         self.parser.add_argument(
             "Pub_key", type=str, help="RSA Public Key", required=True
         )
+        self.parser.add_argument("Title", type=str, help="Phone Number", required=False)
+        self.parser.add_argument(
+            "Department", type=str, help="Phone Number", required=False
+        )
 
     def post(self):
         args = self.parser.parse_args()
+        if args["Account_Type"] == "admin" and not hasattr(args, "Age"):
+            return jsonify({"message": f"Missing Fields"})
+
+        if args["Account_Type"] == "physician" and (
+            not hasattr(args, "Title") or not hasattr(args, "Department")
+        ):
+            return jsonify({"message": f"Missing Fields"})
 
         response = GRPC_API.register(args)
         if not response.successful:
