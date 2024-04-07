@@ -42,7 +42,7 @@ lazy_static! {
 pub struct DBHandler<'a> {
     // to-do: make this thread safe
     connection: Connection<'a>,
-    MAC_Key: KeyType,
+    MAC_key: KeyType,
 }
 pub enum DBVALUE {
     StringVal(String),
@@ -70,7 +70,7 @@ impl DBHandler<'_> {
                 connection_string,
                 ConnectionOptions::default()
             )?,
-            MAC_Key: GenericArray::default(),
+            MAC_key: GenericArray::default(),
         })
     }
 
@@ -108,7 +108,7 @@ impl DBHandler<'_> {
                         .to_vec();
 
                     println!("int key: {:?}", key_vec);
-                    self.MAC_Key.copy_from_slice(&key_vec[..]);
+                    self.MAC_key.copy_from_slice(&key_vec[..]);
                     found_key = true;
                 }
             }
@@ -193,7 +193,7 @@ impl DBHandler<'_> {
         }
         let hash = digest(plaintext).into_bytes();
 
-        let cipher = ChaCha20Poly1305::new(&self.MAC_Key);
+        let cipher = ChaCha20Poly1305::new(&self.MAC_key);
         let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng); // 96-bits; unique per message
         let ciphertext = cipher.encrypt(&nonce, hash.as_slice())?;
 
@@ -225,7 +225,7 @@ impl DBHandler<'_> {
         }
 
         let hash = digest(plaintext).into_bytes();
-        let cipher = ChaCha20Poly1305::new(&self.MAC_Key);
+        let cipher = ChaCha20Poly1305::new(&self.MAC_key);
 
         let (nonce_vec, ciphertext) = fields["Magic"].split_at(12);
         let mut nonce: NonceType = GenericArray::default();
