@@ -1,4 +1,4 @@
-raw="""
+raw = """
 insert into Medicine (Name, Instructions, Description, Type) values ('Lorazepam', 'Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor. Morbi vel lectus in quam fringilla rhoncus. Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci. Mauris lacinia sapien quis libero. Nullam sit amet turpis elementum ligula vehicula consequat. Morbi a ipsum.', 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec pharetra, magna vestibulum aliquet ultrices, erat tortor sollicitudin mi, sit amet lobortis sapien sapien non mi. Integer ac neque. Duis bibendum. Morbi non quam nec dui luctus rutrum. Nulla tellus. In sagittis dui vel nisl. Duis ac nibh. Fusce lacus purus, aliquet at, feugiat non, pretium quis, lectus. Suspendisse potenti. In eleifend quam a odio.', 'Cardiovascular');
 insert into Medicine (Name, Instructions, Description, Type) values ('GLYCERIN', 'Integer ac leo. Pellentesque ultrices mattis odio.', 'Mauris enim leo, rhoncus sed, vestibulum sit amet, cursus id, turpis. Integer aliquet, massa id lobortis convallis, tortor risus dapibus augue, vel accumsan tellus nisi eu orci.', 'Sedatives');
 insert into Medicine (Name, Instructions, Description, Type) values ('ALUMINUM CHLOROHYDRATE', 'Aliquam augue quam, sollicitudin vitae, consectetuer eget, rutrum at, lorem.', 'Duis consequat dui nec nisi volutpat eleifend. Donec ut dolor.', 'Sedatives');
@@ -105,14 +105,16 @@ record = set()
 
 raw = raw.strip()
 for line in raw.split("\n"):
-	medicine = line.split("values")[1].split(",")[0][2:].upper()
-	if medicine in record:
-		continue
+    line = line.strip()
+    if line == "":
+        continue
+    medicine = line.split("values")[1].split("',")[0][3:]
+    fixed = medicine.split(",")[0]
+    if fixed.upper() in record or "N/A" in fixed:
+        continue
 
-	record.add(medicine)
-	res.append(line)
+    record.add(fixed.upper())
+    line = line.replace(medicine, fixed)
+    res.append(line)
 
 print("\n".join(res))
-
-
-

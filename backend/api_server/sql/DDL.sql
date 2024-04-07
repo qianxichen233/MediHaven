@@ -1,5 +1,5 @@
 CREATE TABLE Department(
-    Name VARCHAR(20),
+    Name VARCHAR(50),
     PRIMARY KEY(Name)
 );
 
@@ -51,16 +51,6 @@ CREATE TABLE Patient (
     FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
 );
 
-
-CREATE TABLE Medicine_Treat (
-    ID INT NOT NULL AUTO_INCREMENT,
-    Medicine_Name VARCHAR(100) NOT NULL,
-    Record_ID INT NOT NULL,
-    PRIMARY KEY(ID),
-    FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name),
-    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID)
-);
-
 CREATE TABLE Physician (
     ID INT NOT NULL AUTO_INCREMENT,
     First_Name VARCHAR(100) NOT NULL,
@@ -86,7 +76,16 @@ CREATE TABLE Medical_Record (
     Diagnosis TEXT,
     PRIMARY KEY(ID),
     FOREIGN KEY(Patient_ID) REFERENCES Patient(ID),
-    FOREIGN KEY(Physician_ID) REFERENCES Physician(ID),
+    FOREIGN KEY(Physician_ID) REFERENCES Physician(ID)
+);
+
+CREATE TABLE Medicine_Treat (
+    ID INT NOT NULL AUTO_INCREMENT,
+    Medicine_Name VARCHAR(100) NOT NULL,
+    Record_ID INT NOT NULL,
+    PRIMARY KEY(ID),
+    FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name),
+    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID)
 );
 
 CREATE TABLE register_code (
