@@ -7,7 +7,7 @@ CREATE TABLE Medicine (
     Name VARCHAR(100),
     Instructions TEXT NOT NULL,
     Description TEXT NOT NULL,
-    Expiration_Date DATE Not NULL,
+    Type VARCHAR(100) NOT NULL,
     PRIMARY KEY(Name)
 );
 
