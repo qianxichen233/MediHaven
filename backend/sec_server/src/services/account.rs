@@ -1,4 +1,5 @@
 use json::object;
+use crate::mediheaven::PatientRequest;
 use crate::mycrypto::MyCrypto;
 use crate::myutils;
 use crate::globals;
@@ -150,5 +151,17 @@ impl Account for AccountService {
                 return Ok(failed_msg);
             }
         }
+    }
+
+    async fn patient(
+        &self,
+        request: Request<PatientRequest>
+    ) -> Result<Response<SuccessResponse>, Status> {
+        let failed_msg = Response::new(SuccessResponse {
+            successful: false,
+            msg: None,
+        });
+
+        Ok(failed_msg)
     }
 }

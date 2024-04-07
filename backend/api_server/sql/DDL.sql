@@ -21,6 +21,8 @@ CREATE TABLE Insurance (
     PRIMARY KEY(ID)
 );
 
+ALTER TABLE Insurance AUTO_INCREMENT = 1;
+
 CREATE TABLE Administrator (
     ID INT NOT NULL AUTO_INCREMENT,
     First_Name VARCHAR(100) NOT NULL,
@@ -37,15 +39,14 @@ CREATE TABLE Administrator (
 
 CREATE TABLE Patient (
     ID INT NOT NULL AUTO_INCREMENT,
-    SSN VARCHAR(20) NOT NULL,
+    SSN VARCHAR(20) NOT NULL UNIQUE,
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
     Insurance_ID INT NOT NULL,
     Sex VARCHAR(20) NOT NULL,
-    Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100) NULL,
-    Email VARCHAR(100) NOT NULL,
+    Phone_Number VARCHAR(100),
+    Email VARCHAR(100),
     PRIMARY KEY(ID),
     FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
 );
@@ -54,24 +55,21 @@ CREATE TABLE Patient (
 CREATE TABLE Medicine_Treat (
     ID INT NOT NULL AUTO_INCREMENT,
     Medicine_Name VARCHAR(100) NOT NULL,
-    Production_Date DATE NOT NULL,
-    Expiration_Date DATE NOT NULL,
+    Record_ID INT NOT NULL,
     PRIMARY KEY(ID),
-    FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name)
+    FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name),
+    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID)
 );
 
 CREATE TABLE Physician (
     ID INT NOT NULL AUTO_INCREMENT,
-    SSN VARCHAR(20) NOT NULL,
-    password VARCHAR(200) NOT NULL,
     First_Name VARCHAR(100) NOT NULL,
     Last_Name VARCHAR(100) NOT NULL,
     Sex VARCHAR(20) NOT NULL,
     Department VARCHAR(20) NOT NULL,
     Title VARCHAR(20) NOT NULL,
-    Age INT NOT NULL,
     Date_Of_Birth DATE NOT NULL,
-    Phone_Number VARCHAR(100) NULL,
+    Phone_Number VARCHAR(100) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     Pub_key VARCHAR(1000) NOT NULL,
     Magic BLOB NOT NULL,
@@ -83,16 +81,12 @@ CREATE TABLE Medical_Record (
     ID INT NOT NULL AUTO_INCREMENT,
     Patient_ID INT NOT NULL,
     Physician_ID INT NOT NULL,
-    Medicine_ID INT NOT NULL,
-    Insurance_ID INT NOT NULL,
-    Complete_Date DATE NOT NULL,
-    Encounter_Summary TEXT NOT NULL,
-    Diagnosis TEXT NOT NULL,
+    Complete_Date DATETIME NOT NULL,
+    Encounter_Summary TEXT,
+    Diagnosis TEXT,
     PRIMARY KEY(ID),
     FOREIGN KEY(Patient_ID) REFERENCES Patient(ID),
     FOREIGN KEY(Physician_ID) REFERENCES Physician(ID),
-    FOREIGN KEY(Medicine_ID) REFERENCES Medicine_Treat(ID),
-    FOREIGN KEY(Insurance_ID) REFERENCES Insurance(ID)
 );
 
 CREATE TABLE register_code (

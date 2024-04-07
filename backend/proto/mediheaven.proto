@@ -10,8 +10,19 @@ service Code {
 service Account {
     rpc register (RegisterRequest) returns (SuccessResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
+    rpc patient (PatientRequest) returns (SuccessResponse);
 }
 
+service MedicalRecord {
+    rpc getRecord (getRecordRequest) returns (RecordResponse);
+    rpc writeRecord (writeRecordRequest) returns (SuccessResponse);
+}
+
+message Auth {
+    string issuer_email = 1;
+    string timestamp = 2;
+    string signature = 3;
+}
 
 /*Service Code*/
 message CodeRequest {
@@ -82,4 +93,45 @@ message LoginResponse {
     bool successful = 1;
     string pub_key = 2;
     optional string msg = 3;
+}
+
+message PatientRequest {
+    string SSN = 1;
+    string First_Name = 2;
+    string Last_Name = 3;
+    string Insurance_ID = 4;
+    string Sex = 5;
+    string Date_Of_Birth = 6;
+    optional string Phone_Number = 7;
+    optional string Email = 8;
+
+    Auth auth = 9; 
+}
+
+/*Service MedicalRecord*/
+message SingleRecord {
+    string patient_first_name = 1;
+    string patient_last_name = 2;
+    string physician_first_name = 3;
+    string physician_last_name = 4;
+    repeated string medicines = 5;
+    string complete_date = 6;
+    string encounter_summary = 7;
+    string diagnosis = 8;
+}
+
+message getRecordRequest {
+    string SSN = 1;
+    Auth auth = 2;
+}
+
+message RecordResponse {
+    repeated SingleRecord records = 1;
+    optional string msg = 2;
+}
+
+message writeRecordRequest{
+    string SSN = 1;
+    SingleRecord record = 2;
+    Auth auth = 3;
 }

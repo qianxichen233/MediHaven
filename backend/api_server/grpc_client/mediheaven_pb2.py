@@ -14,35 +14,49 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10mediheaven.proto\x12\nmediheaven\"q\n\x0b\x43odeRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"J\n\x0c\x43odeResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x10\n\x03msg\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"S\n\x0e\x43odeDelRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\"F\n\x0f\x43odeListRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x11\n\tsignature\x18\x03 \x01(\t\"T\n\x10\x43odeListResponse\x12&\n\x05\x63odes\x18\x01 \x03(\x0b\x32\x17.mediheaven.CodeMessage\x12\x10\n\x03msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"J\n\x0b\x43odeMessage\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"\xc3\x01\n\x0fRegisterRequest\x12\x0c\n\x04\x43ode\x18\x01 \x01(\t\x12\x14\n\x0c\x41\x63\x63ount_Type\x18\x02 \x01(\t\x12\x12\n\nFirst_Name\x18\x03 \x01(\t\x12\x11\n\tLast_Name\x18\x04 \x01(\t\x12\x0b\n\x03Sex\x18\x05 \x01(\t\x12\x0b\n\x03\x41ge\x18\x06 \x01(\x05\x12\x15\n\rDate_Of_Birth\x18\x07 \x01(\t\x12\x14\n\x0cPhone_Number\x18\x08 \x01(\t\x12\r\n\x05\x45mail\x18\t \x01(\t\x12\x0f\n\x07Pub_key\x18\n \x01(\t\"?\n\x0fSuccessResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x10\n\x03msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"Y\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x04 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x03 \x01(\t\"N\n\rLoginResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x10\n\x03msg\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg2\xcf\x01\n\x04\x43ode\x12<\n\x07getCode\x12\x17.mediheaven.CodeRequest\x1a\x18.mediheaven.CodeResponse\x12\x42\n\x07\x64\x65lCode\x12\x1a.mediheaven.CodeDelRequest\x1a\x1b.mediheaven.SuccessResponse\x12\x45\n\x08listCode\x12\x1b.mediheaven.CodeListRequest\x1a\x1c.mediheaven.CodeListResponse2\x8d\x01\n\x07\x41\x63\x63ount\x12\x44\n\x08register\x12\x1b.mediheaven.RegisterRequest\x1a\x1b.mediheaven.SuccessResponse\x12<\n\x05Login\x12\x18.mediheaven.LoginRequest\x1a\x19.mediheaven.LoginResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10mediheaven.proto\x12\nmediheaven\"B\n\x04\x41uth\x12\x14\n\x0cissuer_email\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x11\n\tsignature\x18\x03 \x01(\t\"q\n\x0b\x43odeRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"J\n\x0c\x43odeResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x10\n\x03msg\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"S\n\x0e\x43odeDelRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\"F\n\x0f\x43odeListRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x11\n\tsignature\x18\x03 \x01(\t\"T\n\x10\x43odeListResponse\x12&\n\x05\x63odes\x18\x01 \x03(\x0b\x32\x17.mediheaven.CodeMessage\x12\x10\n\x03msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"J\n\x0b\x43odeMessage\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpiration_date\x18\x03 \x01(\t\"\xc3\x01\n\x0fRegisterRequest\x12\x0c\n\x04\x43ode\x18\x01 \x01(\t\x12\x14\n\x0c\x41\x63\x63ount_Type\x18\x02 \x01(\t\x12\x12\n\nFirst_Name\x18\x03 \x01(\t\x12\x11\n\tLast_Name\x18\x04 \x01(\t\x12\x0b\n\x03Sex\x18\x05 \x01(\t\x12\x0b\n\x03\x41ge\x18\x06 \x01(\x05\x12\x15\n\rDate_Of_Birth\x18\x07 \x01(\t\x12\x14\n\x0cPhone_Number\x18\x08 \x01(\t\x12\r\n\x05\x45mail\x18\t \x01(\t\x12\x0f\n\x07Pub_key\x18\n \x01(\t\"?\n\x0fSuccessResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x10\n\x03msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"Y\n\x0cLoginRequest\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x11\n\ttimestamp\x18\x04 \x01(\t\x12\x11\n\tsignature\x18\x02 \x01(\t\x12\x14\n\x0c\x61\x63\x63ount_type\x18\x03 \x01(\t\"N\n\rLoginResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x10\n\x03msg\x18\x03 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"\xe8\x01\n\x0ePatientRequest\x12\x0b\n\x03SSN\x18\x01 \x01(\t\x12\x12\n\nFirst_Name\x18\x02 \x01(\t\x12\x11\n\tLast_Name\x18\x03 \x01(\t\x12\x14\n\x0cInsurance_ID\x18\x04 \x01(\t\x12\x0b\n\x03Sex\x18\x05 \x01(\t\x12\x15\n\rDate_Of_Birth\x18\x06 \x01(\t\x12\x19\n\x0cPhone_Number\x18\x07 \x01(\tH\x00\x88\x01\x01\x12\x12\n\x05\x45mail\x18\x08 \x01(\tH\x01\x88\x01\x01\x12\x1e\n\x04\x61uth\x18\t \x01(\x0b\x32\x10.mediheaven.AuthB\x0f\n\r_Phone_NumberB\x08\n\x06_Email\"\xd8\x01\n\x0cSingleRecord\x12\x1a\n\x12patient_first_name\x18\x01 \x01(\t\x12\x19\n\x11patient_last_name\x18\x02 \x01(\t\x12\x1c\n\x14physician_first_name\x18\x03 \x01(\t\x12\x1b\n\x13physician_last_name\x18\x04 \x01(\t\x12\x11\n\tmedicines\x18\x05 \x03(\t\x12\x15\n\rcomplete_date\x18\x06 \x01(\t\x12\x19\n\x11\x65ncounter_summary\x18\x07 \x01(\t\x12\x11\n\tdiagnosis\x18\x08 \x01(\t\"?\n\x10getRecordRequest\x12\x0b\n\x03SSN\x18\x01 \x01(\t\x12\x1e\n\x04\x61uth\x18\x02 \x01(\x0b\x32\x10.mediheaven.Auth\"U\n\x0eRecordResponse\x12)\n\x07records\x18\x01 \x03(\x0b\x32\x18.mediheaven.SingleRecord\x12\x10\n\x03msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\x06\n\x04_msg\"k\n\x12writeRecordRequest\x12\x0b\n\x03SSN\x18\x01 \x01(\t\x12(\n\x06record\x18\x02 \x01(\x0b\x32\x18.mediheaven.SingleRecord\x12\x1e\n\x04\x61uth\x18\x03 \x01(\x0b\x32\x10.mediheaven.Auth2\xcf\x01\n\x04\x43ode\x12<\n\x07getCode\x12\x17.mediheaven.CodeRequest\x1a\x18.mediheaven.CodeResponse\x12\x42\n\x07\x64\x65lCode\x12\x1a.mediheaven.CodeDelRequest\x1a\x1b.mediheaven.SuccessResponse\x12\x45\n\x08listCode\x12\x1b.mediheaven.CodeListRequest\x1a\x1c.mediheaven.CodeListResponse2\xd1\x01\n\x07\x41\x63\x63ount\x12\x44\n\x08register\x12\x1b.mediheaven.RegisterRequest\x1a\x1b.mediheaven.SuccessResponse\x12<\n\x05Login\x12\x18.mediheaven.LoginRequest\x1a\x19.mediheaven.LoginResponse\x12\x42\n\x07patient\x12\x1a.mediheaven.PatientRequest\x1a\x1b.mediheaven.SuccessResponse2\xa2\x01\n\rMedicalRecord\x12\x45\n\tgetRecord\x12\x1c.mediheaven.getRecordRequest\x1a\x1a.mediheaven.RecordResponse\x12J\n\x0bwriteRecord\x12\x1e.mediheaven.writeRecordRequest\x1a\x1b.mediheaven.SuccessResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'mediheaven_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_CODEREQUEST']._serialized_start=32
-  _globals['_CODEREQUEST']._serialized_end=145
-  _globals['_CODERESPONSE']._serialized_start=147
-  _globals['_CODERESPONSE']._serialized_end=221
-  _globals['_CODEDELREQUEST']._serialized_start=223
-  _globals['_CODEDELREQUEST']._serialized_end=306
-  _globals['_CODELISTREQUEST']._serialized_start=308
-  _globals['_CODELISTREQUEST']._serialized_end=378
-  _globals['_CODELISTRESPONSE']._serialized_start=380
-  _globals['_CODELISTRESPONSE']._serialized_end=464
-  _globals['_CODEMESSAGE']._serialized_start=466
-  _globals['_CODEMESSAGE']._serialized_end=540
-  _globals['_REGISTERREQUEST']._serialized_start=543
-  _globals['_REGISTERREQUEST']._serialized_end=738
-  _globals['_SUCCESSRESPONSE']._serialized_start=740
-  _globals['_SUCCESSRESPONSE']._serialized_end=803
-  _globals['_LOGINREQUEST']._serialized_start=805
-  _globals['_LOGINREQUEST']._serialized_end=894
-  _globals['_LOGINRESPONSE']._serialized_start=896
-  _globals['_LOGINRESPONSE']._serialized_end=974
-  _globals['_CODE']._serialized_start=977
-  _globals['_CODE']._serialized_end=1184
-  _globals['_ACCOUNT']._serialized_start=1187
-  _globals['_ACCOUNT']._serialized_end=1328
+  _globals['_AUTH']._serialized_start=32
+  _globals['_AUTH']._serialized_end=98
+  _globals['_CODEREQUEST']._serialized_start=100
+  _globals['_CODEREQUEST']._serialized_end=213
+  _globals['_CODERESPONSE']._serialized_start=215
+  _globals['_CODERESPONSE']._serialized_end=289
+  _globals['_CODEDELREQUEST']._serialized_start=291
+  _globals['_CODEDELREQUEST']._serialized_end=374
+  _globals['_CODELISTREQUEST']._serialized_start=376
+  _globals['_CODELISTREQUEST']._serialized_end=446
+  _globals['_CODELISTRESPONSE']._serialized_start=448
+  _globals['_CODELISTRESPONSE']._serialized_end=532
+  _globals['_CODEMESSAGE']._serialized_start=534
+  _globals['_CODEMESSAGE']._serialized_end=608
+  _globals['_REGISTERREQUEST']._serialized_start=611
+  _globals['_REGISTERREQUEST']._serialized_end=806
+  _globals['_SUCCESSRESPONSE']._serialized_start=808
+  _globals['_SUCCESSRESPONSE']._serialized_end=871
+  _globals['_LOGINREQUEST']._serialized_start=873
+  _globals['_LOGINREQUEST']._serialized_end=962
+  _globals['_LOGINRESPONSE']._serialized_start=964
+  _globals['_LOGINRESPONSE']._serialized_end=1042
+  _globals['_PATIENTREQUEST']._serialized_start=1045
+  _globals['_PATIENTREQUEST']._serialized_end=1277
+  _globals['_SINGLERECORD']._serialized_start=1280
+  _globals['_SINGLERECORD']._serialized_end=1496
+  _globals['_GETRECORDREQUEST']._serialized_start=1498
+  _globals['_GETRECORDREQUEST']._serialized_end=1561
+  _globals['_RECORDRESPONSE']._serialized_start=1563
+  _globals['_RECORDRESPONSE']._serialized_end=1648
+  _globals['_WRITERECORDREQUEST']._serialized_start=1650
+  _globals['_WRITERECORDREQUEST']._serialized_end=1757
+  _globals['_CODE']._serialized_start=1760
+  _globals['_CODE']._serialized_end=1967
+  _globals['_ACCOUNT']._serialized_start=1970
+  _globals['_ACCOUNT']._serialized_end=2179
+  _globals['_MEDICALRECORD']._serialized_start=2182
+  _globals['_MEDICALRECORD']._serialized_end=2344
 # @@protoc_insertion_point(module_scope)
