@@ -97,12 +97,9 @@ CREATE TABLE Medicine_Treat (
     ID INT NOT NULL AUTO_INCREMENT,
     Medicine_Name VARCHAR(100) NOT NULL,
     Record_ID INT NOT NULL,
-    nonce BLOB NOT NULL,
-    Key_ID INT NOT NULL,
     PRIMARY KEY(ID),
     FOREIGN KEY(Medicine_Name) REFERENCES Medicine(Name),
-    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID),
-    FOREIGN KEY(Key_ID) REFERENCES mykeys(Key_ID)
+    FOREIGN KEY(Record_ID) REFERENCES Medical_Record(ID)
 );
 
 CREATE TABLE register_code (

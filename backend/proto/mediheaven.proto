@@ -134,14 +134,12 @@ message PatientResponse {
 
 /*Service MedicalRecord*/
 message SingleRecord {
-    string patient_first_name = 1;
-    string patient_last_name = 2;
-    string physician_first_name = 3;
-    string physician_last_name = 4;
-    repeated string medicines = 5;
-    string complete_date = 6;
-    string encounter_summary = 7;
-    string diagnosis = 8;
+    int32 patient_id = 1;
+    int32 physician_id = 2;
+    repeated string medicines = 3;
+    string complete_date = 4;
+    string encounter_summary = 5;
+    string diagnosis = 6;
 }
 
 message getRecordRequest {

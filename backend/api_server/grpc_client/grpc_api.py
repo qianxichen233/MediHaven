@@ -66,6 +66,18 @@ class GRPC_API_Client:
         request = mediheaven_pb2.getRecordRequest(**request, auth=auth)
         response = stub.getRecord(request)
         return response
+    
+    def addRecord(self, request):
+        stub = mediheaven_pb2_grpc.MedicalRecordStub(self.channel)
+        auth = self.getAuth(request)
+        SSN = request["SSN"]
+        del request["SSN"]
+
+        record = mediheaven_pb2.SingleRecord(**request)
+
+        request = mediheaven_pb2.writeRecordRequest(SSN=SSN, record=record, auth=auth)
+        response = stub.writeRecord(request)
+        return response
 
     def test(self):
         # Create a stub (client) for the service

@@ -6,8 +6,9 @@ import inspect
 
 from grpc_client.grpc_api import GRPC_API
 
-user_api = Blueprint("record_api", __name__)
-api = Api(user_api)
+record_api = Blueprint("record_api", __name__)
+api = Api(record_api)
+
 
 class record(Resource):
     def __init__(self):
@@ -16,6 +17,20 @@ class record(Resource):
         self.get_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True)
         self.get_parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
         self.get_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
+        self.put_parser = reqparse.RequestParser()
+        self.put_parser.add_argument("SSN", type=str, help="SSN", required=True)
+        self.put_parser.add_argument("patient_id", type=int, help="patient id", required=True)
+        self.put_parser.add_argument("physician_id", type=int, help="physician id", required=True)
+        self.put_parser.add_argument("medicines", type=str, action='append', help="medicines", required=True)
+        self.put_parser.add_argument("complete_date", type=str, help="complete date", required=True)
+        self.put_parser.add_argument("encounter_summary", type=str, help="encounter summary", required=True)
+        self.put_parser.add_argument("diagnosis", type=str, help="diagnosis", required=True)
+        self.put_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True)
+        self.put_parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
+        self.put_parser.add_argument(
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
     
@@ -27,10 +42,19 @@ class record(Resource):
             del args["X-Signature"]
         return args
 
-    def post(self):
+    def get(self):
         args = self.get_args()
 
         response = GRPC_API.getRecord(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        return jsonify({"message": f"success!"})
+    
+    def put(self):
+        args = self.get_args()
+
+        response = GRPC_API.addRecord(args)
         if not response.successful:
             return jsonify({"message": f"failed!"})
 

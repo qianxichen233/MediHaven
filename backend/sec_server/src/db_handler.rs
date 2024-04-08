@@ -477,8 +477,7 @@ impl DBHandler<'_> {
         if let Some(mut cursor) = self.connection.execute(&sql, params)? {
             let mut row = cursor.next_row()?.unwrap();
             let mut buf: Vec<u8> = Vec::new();
-            row.get_text(1, &mut buf)?;
-            println!("{:?}", String::from_utf8(buf));
+            row.get_text(10, &mut buf)?;
         }
 
         Ok(())
@@ -520,6 +519,71 @@ impl DBHandler<'_> {
         }
 
         return Ok(Some(result));
+    }
+
+    pub fn add_record(
+        &self,
+        fields: &HashMap<&str, &str>,
+        medicines: &Vec<String>
+    ) -> Result<(), Error> {
+        let sql =
+            "INSERT INTO Medical_Record(Patient_ID, Physician_ID, Complete_Date, Encounter_Summary, Diagnosis, nonce, Key_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
+        let cipher = ChaCha20Poly1305::new(&enc_key);
+        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+
+        let mut complete_date = self.encrypt_column(fields["Complete_Date"], &cipher, &nonce);
+        let mut encounter_summary = self.encrypt_column(
+            fields["Encounter_Summary"],
+            &cipher,
+            &nonce
+        );
+        let mut diagnosis = self.encrypt_column(fields["Diagnosis"], &cipher, &nonce);
+
+        let cursor_nonce = std::io::Cursor::new(nonce);
+        let nonce_buf = io::BufReader::new(cursor_nonce);
+        let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
+
+        let params = (
+            &fields["Patient_ID"].into_parameter(),
+            &fields["Physician_ID"].into_parameter(),
+            &mut complete_date.as_blob_param(),
+            &mut encounter_summary.as_blob_param(),
+            &mut diagnosis.as_blob_param(),
+            &mut blob_nonce.as_blob_param(),
+            &id.to_string().into_parameter(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        // very inefficienct, there should be better way to get insert id
+        // cannot figure out right now though
+        let id = String::from_utf8(
+            self
+                .select_one("SELECT MAX(ID) AS LAST_ID FROM Medical_Record", ())
+                .unwrap()
+                .unwrap()["LAST_ID"]
+                .to_vec()
+        )?.parse::<u64>()?;
+
+        let mut prepared = self.connection
+            .prepare("INSERT INTO Medicine_Treat(Medicine_Name, Record_ID) VALUES (?, ?)")
+            .unwrap();
+
+        for medicine in medicines.iter() {
+            prepared.execute((
+                &medicine.as_str().into_parameter(),
+                &id.to_string().into_parameter(),
+            ))?;
+        }
+
+        Ok(())
     }
 
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {

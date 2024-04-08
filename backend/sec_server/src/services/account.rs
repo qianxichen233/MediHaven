@@ -226,7 +226,7 @@ impl Account for AccountService {
             Some(auth) => {
                 let plaintext = (
                     object! {
-                    endpoint: "POST patient",
+                    endpoint: "PUT patient",
                     SSN: req.ssn.clone(),
                     First_Name: req.first_name.clone(),
                     Last_Name: req.last_name.clone(),
