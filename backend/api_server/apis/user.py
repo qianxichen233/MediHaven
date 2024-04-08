@@ -173,28 +173,62 @@ class code(Resource):
 
 class patient(Resource):
     def __init__(self):
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument("SSN", type=str, help="SSN", required=True)
-        self.parser.add_argument("First_Name", type=str, help="First Name", required=True)
-        self.parser.add_argument("Last_Name", type=str, help="Last Name", required=True)
-        self.parser.add_argument("Insurance_ID", type=str, help="Insurance ID", required=True)
-        self.parser.add_argument("Sex", type=str, help="Sex", required=True)
-        self.parser.add_argument("Date_Of_Birth", type=str, help="Date Of Birth", required=True)
-        self.parser.add_argument("Phone_Number", type=str, help="Phone Number", required=True)
-        self.parser.add_argument("Email", type=str, help="Email", required=True)
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument("SSN", type=str, help="SSN", required=True)
+        self.post_parser.add_argument("First_Name", type=str, help="First Name", required=True)
+        self.post_parser.add_argument("Last_Name", type=str, help="Last Name", required=True)
+        self.post_parser.add_argument("Insurance_ID", type=str, help="Insurance ID", required=True)
+        self.post_parser.add_argument("Sex", type=str, help="Sex", required=True)
+        self.post_parser.add_argument("Date_Of_Birth", type=str, help="Date Of Birth", required=True)
+        self.post_parser.add_argument("Phone_Number", type=str, help="Phone Number", required=True)
+        self.post_parser.add_argument("Email", type=str, help="Email", required=True)
 
-        self.parser.add_argument("issuer_email", type=str, help="issuer email", required=True)
-        self.parser.add_argument("timestamp", type=str, help="timestamp", required=True)
-        self.parser.add_argument(
+        self.post_parser.add_argument("issuer_email", type=str, help="issuer email", required=True)
+        self.post_parser.add_argument("timestamp", type=str, help="timestamp", required=True)
+        self.post_parser.add_argument(
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
 
-    def post(self):
-        args = self.parser.parse_args()
-        args.signature = args["X-Signature"]
-        del args["X-Signature"]
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument("SSN", type=str, help="SSN", required=True, location="args")
+        self.get_parser.add_argument("issuer_email", type=str, help="issuer email", required=True, location="args")
+        self.get_parser.add_argument("timestamp", type=str, help="timestamp", required=True, location="args")
+        self.get_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
 
-        response = GRPC_API.patient(args)
+    def get_args(self):
+        caller = inspect.stack()[1].function
+        args = getattr(self, caller + "_parser").parse_args()
+        if hasattr(args, "X-Signature"):
+            args.signature = args["X-Signature"]
+            del args["X-Signature"]
+        return args
+    
+    def get(self):
+        args = self.get_args()
+
+        response = GRPC_API.get_patient(args)
+        if response.patient == None:
+            return jsonify({"message": f"failed!"})
+        
+        result = {}
+        result["SSN"] = response.patient.SSN
+        result["First_Name"] = response.patient.First_Name
+        result["Last_Name"] = response.patient.Last_Name
+        result["Insurance_ID"] = response.patient.Insurance_ID
+        result["Sex"] = response.patient.Sex
+        result["Date_Of_Birth"] = response.patient.Date_Of_Birth
+        result["Phone_Number"] = response.patient.Phone_Number
+        result["Email"] = response.patient.Email
+        result["ID"] = response.patient.ID
+
+        return jsonify({"patient": result})
+
+    def post(self):
+        args = self.get_args()
+
+        response = GRPC_API.add_patient(args)
         if not response.successful:
             return jsonify({"message": f"failed!"})
 

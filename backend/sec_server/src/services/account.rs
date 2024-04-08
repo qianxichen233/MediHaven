@@ -1,5 +1,8 @@
 use json::object;
+use crate::mediheaven::GetPatientRequest;
+use crate::mediheaven::PatientInfo;
 use crate::mediheaven::PatientRequest;
+use crate::mediheaven::PatientResponse;
 use crate::mycrypto::MyCrypto;
 use crate::myutils;
 use crate::globals;
@@ -276,5 +279,77 @@ impl Account for AccountService {
         };
 
         return Ok(Response::new(reply));
+    }
+
+    async fn get_patient(
+        &self,
+        request: Request<GetPatientRequest>
+    ) -> Result<Response<PatientResponse>, Status> {
+        let failed_msg = Response::new(PatientResponse {
+            patient: None,
+        });
+
+        let req = request.into_inner();
+        println!("got message: {:?}", req);
+        match req.auth {
+            Some(auth) => {
+                let plaintext = (
+                    object! {
+                    endpoint: "GET patient",
+                    SSN: req.ssn.clone(),
+                    issuer_email: auth.issuer_email.clone(),
+                    timestamp: auth.timestamp.clone()
+                }
+                ).dump();
+
+                if
+                    !myutils::verify_auth(
+                        &auth.issuer_email,
+                        "physician",
+                        &plaintext,
+                        &auth.signature,
+                        &auth.timestamp
+                    )
+                {
+                    println!("signature failed");
+                    return Ok(failed_msg);
+                }
+            }
+            None => {
+                return Ok(failed_msg);
+            }
+        }
+
+        match globals::get_my_db_handler().get_patient(&req.ssn) {
+            Ok(result) => {
+                if result == None {
+                    return Ok(failed_msg);
+                }
+                let result = result.unwrap();
+                println!("{:?}", result);
+
+                let reply = PatientInfo {
+                    ssn: result["SSN"].clone(),
+                    first_name: result["First_Name"].clone(),
+                    last_name: result["Last_Name"].clone(),
+                    insurance_id: result["Insurance_ID"].clone(),
+                    sex: result["Sex"].clone(),
+                    date_of_birth: result["Date_Of_Birth"].clone(),
+                    phone_number: result["Phone_Number"].clone(),
+                    email: result["Email"].clone(),
+                    id: result["ID"].parse::<i32>().unwrap(),
+                };
+
+                return Ok(
+                    Response::new(PatientResponse {
+                        patient: Some(reply),
+                    })
+                );
+            }
+            Err(err) => {
+                eprintln!("Error: {}", err);
+                return Ok(failed_msg);
+            }
+        }
     }
 }

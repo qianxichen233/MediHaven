@@ -135,6 +135,16 @@ impl DBHandler<'_> {
         Ok(())
     }
 
+    fn get_enc_key(&self, id: u64) -> Option<&KeyType> {
+        for key in &self.ENC_Key {
+            if key.0 == id {
+                return Some(&key.1);
+            }
+        }
+
+        return None;
+    }
+
     fn select_one(
         &self,
         sql: &str,
@@ -254,24 +264,12 @@ impl DBHandler<'_> {
         return Ok(true);
     }
 
-    fn encrypt_data(
+    fn encrypt_column(
         &self,
-        data: &HashMap<&str, &str>
-    ) -> (u64, NonceType, HashMap<String, Vec<u8>>) {
-        let mut result: HashMap<String, Vec<u8>> = HashMap::new();
-        let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
-        let cipher = ChaCha20Poly1305::new(&enc_key);
-        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
-
-        for (key, value) in data.iter() {
-            let ciphertext = cipher.encrypt(&nonce, value.as_bytes().to_vec().as_slice()).unwrap();
-            result.insert(key.clone().into(), ciphertext);
-        }
-
-        return (id, nonce, result);
-    }
-
-    fn encrypt_coumn(&self, data: &str, cipher: &ChaCha20Poly1305, nonce: &NonceType) -> impl Blob {
+        data: &str,
+        cipher: &ChaCha20Poly1305,
+        nonce: &NonceType
+    ) -> impl Blob {
         let ciphertext = cipher.encrypt(&nonce, data.as_bytes().to_vec().as_slice()).unwrap();
 
         let cursor = std::io::Cursor::new(ciphertext);
@@ -279,6 +277,17 @@ impl DBHandler<'_> {
         let blob = BlobRead::with_upper_bound(buf, 10000);
 
         return blob;
+    }
+
+    fn decrypt_column(
+        &self,
+        data: &Vec<u8>,
+        cipher: &ChaCha20Poly1305,
+        nonce: &NonceType
+    ) -> Result<String, chacha20poly1305::Error> {
+        let plaintext = cipher.decrypt(&nonce, data.as_ref())?;
+
+        return Ok(String::from_utf8(plaintext).unwrap());
     }
 
     pub fn store_key(&self, key: &[u8], nonce: &[u8], key_type: &str) -> Result<(), Error> {
@@ -441,12 +450,12 @@ impl DBHandler<'_> {
         let cipher = ChaCha20Poly1305::new(&enc_key);
         let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
 
-        let mut first_name = self.encrypt_coumn(fields["First_Name"], &cipher, &nonce);
-        let mut last_name = self.encrypt_coumn(fields["Last_Name"], &cipher, &nonce);
-        let mut sex = self.encrypt_coumn(fields["Sex"], &cipher, &nonce);
-        let mut date_of_birth = self.encrypt_coumn(fields["Date_Of_Birth"], &cipher, &nonce);
-        let mut phone_number = self.encrypt_coumn(fields["Phone_Number"], &cipher, &nonce);
-        let mut email = self.encrypt_coumn(fields["Email"], &cipher, &nonce);
+        let mut first_name = self.encrypt_column(fields["First_Name"], &cipher, &nonce);
+        let mut last_name = self.encrypt_column(fields["Last_Name"], &cipher, &nonce);
+        let mut sex = self.encrypt_column(fields["Sex"], &cipher, &nonce);
+        let mut date_of_birth = self.encrypt_column(fields["Date_Of_Birth"], &cipher, &nonce);
+        let mut phone_number = self.encrypt_column(fields["Phone_Number"], &cipher, &nonce);
+        let mut email = self.encrypt_column(fields["Email"], &cipher, &nonce);
 
         let cursor_nonce = std::io::Cursor::new(nonce);
         let nonce_buf = io::BufReader::new(cursor_nonce);
@@ -473,6 +482,44 @@ impl DBHandler<'_> {
         }
 
         Ok(())
+    }
+
+    pub fn get_patient(&self, SSN: &str) -> Result<Option<HashMap<String, String>>, Error> {
+        let sql = "SELECT * FROM Patient WHERE SSN = ?";
+        let data = self.select_one(&sql, (&SSN.into_parameter(),))?;
+        if data == None {
+            return Ok(None);
+        }
+
+        let data = data.unwrap();
+
+        let mut result = HashMap::new();
+        let enc_key = self
+            .get_enc_key(String::from_utf8(data["Key_ID"].to_vec())?.parse::<u64>()?)
+            .unwrap();
+        let cipher = ChaCha20Poly1305::new(&enc_key);
+        let mut nonce: NonceType = GenericArray::default();
+        nonce.copy_from_slice(&data["nonce"][..]);
+
+        for (key, value) in data {
+            if key == "Key_ID" || key == "nonce" {
+                continue;
+            }
+            if
+                key == "First_Name" ||
+                key == "Last_Name" ||
+                key == "Sex" ||
+                key == "Date_Of_Birth" ||
+                key == "Phone_Number" ||
+                key == "Email"
+            {
+                result.insert(key, self.decrypt_column(&value, &cipher, &nonce).unwrap());
+            } else {
+                result.insert(key, String::from_utf8(value)?);
+            }
+        }
+
+        return Ok(Some(result));
     }
 
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {

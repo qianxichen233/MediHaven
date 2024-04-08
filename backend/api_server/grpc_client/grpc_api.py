@@ -28,11 +28,18 @@ class GRPC_API_Client:
         response = stub.Login(request)
         return response
     
-    def patient(self, request):
+    def add_patient(self, request):
         stub = mediheaven_pb2_grpc.AccountStub(self.channel)
         auth = self.getAuth(request)
         request = mediheaven_pb2.PatientRequest(**request, auth=auth)
         response = stub.patient(request)
+        return response
+    
+    def get_patient(self, request):
+        stub = mediheaven_pb2_grpc.AccountStub(self.channel)
+        auth = self.getAuth(request)
+        request = mediheaven_pb2.getPatientRequest(**request, auth=auth)
+        response = stub.getPatient(request)
         return response
 
     def get_code(self, request):
@@ -51,6 +58,13 @@ class GRPC_API_Client:
         stub = mediheaven_pb2_grpc.CodeStub(self.channel)
         request = mediheaven_pb2.CodeListRequest(**request)
         response = stub.listCode(request)
+        return response
+    
+    def getRecord(self, request):
+        stub = mediheaven_pb2_grpc.MedicalRecordStub(self.channel)
+        auth = self.getAuth(request)
+        request = mediheaven_pb2.getRecordRequest(**request, auth=auth)
+        response = stub.getRecord(request)
         return response
 
     def test(self):

@@ -117,3 +117,15 @@ CREATE TABLE register_code (
         Account_type IN ("admin", "physician")
     )
 );
+
+CREATE TABLE schedule (
+    ID INT NOT NULL AUTO_INCREMENT,
+    patient_ID INT NOT NULL,
+    physician_ID INT NOT NULL,
+    schedule_st DATETIME NOT NULL,
+    schedule_ed DATETIME NOT NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY(ID),
+    FOREIGN KEY(patient_ID) REFERENCES Patient(ID),
+    FOREIGN KEY(physician_ID) REFERENCES Physician(ID)
+);

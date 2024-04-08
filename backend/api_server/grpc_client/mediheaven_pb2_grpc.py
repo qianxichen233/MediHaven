@@ -156,6 +156,11 @@ class AccountStub(object):
                 request_serializer=mediheaven__pb2.PatientRequest.SerializeToString,
                 response_deserializer=mediheaven__pb2.SuccessResponse.FromString,
                 )
+        self.getPatient = channel.unary_unary(
+                '/mediheaven.Account/getPatient',
+                request_serializer=mediheaven__pb2.getPatientRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.PatientResponse.FromString,
+                )
 
 
 class AccountServicer(object):
@@ -179,6 +184,12 @@ class AccountServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def getPatient(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AccountServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -196,6 +207,11 @@ def add_AccountServicer_to_server(servicer, server):
                     servicer.patient,
                     request_deserializer=mediheaven__pb2.PatientRequest.FromString,
                     response_serializer=mediheaven__pb2.SuccessResponse.SerializeToString,
+            ),
+            'getPatient': grpc.unary_unary_rpc_method_handler(
+                    servicer.getPatient,
+                    request_deserializer=mediheaven__pb2.getPatientRequest.FromString,
+                    response_serializer=mediheaven__pb2.PatientResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -255,6 +271,23 @@ class Account(object):
         return grpc.experimental.unary_unary(request, target, '/mediheaven.Account/patient',
             mediheaven__pb2.PatientRequest.SerializeToString,
             mediheaven__pb2.SuccessResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getPatient(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Account/getPatient',
+            mediheaven__pb2.getPatientRequest.SerializeToString,
+            mediheaven__pb2.PatientResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
