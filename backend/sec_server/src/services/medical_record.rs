@@ -25,7 +25,72 @@ impl MedicalRecord for MedicalRecordService {
         &self,
         request: Request<GetRecordRequest>
     ) -> Result<Response<RecordResponse>, Status> {
-        todo!()
+        let failed_msg = Response::new(RecordResponse {
+            records: vec![],
+            msg: None,
+        });
+
+        let req = request.into_inner();
+        println!("got request: {:?}", req);
+
+        match req.auth {
+            Some(auth) => {
+                let plaintext = (
+                    object! {
+                    endpoint: "GET record",
+                    patient_id: req.patient_id,
+                    issuer_email: auth.issuer_email.clone(),
+                    timestamp: auth.timestamp.clone()
+                }
+                ).dump();
+
+                if
+                    !myutils::verify_auth(
+                        &auth.issuer_email,
+                        "physician",
+                        &plaintext,
+                        &auth.signature,
+                        &auth.timestamp
+                    )
+                {
+                    println!("signature failed");
+                    return Ok(failed_msg);
+                }
+            }
+            None => {
+                return Ok(failed_msg);
+            }
+        }
+
+        match globals::get_my_db_handler().get_record(req.patient_id) {
+            Ok(result) => {
+                // println!("{:?}", result);
+                let mut response = vec![];
+
+                for record in result.iter() {
+                    let g_record = SingleRecord {
+                        patient_id: record.patient_id,
+                        physician_id: record.physician_id,
+                        medicines: record.medicines.clone(),
+                        complete_date: record.complete_date.clone(),
+                        encounter_summary: record.encounter_summary.clone(),
+                        diagnosis: record.diagnosis.clone(),
+                    };
+                    response.push(g_record);
+                }
+
+                return Ok(
+                    Response::new(RecordResponse {
+                        records: response,
+                        msg: None,
+                    })
+                );
+            }
+            Err(err) => {
+                eprintln!("Error: {}", err);
+                return Ok(failed_msg);
+            }
+        }
     }
 
     async fn write_record(

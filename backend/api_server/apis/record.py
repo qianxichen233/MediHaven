@@ -13,9 +13,9 @@ api = Api(record_api)
 class record(Resource):
     def __init__(self):
         self.get_parser = reqparse.RequestParser()
-        self.get_parser.add_argument("SSN", type=str, help="SSN", required=True)
-        self.get_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True)
-        self.get_parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
+        self.get_parser.add_argument("patient_id", type=int, help="patient id", required=True, location="args")
+        self.get_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True, location="args")
+        self.get_parser.add_argument("timestamp", type=str, help="Timestamp", required=True, location="args")
         self.get_parser.add_argument(
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
@@ -46,10 +46,23 @@ class record(Resource):
         args = self.get_args()
 
         response = GRPC_API.getRecord(args)
-        if not response.successful:
-            return jsonify({"message": f"failed!"})
+        result = []
+        for record in response.records:
+            medicines = []
+            if record.medicines != None:
+                for medicine in record.medicines:
+                    medicines.append(medicine)
 
-        return jsonify({"message": f"success!"})
+            result.append({
+                "patient_id": record.patient_id,
+                "physician_id": record.physician_id,
+                "medicines": medicines,
+                "complete_date": record.complete_date,
+                "encounter_summary": record.encounter_summary,
+                "diagnosis": record.diagnosis
+            })
+
+        return jsonify({"records": result})
     
     def put(self):
         args = self.get_args()

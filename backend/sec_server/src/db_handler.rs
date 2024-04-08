@@ -1,7 +1,6 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
-use crate::mytypes::codeType;
-use openssl::encrypt;
+use crate::mytypes::{ codeType, recordType };
 use rand::Rng;
 
 use odbc_api::{
@@ -584,6 +583,53 @@ impl DBHandler<'_> {
         }
 
         Ok(())
+    }
+
+    pub fn get_record(&self, id: i32) -> Result<Vec<recordType>, Error> {
+        let mut result: Vec<recordType> = vec![];
+        let sql =
+            "SElECT ID, Patient_ID, Physician_ID, Complete_Date, Encounter_Summary, Diagnosis, nonce, Key_ID FROM Medical_Record WHERE patient_id = ?";
+
+        // should use prepared query here for efficiency, to do later
+        // let mut prepared = self.connection
+        //     .prepare("SELECT Medicine_Name FROM Medicine_Treat WHERE Record_ID = ?")
+        //     .unwrap();
+        let sql_medicine = "SELECT Medicine_Name FROM Medicine_Treat WHERE Record_ID = ?";
+
+        let records = self.select_many(sql, (&id.to_string().into_parameter(),)).unwrap();
+        for record_raw in records.iter() {
+            let id = String::from_utf8(record_raw[0].to_vec())?.parse::<i32>()?;
+
+            let medicines_raw = self
+                .select_many(sql_medicine, (&id.to_string().into_parameter(),))
+                .unwrap();
+
+            let mut medicines = vec![];
+            for medicine in medicines_raw.iter() {
+                medicines.push(String::from_utf8(medicine[0].clone())?);
+            }
+
+            let enc_key = self
+                .get_enc_key(String::from_utf8(record_raw[7].to_vec())?.parse::<u64>()?)
+                .unwrap();
+
+            let cipher = ChaCha20Poly1305::new(&enc_key);
+            let mut nonce: NonceType = GenericArray::default();
+            nonce.copy_from_slice(&record_raw[6][..]);
+
+            let record = recordType {
+                patient_id: String::from_utf8(record_raw[1].to_vec())?.parse::<i32>()?,
+                physician_id: String::from_utf8(record_raw[2].to_vec())?.parse::<i32>()?,
+                medicines: medicines,
+                complete_date: self.decrypt_column(&record_raw[3], &cipher, &nonce).unwrap(),
+                encounter_summary: self.decrypt_column(&record_raw[4], &cipher, &nonce).unwrap(),
+                diagnosis: self.decrypt_column(&record_raw[5], &cipher, &nonce).unwrap(),
+            };
+
+            result.push(record);
+        }
+
+        return Ok(result);
     }
 
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
