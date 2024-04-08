@@ -1,4 +1,4 @@
-mod db_handler;
+use sec_server::db_handler;
 
 use chacha20poly1305::{
     aead::{

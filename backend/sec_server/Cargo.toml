@@ -12,8 +12,8 @@ name = "init-key"
 path = "src/init_key.rs"
 
 [[bin]]
-name = "sign-test"
-path = "src/sign.rs"
+name = "sign"
+path = "src/gen_signature.rs"
 
 # [[bin]]
 # name = "mediheaven-client"

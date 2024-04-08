@@ -38,3 +38,5 @@ __pycache__/
 *.pem
 *.crt
 *.bin
+
+ig_*
