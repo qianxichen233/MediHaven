@@ -1,0 +1,18 @@
+#!/bin/zsh
+CURRENT_DIR=`pwd`
+
+MEDIHEAVEN_BACKEND_ROOT=$(echo $CURRENT_DIR | sed 's/\(.*\)\/backend.*/\1/')
+if [[ "$MEDIHEAVEN_BACKEND_ROOT" == $CURRENT_DIR ]]; then
+    echo "Please run the script inside backend folder"
+    exit 1
+fi
+
+MEDIHEAVEN_BACKEND_ROOT="$MEDIHEAVEN_BACKEND_ROOT/backend"
+
+echo "reseting gRPC file...."
+cd "$MEDIHEAVEN_BACKEND_ROOT/api_server/grpc_client"
+sh build.sh || exit 1
+cd $MEDIHEAVEN_BACKEND_ROOT
+echo "done"
+
+ch $CURRENT_DIR
