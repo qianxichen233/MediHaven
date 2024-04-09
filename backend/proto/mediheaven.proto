@@ -171,6 +171,8 @@ message singleSchedule {
     string schedule_ed = 4;
     string created_at = 5;
     string description = 6;
+    optional string patient_first_name = 7;
+    optional string patient_last_name = 8;
 }
 
 message addScheduleRequest {
@@ -179,7 +181,7 @@ message addScheduleRequest {
 }
 
 message getScheduleRequest {
-    int32 physician_ID = 1;
+    string email = 1;
     string timestamp_st = 2;
     string timestamp_ed = 3;
     Auth auth = 4;

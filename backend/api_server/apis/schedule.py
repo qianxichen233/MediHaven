@@ -13,7 +13,9 @@ api = Api(schedule_api)
 class schedule(Resource):
     def __init__(self):
         self.get_parser = reqparse.RequestParser()
-        self.get_parser.add_argument("patient_id", type=int, help="patient id", required=True, location="args")
+        self.get_parser.add_argument("email", type=str, help="email", required=True, location="args")
+        self.get_parser.add_argument("timestamp_st", type=str, help="email", required=True, location="args")
+        self.get_parser.add_argument("timestamp_ed", type=str, help="email", required=True, location="args")
         self.get_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True, location="args")
         self.get_parser.add_argument("timestamp", type=str, help="Timestamp", required=True, location="args")
         self.get_parser.add_argument(
@@ -49,5 +51,27 @@ class schedule(Resource):
             return jsonify({"message": f"failed!"})
 
         return jsonify({"message": f"success!"})
+    
+    def get(self):
+        args = self.get_args()
+
+        response = GRPC_API.getSchedule(args)
+        
+        result = []
+        for schedule in response.schedules:
+            result.append({
+                "patient_ID": schedule.patient_ID,
+                "physician_ID": schedule.physician_ID,
+                "schedule_st": schedule.schedule_st,
+                "schedule_ed": schedule.schedule_ed,
+                "created_at": schedule.created_at,
+                "description": schedule.description,
+                "patient_first_name": schedule.patient_first_name,
+                "patient_last_name": schedule.patient_last_name,
+            })
+
+
+        return jsonify({"schedules": result})
+
 
 api.add_resource(schedule, "/schedule")

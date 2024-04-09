@@ -1,6 +1,6 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
-use crate::mytypes::{ codeType, recordType };
+use crate::mytypes::{ codeType, recordType, scheduleType };
 use rand::Rng;
 
 use odbc_api::{
@@ -759,5 +759,62 @@ impl DBHandler<'_> {
         }
 
         Ok(())
+    }
+
+    pub fn get_schedule(
+        &self,
+        email: &str,
+        st: &str,
+        ed: &str
+    ) -> Result<Vec<scheduleType>, Error> {
+        let mut result: Vec<scheduleType> = Vec::new();
+        let sql =
+            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID FROM schedule s JOIN Physician p JOIN Patient pa WHERE p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
+        let schedules = self.select_many(sql, (
+            &email.into_parameter(),
+            &st.into_parameter(),
+            &ed.into_parameter(),
+        ))?;
+
+        for schedule_raw in schedules.iter() {
+            let enc_key_schedule = self
+                .get_enc_key(String::from_utf8(schedule_raw[9].to_vec())?.parse::<u64>()?)
+                .unwrap();
+            let cipher_schedule = ChaCha20Poly1305::new(&enc_key_schedule);
+            let mut nonce_schedule: Nonce = GenericArray::default();
+            nonce_schedule.copy_from_slice(&schedule_raw[8][..]);
+
+            let enc_key_patient = self
+                .get_enc_key(String::from_utf8(schedule_raw[11].to_vec())?.parse::<u64>()?)
+                .unwrap();
+            let cipher_patient = ChaCha20Poly1305::new(&enc_key_patient);
+            let mut nonce_patient: Nonce = GenericArray::default();
+            nonce_patient.copy_from_slice(&schedule_raw[10][..]);
+
+            let description = self
+                .decrypt_column(&schedule_raw[5], &cipher_schedule, &nonce_schedule)
+                .unwrap();
+            let patient_first_name = self
+                .decrypt_column(&schedule_raw[6], &cipher_patient, &nonce_patient)
+                .unwrap();
+            myutils::increment_nonce(&mut nonce_patient);
+            let patient_last_name = self
+                .decrypt_column(&schedule_raw[7], &cipher_patient, &nonce_patient)
+                .unwrap();
+
+            let schedule = scheduleType {
+                patient_id: String::from_utf8(schedule_raw[0].to_vec())?.parse::<i32>()?,
+                physician_id: String::from_utf8(schedule_raw[1].to_vec())?.parse::<i32>()?,
+                schedule_st: String::from_utf8(schedule_raw[2].clone())?,
+                schedule_ed: String::from_utf8(schedule_raw[3].clone())?,
+                created_at: String::from_utf8(schedule_raw[4].clone())?,
+                description: description,
+                patient_first_name: patient_first_name,
+                patient_last_name: patient_last_name,
+            };
+            result.push(schedule);
+        }
+
+        return Ok(result);
     }
 }

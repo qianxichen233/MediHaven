@@ -12,3 +12,14 @@ pub struct recordType {
     pub encounter_summary: String,
     pub diagnosis: String,
 }
+
+pub struct scheduleType {
+    pub patient_id: i32,
+    pub physician_id: i32,
+    pub schedule_st: String,
+    pub schedule_ed: String,
+    pub created_at: String,
+    pub description: String,
+    pub patient_first_name: String,
+    pub patient_last_name: String,
+}
