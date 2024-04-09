@@ -43,7 +43,7 @@ pub fn generate_code() -> String {
 
 pub fn verify_auth(
     issuer: &str,
-    acc_type: &str,
+    acc_types: &Vec<&str>,
     plaintext: &str,
     signature: &str,
     timestamp: &str
@@ -52,19 +52,19 @@ pub fn verify_auth(
         return false;
     }
 
-    let mut cache_key = String::from(acc_type);
-    cache_key += "_";
-    cache_key += &issuer;
-    println!("{:}", cache_key);
-
     let cache = globals::get_pubkey_cache().lock().unwrap();
 
-    if cache.contains_key(&cache_key) {
-        if !MyCrypto::verify_signature(signature, &cache[&cache_key], plaintext) {
-            return false;
-        }
+    for acc_type in acc_types.iter() {
+        let mut cache_key = String::from(acc_type.clone());
+        cache_key += "_";
+        cache_key += &issuer;
+        if cache.contains_key(&cache_key) {
+            if !MyCrypto::verify_signature(signature, &cache[&cache_key], plaintext) {
+                return false;
+            }
 
-        return true;
+            return true;
+        }
     }
 
     println!("signer not logged in!");

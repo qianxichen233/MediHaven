@@ -53,7 +53,7 @@ impl Schedule for ScheduleService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["receptionist"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp
@@ -126,7 +126,7 @@ impl Schedule for ScheduleService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["physician", "receptionist"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp

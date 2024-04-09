@@ -46,7 +46,7 @@ impl MedicalRecord for MedicalRecordService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["physician"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp
@@ -125,7 +125,7 @@ impl MedicalRecord for MedicalRecordService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["physician"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp

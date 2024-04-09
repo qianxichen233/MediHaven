@@ -27,6 +27,16 @@ lazy_static! {
                         "Pub_key"]
         );
 
+        map.insert("Receptionist",
+                    vec!["First_Name",
+                        "Last_Name",
+                        "Sex",
+                        "Date_Of_Birth",
+                        "Phone_Number",
+                        "Email",
+                        "Pub_key"]
+        );
+
         map.insert("register_code",
                     vec!["CODE",
                         "Account_type",

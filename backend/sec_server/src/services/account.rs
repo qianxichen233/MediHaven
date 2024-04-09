@@ -80,6 +80,20 @@ impl Account for AccountService {
                 eprintln!("Error: {}", err);
                 return Ok(failed);
             }
+        } else if req.account_type == "receptionist" {
+            let mut fields: HashMap<&str, &str> = HashMap::new();
+            fields.insert("First_Name", &req.first_name);
+            fields.insert("Last_Name", &req.last_name);
+            fields.insert("Sex", &req.sex);
+            fields.insert("Date_Of_Birth", &req.date_of_birth);
+            fields.insert("Phone_Number", &req.phone_number);
+            fields.insert("Email", &req.email);
+            fields.insert("Pub_key", &req.pub_key);
+
+            if let Err(err) = globals::get_my_db_handler().register_receptionist(&fields) {
+                eprintln!("Error: {}", err);
+                return Ok(failed);
+            }
         }
 
         globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
@@ -206,6 +220,38 @@ impl Account for AccountService {
                     return Ok(failed_msg);
                 }
             }
+        } else if req.account_type == "receptionist" {
+            match globals::get_my_db_handler().get_receptionist(&req.email) {
+                Ok(result) => {
+                    if result == None {
+                        return Ok(failed_msg);
+                    }
+                    let result = result.unwrap();
+
+                    if
+                        !MyCrypto::verify_signature(
+                            &req.signature,
+                            &result["Pub_key"],
+                            &signature_plaintext
+                        )
+                    {
+                        return Ok(failed_msg);
+                    }
+                    cache.insert(cache_key, result["Pub_key"].clone());
+
+                    let reply = LoginResponse {
+                        successful: true,
+                        pub_key: result["Pub_key"].clone(),
+                        msg: None,
+                    };
+
+                    return Ok(Response::new(reply));
+                }
+                Err(err) => {
+                    eprintln!("Error: {}", err);
+                    return Ok(failed_msg);
+                }
+            }
         }
 
         return Ok(failed_msg);
@@ -243,7 +289,7 @@ impl Account for AccountService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["receptionist"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp
@@ -305,7 +351,7 @@ impl Account for AccountService {
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,
-                        "physician",
+                        &vec!["physician", "receptionist"],
                         &plaintext,
                         &auth.signature,
                         &auth.timestamp

@@ -396,6 +396,35 @@ impl DBHandler<'_> {
         Ok(())
     }
 
+    pub fn register_receptionist(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        let sql =
+            "INSERT INTO Receptionist(First_Name, Last_Name, Sex, Date_Of_Birth, Phone_Number, Email, Pub_key, Magic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        let mut magic = self
+            .generate_magic(&MAGIC_KEYS["Receptionist"], &fields)
+            .expect("generate magic failed");
+
+        let params = (
+            &fields["First_Name"].into_parameter(),
+            &fields["Last_Name"].into_parameter(),
+            &fields["Sex"].into_parameter(),
+            &fields["Date_Of_Birth"].into_parameter(),
+            &fields["Phone_Number"].into_parameter(),
+            &fields["Email"].into_parameter(),
+            &fields["Pub_key"].into_parameter(),
+            &mut magic.as_blob_param(),
+        );
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
+    }
+
     pub fn get_physician(&self, email: &str) -> Result<Option<HashMap<String, String>>, Error> {
         let sql = "SELECT * FROM Physician WHERE Email = ?";
         let data = self.select_one(&sql, (&email.into_parameter(),))?;
@@ -407,7 +436,39 @@ impl DBHandler<'_> {
 
         let mut result = HashMap::new();
 
-        match self.verify_magic(&MAGIC_KEYS["Physician"], &data) {
+        match self.verify_magic(&MAGIC_KEYS["Receptionist"], &data) {
+            Ok(val) => {
+                if !val {
+                    return Err(anyhow!("integrity check failed!"));
+                }
+            }
+            Err(_) => {
+                return Err(anyhow!("integrity check failed!"));
+            }
+        }
+
+        for (key, value) in data {
+            if key == "Magic" {
+                continue;
+            }
+            result.insert(key, String::from_utf8(value)?);
+        }
+
+        return Ok(Some(result));
+    }
+
+    pub fn get_receptionist(&self, email: &str) -> Result<Option<HashMap<String, String>>, Error> {
+        let sql = "SELECT * FROM Receptionist WHERE Email = ?";
+        let data = self.select_one(&sql, (&email.into_parameter(),))?;
+        if data == None {
+            return Ok(None);
+        }
+
+        let data = data.unwrap();
+
+        let mut result = HashMap::new();
+
+        match self.verify_magic(&MAGIC_KEYS["Receptionist"], &data) {
             Ok(val) => {
                 if !val {
                     return Err(anyhow!("integrity check failed!"));

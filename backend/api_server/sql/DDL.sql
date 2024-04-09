@@ -78,6 +78,19 @@ CREATE TABLE Physician (
     FOREIGN KEY(Department) REFERENCES Department(Name)
 );
 
+CREATE TABLE Receptionist (
+    ID INT NOT NULL AUTO_INCREMENT,
+    First_Name VARCHAR(100) NOT NULL,
+    Last_Name VARCHAR(100) NOT NULL,
+    Sex VARCHAR(20) NOT NULL,
+    Date_Of_Birth DATE NOT NULL,
+    Phone_Number VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Pub_key VARCHAR(1000) NOT NULL,
+    Magic BLOB NOT NULL,
+    PRIMARY KEY(ID)
+);
+
 CREATE TABLE Medical_Record (
     ID INT NOT NULL AUTO_INCREMENT,
     Patient_ID INT NOT NULL,
@@ -111,7 +124,7 @@ CREATE TABLE register_code (
     PRIMARY KEY(CODE),
     FOREIGN KEY(issuer) REFERENCES Administrator(Email),
     CHECK (
-        Account_type IN ("admin", "physician")
+        Account_type IN ("admin", "physician", "receptionist")
     )
 );
 
