@@ -44,7 +44,7 @@ fn main() {
     let data =
         object! {
         email: email,
-        account_type: account_type,
+        // account_type: account_type,
         timestamp: timestamp
         
     };

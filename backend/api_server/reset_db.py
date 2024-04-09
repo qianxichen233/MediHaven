@@ -1,4 +1,5 @@
 import pyodbc
+import re
 
 connection_string = "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven;UID=root;PWD="
 
@@ -13,7 +14,8 @@ def execute_sql_file(sql_file, conn):
         cursor = conn.cursor()
 
         # Execute SQL commands
-        for statment in sql_script.split(";"):
+        for statment in re.split(r";\s*\n", sql_script):
+            statment = statment.strip()
             if statment == "":
                 continue
             cursor.execute(statment + ";")
@@ -25,14 +27,15 @@ def execute_sql_file(sql_file, conn):
     except Exception as e:
         print("Error executing SQL script:", e)
         conn.rollback()
+        exit(1)
 
 
 conn = pyodbc.connect(
-    # "Driver={ODBC Driver 18 for SQL Server};Server=tcp:mediheaven.database.windows.net,1433;Database=MediHeaven;Uid=qianxichen;Pwd=kkMYVY9@ATvWkNH;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
     "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven;UID=root;PWD="
 )
 
 execute_sql_file("./sql/clear.sql", conn)
 execute_sql_file("./sql/DDL.sql", conn)
+execute_sql_file("./sql/inserts.sql", conn)
 
 conn.close()
