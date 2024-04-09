@@ -384,3 +384,97 @@ class MedicalRecord(object):
             mediheaven__pb2.SuccessResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class ScheduleStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.addSchedule = channel.unary_unary(
+                '/mediheaven.Schedule/addSchedule',
+                request_serializer=mediheaven__pb2.addScheduleRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.SuccessResponse.FromString,
+                )
+        self.getSchedule = channel.unary_unary(
+                '/mediheaven.Schedule/getSchedule',
+                request_serializer=mediheaven__pb2.getScheduleRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.scheduleResponse.FromString,
+                )
+
+
+class ScheduleServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def addSchedule(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def getSchedule(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_ScheduleServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'addSchedule': grpc.unary_unary_rpc_method_handler(
+                    servicer.addSchedule,
+                    request_deserializer=mediheaven__pb2.addScheduleRequest.FromString,
+                    response_serializer=mediheaven__pb2.SuccessResponse.SerializeToString,
+            ),
+            'getSchedule': grpc.unary_unary_rpc_method_handler(
+                    servicer.getSchedule,
+                    request_deserializer=mediheaven__pb2.getScheduleRequest.FromString,
+                    response_serializer=mediheaven__pb2.scheduleResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'mediheaven.Schedule', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class Schedule(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def addSchedule(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Schedule/addSchedule',
+            mediheaven__pb2.addScheduleRequest.SerializeToString,
+            mediheaven__pb2.SuccessResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getSchedule(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Schedule/getSchedule',
+            mediheaven__pb2.getScheduleRequest.SerializeToString,
+            mediheaven__pb2.scheduleResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

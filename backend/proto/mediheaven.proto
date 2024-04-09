@@ -19,6 +19,11 @@ service MedicalRecord {
     rpc writeRecord (writeRecordRequest) returns (SuccessResponse);
 }
 
+service Schedule {
+    rpc addSchedule (addScheduleRequest) returns (SuccessResponse);
+    rpc getSchedule (getScheduleRequest) returns (scheduleResponse);
+}
+
 message Auth {
     string issuer_email = 1;
     string timestamp = 2;
@@ -156,4 +161,31 @@ message writeRecordRequest{
     string SSN = 1;
     SingleRecord record = 2;
     Auth auth = 3;
+}
+
+/*Service Schedule*/
+message singleSchedule {
+    int32 patient_ID = 1;
+    int32 physician_ID = 2;
+    string schedule_st = 3;
+    string schedule_ed = 4;
+    string created_at = 5;
+    string description = 6;
+}
+
+message addScheduleRequest {
+    singleSchedule schedule = 1;
+    Auth auth = 2;
+}
+
+message getScheduleRequest {
+    int32 physician_ID = 1;
+    string timestamp_st = 2;
+    string timestamp_ed = 3;
+    Auth auth = 4;
+}
+
+message scheduleResponse {
+    repeated singleSchedule schedules = 1;
+    optional string msg = 2;
 }

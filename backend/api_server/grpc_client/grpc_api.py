@@ -78,6 +78,16 @@ class GRPC_API_Client:
         request = mediheaven_pb2.writeRecordRequest(SSN=SSN, record=record, auth=auth)
         response = stub.writeRecord(request)
         return response
+    
+    def addSchedule(self, request):
+        stub = mediheaven_pb2_grpc.ScheduleStub(self.channel)
+        auth = self.getAuth(request)
+
+        schedule = mediheaven_pb2.singleSchedule(**request)
+
+        request = mediheaven_pb2.addScheduleRequest(schedule=schedule, auth=auth)
+        response = stub.addSchedule(request)
+        return response
 
     def test(self):
         # Create a stub (client) for the service

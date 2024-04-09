@@ -6,11 +6,11 @@ import inspect
 
 from grpc_client.grpc_api import GRPC_API
 
-record_api = Blueprint("record_api", __name__)
-api = Api(record_api)
+schedule_api = Blueprint("schedule_api", __name__)
+api = Api(schedule_api)
 
 
-class record(Resource):
+class schedule(Resource):
     def __init__(self):
         self.get_parser = reqparse.RequestParser()
         self.get_parser.add_argument("patient_id", type=int, help="patient id", required=True, location="args")
@@ -21,13 +21,12 @@ class record(Resource):
         )
 
         self.put_parser = reqparse.RequestParser()
-        self.put_parser.add_argument("SSN", type=str, help="SSN", required=True)
-        self.put_parser.add_argument("patient_id", type=int, help="patient id", required=True)
-        self.put_parser.add_argument("physician_id", type=int, help="physician id", required=True)
-        self.put_parser.add_argument("medicines", type=str, action='append', help="medicines", required=True)
-        self.put_parser.add_argument("complete_date", type=str, help="complete date", required=True)
-        self.put_parser.add_argument("encounter_summary", type=str, help="encounter summary", required=True)
-        self.put_parser.add_argument("diagnosis", type=str, help="diagnosis", required=True)
+        self.put_parser.add_argument("patient_ID", type=int, help="patient ID", required=True)
+        self.put_parser.add_argument("physician_ID", type=int, help="physician ID", required=True)
+        self.put_parser.add_argument("schedule_st", type=str, help="schedule start timestamp", required=True)
+        self.put_parser.add_argument("schedule_ed", type=str, help="schedule end timestamp", required=True)
+        self.put_parser.add_argument("created_at", type=str, help="appointment timestamp", required=True)
+        self.put_parser.add_argument("description", type=str, help="description", required=True)
         self.put_parser.add_argument("issuer_email", type=str, help="Issuer Email", required=True)
         self.put_parser.add_argument("timestamp", type=str, help="Timestamp", required=True)
         self.put_parser.add_argument(
@@ -41,28 +40,6 @@ class record(Resource):
             args.signature = args["X-Signature"]
             del args["X-Signature"]
         return args
-
-    def get(self):
-        args = self.get_args()
-
-        response = GRPC_API.getRecord(args)
-        result = []
-        for record in response.records:
-            medicines = []
-            if record.medicines != None:
-                for medicine in record.medicines:
-                    medicines.append(medicine)
-
-            result.append({
-                "patient_id": record.patient_id,
-                "physician_id": record.physician_id,
-                "medicines": medicines,
-                "complete_date": record.complete_date,
-                "encounter_summary": record.encounter_summary,
-                "diagnosis": record.diagnosis
-            })
-
-        return jsonify({"records": result})
     
     def put(self):
         args = self.get_args()
@@ -73,4 +50,4 @@ class record(Resource):
 
         return jsonify({"message": f"success!"})
 
-api.add_resource(record, "/record")
+api.add_resource(schedule, "/schedule")
