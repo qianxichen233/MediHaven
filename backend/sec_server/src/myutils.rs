@@ -4,6 +4,8 @@ use rand::Rng;
 use crate::globals;
 use crate::mycrypto::MyCrypto;
 
+use chacha20poly1305::Nonce;
+
 pub fn verify_timestamp(timestamp_str: &str, expire: i64) -> bool {
     let timestamp;
 
@@ -67,4 +69,15 @@ pub fn verify_auth(
 
     println!("signer not logged in!");
     return false;
+}
+
+pub fn increment_nonce(nonce: &mut Nonce) -> &Nonce {
+    for i in 0..nonce.len() {
+        nonce[i] += 1;
+        if nonce[i] != 0 {
+            break;
+        }
+    }
+
+    return nonce;
 }

@@ -67,7 +67,7 @@ class record(Resource):
     def put(self):
         args = self.get_args()
 
-        response = GRPC_API.addSchedule(args)
+        response = GRPC_API.addRecord(args)
         if not response.successful:
             return jsonify({"message": f"failed!"})
 

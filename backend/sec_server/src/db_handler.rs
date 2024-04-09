@@ -9,21 +9,16 @@ use odbc_api::{
     Cursor,
     Environment,
     IntoParameter,
-    parameter::{ Blob, BlobRead, BlobParam },
+    parameter::{ Blob, BlobRead },
     buffers::TextRowSet,
     ResultSetMetadata,
 };
 
 use chacha20poly1305::{
-    aead::{
-        Aead,
-        AeadCore,
-        KeyInit,
-        OsRng,
-        generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
-    },
-    consts::{ B0, B1 },
+    aead::{ Aead, AeadCore, KeyInit, OsRng, generic_array::GenericArray },
     ChaCha20Poly1305,
+    Nonce,
+    Key,
 };
 
 use anyhow::{ anyhow, Error };
@@ -33,9 +28,6 @@ use lazy_static::lazy_static;
 use std::io;
 use sha256::digest;
 
-type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
-type NonceType = GenericArray<u8, UInt<UInt<UInt<UInt<UTerm, B1>, B1>, B0>, B0>>;
-
 lazy_static! {
     static ref MYENV: Environment = Environment::new().unwrap();
 }
@@ -43,8 +35,8 @@ lazy_static! {
 pub struct DBHandler<'a> {
     // to-do: make this thread safe
     connection: Connection<'a>,
-    MAC_key: KeyType,
-    ENC_Key: Vec<(u64, KeyType)>,
+    MAC_key: Key,
+    ENC_Key: Vec<(u64, Key)>,
 }
 pub enum DBVALUE {
     StringVal(String),
@@ -77,7 +69,7 @@ impl DBHandler<'_> {
         })
     }
 
-    pub fn init(&mut self, root_key: &KeyType) -> Result<(), Error> {
+    pub fn init(&mut self, root_key: &Key) -> Result<(), Error> {
         let sql = "SELECT ekey, nonce, key_type, Key_ID FROM mykeys;";
 
         let cipher = ChaCha20Poly1305::new(&root_key);
@@ -103,7 +95,7 @@ impl DBHandler<'_> {
                         .map(|col_index| { batch.at(col_index, row_index).unwrap_or(&[]) })
                         .collect();
 
-                    let mut nonce: NonceType = GenericArray::default();
+                    let mut nonce: Nonce = GenericArray::default();
                     nonce.copy_from_slice(&record[1][..]);
                     let key_vec = cipher
                         .decrypt(&nonce, record[0].as_ref())
@@ -116,7 +108,7 @@ impl DBHandler<'_> {
                         found_key = true;
                     } else {
                         println!("data key: {:?}", key_vec);
-                        let mut key: KeyType = GenericArray::default();
+                        let mut key: Key = GenericArray::default();
                         key.copy_from_slice(&key_vec[..]);
                         self.ENC_Key.push((
                             String::from_utf8(record[3].to_vec())?.parse::<u64>()?,
@@ -134,7 +126,7 @@ impl DBHandler<'_> {
         Ok(())
     }
 
-    fn get_enc_key(&self, id: u64) -> Option<&KeyType> {
+    fn get_enc_key(&self, id: u64) -> Option<&Key> {
         for key in &self.ENC_Key {
             if key.0 == id {
                 return Some(&key.1);
@@ -251,7 +243,7 @@ impl DBHandler<'_> {
         let cipher = ChaCha20Poly1305::new(&self.MAC_key);
 
         let (nonce_vec, ciphertext) = fields["Magic"].split_at(12);
-        let mut nonce: NonceType = GenericArray::default();
+        let mut nonce: Nonce = GenericArray::default();
         nonce.copy_from_slice(&nonce_vec[..]);
 
         let plaintext = cipher.decrypt(&nonce, ciphertext.as_ref())?;
@@ -263,12 +255,7 @@ impl DBHandler<'_> {
         return Ok(true);
     }
 
-    fn encrypt_column(
-        &self,
-        data: &str,
-        cipher: &ChaCha20Poly1305,
-        nonce: &NonceType
-    ) -> impl Blob {
+    fn encrypt_column(&self, data: &str, cipher: &ChaCha20Poly1305, nonce: &Nonce) -> impl Blob {
         let ciphertext = cipher.encrypt(&nonce, data.as_bytes().to_vec().as_slice()).unwrap();
 
         let cursor = std::io::Cursor::new(ciphertext);
@@ -282,7 +269,7 @@ impl DBHandler<'_> {
         &self,
         data: &Vec<u8>,
         cipher: &ChaCha20Poly1305,
-        nonce: &NonceType
+        nonce: &Nonce
     ) -> Result<String, chacha20poly1305::Error> {
         let plaintext = cipher.decrypt(&nonce, data.as_ref())?;
 
@@ -447,18 +434,23 @@ impl DBHandler<'_> {
 
         let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
         let cipher = ChaCha20Poly1305::new(&enc_key);
-        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
-
-        let mut first_name = self.encrypt_column(fields["First_Name"], &cipher, &nonce);
-        let mut last_name = self.encrypt_column(fields["Last_Name"], &cipher, &nonce);
-        let mut sex = self.encrypt_column(fields["Sex"], &cipher, &nonce);
-        let mut date_of_birth = self.encrypt_column(fields["Date_Of_Birth"], &cipher, &nonce);
-        let mut phone_number = self.encrypt_column(fields["Phone_Number"], &cipher, &nonce);
-        let mut email = self.encrypt_column(fields["Email"], &cipher, &nonce);
+        let mut nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
 
         let cursor_nonce = std::io::Cursor::new(nonce);
         let nonce_buf = io::BufReader::new(cursor_nonce);
         let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
+
+        let mut first_name = self.encrypt_column(fields["First_Name"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
+        let mut last_name = self.encrypt_column(fields["Last_Name"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
+        let mut sex = self.encrypt_column(fields["Sex"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
+        let mut date_of_birth = self.encrypt_column(fields["Date_Of_Birth"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
+        let mut phone_number = self.encrypt_column(fields["Phone_Number"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
+        let mut email = self.encrypt_column(fields["Email"], &cipher, &nonce);
 
         let params = (
             &fields["SSN"].into_parameter(),
@@ -483,7 +475,8 @@ impl DBHandler<'_> {
     }
 
     pub fn get_patient(&self, SSN: &str) -> Result<Option<HashMap<String, String>>, Error> {
-        let sql = "SELECT * FROM Patient WHERE SSN = ?";
+        let sql =
+            "SELECT ID, SSN, First_Name, Last_Name, Insurance_ID, Sex, Date_Of_Birth, Phone_Number, Email, nonce, Key_ID FROM Patient WHERE SSN = ?";
         let data = self.select_one(&sql, (&SSN.into_parameter(),))?;
         if data == None {
             return Ok(None);
@@ -496,26 +489,41 @@ impl DBHandler<'_> {
             .get_enc_key(String::from_utf8(data["Key_ID"].to_vec())?.parse::<u64>()?)
             .unwrap();
         let cipher = ChaCha20Poly1305::new(&enc_key);
-        let mut nonce: NonceType = GenericArray::default();
+        let mut nonce: Nonce = GenericArray::default();
         nonce.copy_from_slice(&data["nonce"][..]);
 
-        for (key, value) in data {
-            if key == "Key_ID" || key == "nonce" {
-                continue;
-            }
-            if
-                key == "First_Name" ||
-                key == "Last_Name" ||
-                key == "Sex" ||
-                key == "Date_Of_Birth" ||
-                key == "Phone_Number" ||
-                key == "Email"
-            {
-                result.insert(key, self.decrypt_column(&value, &cipher, &nonce).unwrap());
-            } else {
-                result.insert(key, String::from_utf8(value)?);
-            }
-        }
+        result.insert("ID".to_owned(), String::from_utf8(data["ID"].clone())?);
+        result.insert("SSN".to_owned(), String::from_utf8(data["SSN"].clone())?);
+        result.insert(
+            "First_Name".to_owned(),
+            self.decrypt_column(&data["First_Name"], &cipher, &nonce).unwrap()
+        );
+        myutils::increment_nonce(&mut nonce);
+        result.insert(
+            "Last_Name".to_owned(),
+            self.decrypt_column(&data["Last_Name"], &cipher, &nonce).unwrap()
+        );
+        myutils::increment_nonce(&mut nonce);
+        result.insert("Insurance_ID".to_owned(), String::from_utf8(data["Insurance_ID"].clone())?);
+        result.insert(
+            "Sex".to_owned(),
+            self.decrypt_column(&data["Sex"], &cipher, &nonce).unwrap()
+        );
+        myutils::increment_nonce(&mut nonce);
+        result.insert(
+            "Date_Of_Birth".to_owned(),
+            self.decrypt_column(&data["Date_Of_Birth"], &cipher, &nonce).unwrap()
+        );
+        myutils::increment_nonce(&mut nonce);
+        result.insert(
+            "Phone_Number".to_owned(),
+            self.decrypt_column(&data["Phone_Number"], &cipher, &nonce).unwrap()
+        );
+        myutils::increment_nonce(&mut nonce);
+        result.insert(
+            "Email".to_owned(),
+            self.decrypt_column(&data["Email"], &cipher, &nonce).unwrap()
+        );
 
         return Ok(Some(result));
     }
@@ -530,19 +538,21 @@ impl DBHandler<'_> {
 
         let (id, enc_key) = self.ENC_Key[rand::thread_rng().gen_range(0..self.ENC_Key.len())];
         let cipher = ChaCha20Poly1305::new(&enc_key);
-        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+        let mut nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+
+        let cursor_nonce = std::io::Cursor::new(nonce);
+        let nonce_buf = io::BufReader::new(cursor_nonce);
+        let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
 
         let mut complete_date = self.encrypt_column(fields["Complete_Date"], &cipher, &nonce);
+        myutils::increment_nonce(&mut nonce);
         let mut encounter_summary = self.encrypt_column(
             fields["Encounter_Summary"],
             &cipher,
             &nonce
         );
+        myutils::increment_nonce(&mut nonce);
         let mut diagnosis = self.encrypt_column(fields["Diagnosis"], &cipher, &nonce);
-
-        let cursor_nonce = std::io::Cursor::new(nonce);
-        let nonce_buf = io::BufReader::new(cursor_nonce);
-        let mut blob_nonce = BlobRead::with_upper_bound(nonce_buf, 1000);
 
         let params = (
             &fields["Patient_ID"].into_parameter(),
@@ -614,16 +624,22 @@ impl DBHandler<'_> {
                 .unwrap();
 
             let cipher = ChaCha20Poly1305::new(&enc_key);
-            let mut nonce: NonceType = GenericArray::default();
+            let mut nonce: Nonce = GenericArray::default();
             nonce.copy_from_slice(&record_raw[6][..]);
+
+            let complete_date = self.decrypt_column(&record_raw[3], &cipher, &nonce).unwrap();
+            myutils::increment_nonce(&mut nonce);
+            let encounter_summary = self.decrypt_column(&record_raw[4], &cipher, &nonce).unwrap();
+            myutils::increment_nonce(&mut nonce);
+            let diagnosis = self.decrypt_column(&record_raw[5], &cipher, &nonce).unwrap();
 
             let record = recordType {
                 patient_id: String::from_utf8(record_raw[1].to_vec())?.parse::<i32>()?,
                 physician_id: String::from_utf8(record_raw[2].to_vec())?.parse::<i32>()?,
                 medicines: medicines,
-                complete_date: self.decrypt_column(&record_raw[3], &cipher, &nonce).unwrap(),
-                encounter_summary: self.decrypt_column(&record_raw[4], &cipher, &nonce).unwrap(),
-                diagnosis: self.decrypt_column(&record_raw[5], &cipher, &nonce).unwrap(),
+                complete_date: complete_date,
+                encounter_summary: encounter_summary,
+                diagnosis: diagnosis,
             };
 
             result.push(record);
