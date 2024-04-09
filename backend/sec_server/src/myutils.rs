@@ -55,7 +55,7 @@ pub fn verify_auth(
     let cache = globals::get_pubkey_cache().lock().unwrap();
 
     for acc_type in acc_types.iter() {
-        let mut cache_key = String::from(acc_type.clone());
+        let mut cache_key = acc_type.to_string();
         cache_key += "_";
         cache_key += &issuer;
         if cache.contains_key(&cache_key) {

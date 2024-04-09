@@ -171,7 +171,5 @@ impl Schedule for ScheduleService {
                 return Ok(failed_msg);
             }
         }
-
-        return Ok(failed_msg);
     }
 }
