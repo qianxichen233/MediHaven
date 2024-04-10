@@ -38,14 +38,18 @@ const Welcome = () => {
             width="300px"
             height="50px"
             color="white"
-            onClick={() => navigate('/register')}
+            onClick={() =>
+              navigate('/account', {
+                state: { action: 'register' },
+              })
+            }
           />
           <Button
             text="RETURNING USER"
             width="300px"
             height="50px"
             color="white"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/account', { state: { action: 'login' } })}
           />
         </div>
       </div>
