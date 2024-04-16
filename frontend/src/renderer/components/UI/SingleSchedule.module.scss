@@ -1,0 +1,88 @@
+.container {
+    width: 100%;
+    height: 150px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+
+    background-color: white;
+
+    font-family: KoHo;
+
+    .info {
+        border-right: 1px black solid;
+        width: 350px;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+
+        font-size: 20px;
+
+        margin-left: 10px;
+        padding-right: 10px;
+
+        > div {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .placeholder {
+            display: block;
+
+            width: 100px;
+            height: 100px;
+
+            border-radius: 50%;
+
+            background-color: #9bd8d1;
+        }
+    }
+
+    .schedule {
+        height: calc(100% + 40px);
+        width: 100%;
+
+        overflow-x: scroll;
+        white-space: nowrap;
+
+        > div {
+            position: relative;
+
+            display: inline-block;
+
+            top: 40px;
+
+            height: calc(100% - 40px);
+            width: 120px;
+
+            border-right: 1px black solid;
+
+            .time {
+                display: block;
+                position: absolute;
+                top: -40px;
+                left: 3px;
+
+                height: 30px;
+
+                color: black;
+
+                line-height: 40px;
+
+                padding-left: 5px;
+
+                border-left: 2px black solid;
+            }
+        }
+
+        > div.highlight {
+            background-color: #d9d9d9;
+        }
+    }
+}
