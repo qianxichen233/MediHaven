@@ -15,6 +15,8 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+import { create_key, remove_key, get_public_key, sign } from './key_manager';
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -29,6 +31,19 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.handle('create_key', async (event, arg) => {
+  return create_key(...arg);
+});
+ipcMain.handle('remove_key', async (event, arg) => {
+  return remove_key(...arg);
+});
+ipcMain.handle('get_public_key', async (event, arg) => {
+  return get_public_key(...arg);
+});
+ipcMain.handle('sign', async (event, arg) => {
+  return sign(...arg);
 });
 
 if (process.env.NODE_ENV === 'production') {
