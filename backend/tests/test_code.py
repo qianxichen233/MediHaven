@@ -71,6 +71,23 @@ def test_add_code_receptionist(api_url):
     # code should be 8 digit long
     assert len(content["code"]) == 8
 
+# this test is used for testing adding new registration code with invalid signature
+def test_add_code_admin_invalid_signature(api_url):
+    data = {
+        "email": "qc815@nyu.edu",
+        "account_type": "admin",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.post(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing getting registration code
 def test_get_code(api_url):
     params = {
@@ -92,6 +109,22 @@ def test_get_code(api_url):
     # should have at least one code
     assert len(content) != 0
 
+# this test is used for testing getting registration code with invalid signature
+def test_get_code_invalid_signature(api_url):
+    params = {
+        'email': 'qc815@nyu.edu',
+        "timestamp": "2024-03-25 20:10:00",
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing delting a registration code
 def test_del_code(api_url):
     data = {
@@ -108,6 +141,23 @@ def test_del_code(api_url):
 
     # response should be successful
     assert response.status_code == 200
+
+# this test is used for testing delting a registration code with invalid signature
+def test_del_code_invalid_signature(api_url):
+    data = {
+        "email": "qc815@nyu.edu",
+        "code": "RPIsRwnq6DZWq0FXUBswKOjbl667q4CFDrY71skAhF4gFvfE60uGV19QddwWaGH6",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.delete(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
 
 # this test is used for testing delting an non existing registration code
 def test_del_code_non_existing(api_url):

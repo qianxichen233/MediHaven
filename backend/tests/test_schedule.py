@@ -50,6 +50,28 @@ def test_add_schedule(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing adding a new schedule with invalid signature
+def test_add_schedule_invalid_signature(api_url):
+    data = {
+        "patient_ID": 3,
+        "physician_ID": 1,
+        "schedule_st": "2024-03-25 13:10:00",
+        "schedule_ed": "2024-03-25 13:40:00",
+        "created_at": "2024-03-24 13:10:00",
+        "description": "talking about diseases in my code",
+        "issuer_email": "qc815@nyu.edu",
+        "timestamp": "2024-03-24 13:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.put(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing getting the schedule
 def test_get_schedule(api_url):
     params = {
@@ -116,5 +138,24 @@ def test_get_schedule(api_url):
 
         # schedule start timestamp should be within the range
         assert start_time <= schedule_st <= end_time
+
+# this test is used for testing getting the schedule with invalid signature
+def test_get_schedule_invalid_signature(api_url):
+    params = {
+        'email': 'qc815@nyu.edu',
+        "timestamp_st": "2024-03-25 8:00:00",
+        "timestamp_ed": "2024-03-25 16:00:00",
+        "issuer_email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
 
 

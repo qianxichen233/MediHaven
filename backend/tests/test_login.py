@@ -22,6 +22,23 @@ def test_admin_login(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing admin login with invalid signature
+def test_admin_login_invalid_signature(api_url):
+    data = {
+        "account_type": "admin",
+        "email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.post(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing physician login
 def test_physician_login(api_url):
     data = {
@@ -39,6 +56,23 @@ def test_physician_login(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing physician login with invalid signature
+def test_physician_login_invalid_signature(api_url):
+    data = {
+        "account_type": "physician",
+        "email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.post(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing receptionist login
 def test_receptionist_login(api_url):
     data = {
@@ -55,4 +89,21 @@ def test_receptionist_login(api_url):
 
     # response should be successful
     assert response.status_code == 200
+
+# this test is used for testing receptionist login with invalid signature
+def test_receptionist_login_invalid_signature(api_url):
+    data = {
+        "account_type": "receptionist",
+        "email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.post(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
 

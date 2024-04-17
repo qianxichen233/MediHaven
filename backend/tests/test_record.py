@@ -50,6 +50,29 @@ def test_add_record(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing adding new record with invalid signature
+def test_add_record_invalid_signature(api_url):
+    data = {
+        "SSN": "111-22-3333",
+        "patient_id": 3,
+        "physician_id": 1,
+        "medicines": ["Acetaminophen", "atenolol"],
+        "complete_date": "2024-03-25 20:10:00",
+        "encounter_summary": "this is the encounter summary",
+        "diagnosis": "this is the diagnosis",
+        "issuer_email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.put(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing getting record
 def test_get_record(api_url):
     params = {
@@ -100,3 +123,21 @@ def test_get_record(api_url):
     for record in content:
         # patient id should match
         assert record["patient_id"] == 1
+
+# this test is used for testing getting record with invalid signature
+def test_get_record_invalid_signature(api_url):
+    params = {
+        'patient_id': '3',
+        "issuer_email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+

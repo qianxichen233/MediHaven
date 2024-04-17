@@ -52,6 +52,30 @@ def test_patient_register(api_url):
     # response should be successful
     assert response.status_code == 200
 
+# this test is used for testing registering new patient with invalid signature
+def test_patient_register_invalid_signature(api_url):
+    data = {
+        "SSN": "111-22-3333",
+        "First_Name": "Qianxi",
+        "Last_Name": "Chen",
+        "Sex": "Male",
+        "Date_Of_Birth": "1970-12-31",
+        "Phone_Number": "123-456-7890",
+        "Email": "qc815@nyu.edu",
+        "Insurance_ID": "1",
+        "issuer_email": "qc815@nyu.edu",
+        "timestamp": "2024-03-25 20:10:00"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.post(api_url, json=data, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
+
 # this test is used for testing getting patient information
 def test_patient_get(api_url):
     params = {
@@ -100,3 +124,21 @@ def test_patient_get(api_url):
 
     # SSN should match
     assert content["patient"]["SSN"] == "666-66-6666"
+
+
+# this test is used for testing getting patient information with invalid signature
+def test_patient_get_invalid_signature(api_url):
+    params = {
+        'SSN': '111-22-3333',
+        "timestamp": "2024-03-25 20:10:00",
+        "issuer_email": "qc815@nyu.edu"
+    }
+
+    headers = {
+        "X-Signature": "invalid"
+    }
+
+    response = requests.get(api_url, params=params, headers=headers)
+
+    # response should not be successful
+    assert response.status_code != 200
