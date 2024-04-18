@@ -1,0 +1,64 @@
+.bookmarks {
+    position: absolute;
+    top: -10px;
+    right: -30px;
+    width: 30px;
+    // height: 300px;
+}
+
+.bookmark {
+    width: 30px;
+    height: max-content;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background-color: lightblue;
+    text-align: center;
+    font-family: Kodchasan;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    cursor: pointer;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+
+    transition:
+        width 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+    -webkit-transition:
+        width 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+    -moz-transition:
+        width 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+    -ms-transition:
+        width 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+    -o-transition:
+        width 0.2s ease-in-out,
+        background-color 0.2s ease-in-out;
+
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.bookmark:hover {
+    background-color: orange;
+    width: 45px;
+}
+
+.bookmark.active {
+    background-color: orange;
+}
+
+.container {
+    width: 50%;
+    position: relative;
+
+    box-sizing: border-box;
+
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
