@@ -136,6 +136,8 @@ impl Account for AccountService {
         }
         ).dump();
 
+        println!("{:}", signature_plaintext);
+
         if cache.contains_key(&cache_key) {
             if
                 !MyCrypto::verify_signature(
@@ -203,6 +205,7 @@ impl Account for AccountService {
                             &signature_plaintext
                         )
                     {
+                        println!("signature failed!");
                         return Ok(failed_msg);
                     }
                     cache.insert(cache_key, result["Pub_key"].clone());

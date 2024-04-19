@@ -436,7 +436,7 @@ impl DBHandler<'_> {
 
         let mut result = HashMap::new();
 
-        match self.verify_magic(&MAGIC_KEYS["Receptionist"], &data) {
+        match self.verify_magic(&MAGIC_KEYS["Physician"], &data) {
             Ok(val) => {
                 if !val {
                     return Err(anyhow!("integrity check failed!"));

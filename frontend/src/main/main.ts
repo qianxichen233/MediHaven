@@ -15,6 +15,8 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+const xmpp = require('simple-xmpp');
+
 import { create_key, remove_key, get_public_key, sign } from './key_manager';
 
 class AppUpdater {
@@ -44,6 +46,33 @@ ipcMain.handle('get_public_key', async (event, arg) => {
 });
 ipcMain.handle('sign', async (event, arg) => {
   return sign(...arg);
+});
+
+ipcMain.handle('connect', async (event, arg) => {
+    xmpp.on('online', (data: any) => {
+        console.log('Hey you are online! ');
+        console.log(`Connected as ${data.jid.user}`);
+        // send();
+    });
+
+    function send() {
+        setTimeout(send, 5000);
+        xmpp.send('admin@localhost', `hi! ${Date.now()}`);
+    }
+    xmpp.on('error', (error: string) =>
+        console.log(`something went wrong!${error} `),
+    );
+
+    xmpp.on('chat', (from: string, message: String) => {
+        console.log(`Got a message! ${message} from ${from}`);
+    });
+
+    xmpp.connect({
+        jid: 'admin@localhost',
+        password: 'password',
+        host: '172.210.68.64',
+        port: 5222,
+    });
 });
 
 if (process.env.NODE_ENV === 'production') {

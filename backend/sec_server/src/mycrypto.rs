@@ -29,11 +29,13 @@ impl MyCrypto {
                         signature = sig;
                     }
                     Err(_) => {
+                        println!("convert signature failed!");
                         return false;
                     }
                 }
             }
             Err(_) => {
+                println!("decode failed");
                 return false;
             }
         }
@@ -47,11 +49,13 @@ impl MyCrypto {
                         return true;
                     }
                     Err(_) => {
+                        println!("verify failed");
                         return false;
                     }
                 }
             }
-            Err(_) => {
+            Err(err) => {
+                println!("convert key failed: {:?}", err);
                 return false;
             }
         }
