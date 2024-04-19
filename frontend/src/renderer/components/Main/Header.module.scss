@@ -1,0 +1,64 @@
+.placeholder {
+    width: 100%;
+    height: 120px;
+}
+
+.header {
+    position: fixed;
+
+    width: 100%;
+    height: 120px;
+
+    background-color: var(--secondary-bg-color);
+
+    padding-top: 10px;
+
+    font-family: KoHo;
+
+    z-index: 10;
+
+    .top {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .menu {
+            width: 60%;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+
+            color: white;
+
+            > span {
+                user-select: none;
+
+                cursor: pointer;
+            }
+        }
+
+        .search {
+            width: 40%;
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+
+            > span {
+                width: 80%;
+                background-color: white;
+                color: darkgray;
+                padding-left: 40px;
+                padding-top: 7px;
+                padding-bottom: 7px;
+
+                margin-right: 20px;
+
+                user-select: none;
+                cursor: text;
+            }
+        }
+    }
+}
