@@ -1,44 +1,42 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './Tab.module.scss';
 
 const Tab = (props) => {
-    const calendarRef = useRef(null);
-    const messagesRef = useRef(null);
+    const refArray = useRef(Array(props.pagelist.length));
+
     const slideRef = useRef(null);
+
+    // console.log(refArray.current.length);
 
     useEffect(() => {
         if (!slideRef.current) return;
 
-        if (props.page === 'calendar' && !!calendarRef.current) {
-            slideRef.current.style.left = `${
-                calendarRef.current.getBoundingClientRect().x
-            }px`;
+        for (let i = 0; i < props.pagelist.length; ++i) {
+            if (props.page === props.pagelist[i] && !!refArray.current[i]) {
+                slideRef.current.style.left = `${
+                    refArray.current[i].getBoundingClientRect().x
+                }px`;
+                return;
+            }
         }
+    }, [slideRef, refArray.current, props.page]);
 
-        if (props.page === 'messages' && !!messagesRef.current) {
-            slideRef.current.style.left = `${
-                messagesRef.current.getBoundingClientRect().x
-            }px`;
-        }
-    }, [calendarRef, messagesRef, slideRef, props.page]);
+    // if (refArray.current.length !== props.pagelist.length) return <></>;
 
     return (
         <div className={styles.tab}>
             <span className={styles.slide} ref={slideRef}></span>
-            <span
-                ref={calendarRef}
-                className={props.page === 'calendar' ? styles.active : ''}
-                onClick={props.onChange.bind(this, 'calendar')}
-            >
-                Calendar
-            </span>
-            <span
-                ref={messagesRef}
-                className={props.page === 'messages' ? styles.active : ''}
-                onClick={props.onChange.bind(this, 'messages')}
-            >
-                Messages
-            </span>
+            {props.pagelist.map((item, index) => {
+                return (
+                    <span
+                        ref={(el) => (refArray.current[index] = el)}
+                        className={props.page === item ? styles.active : ''}
+                        onClick={props.onChange.bind(this, item)}
+                    >
+                        {item}
+                    </span>
+                );
+            })}
         </div>
     );
 };

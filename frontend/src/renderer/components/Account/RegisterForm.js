@@ -61,7 +61,9 @@ const RegisterForm = (props) => {
     const [message, setMessage] = useState('');
 
     const onSubmit = async (form) => {
+        console.log(form);
         const result = await register(account_type, form);
+        console.log(result);
         if (result) {
             setMessage('register successfully!');
             setTimeout(() => {

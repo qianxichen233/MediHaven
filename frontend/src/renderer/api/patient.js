@@ -96,7 +96,7 @@ const get_patient = async (SSN, type, email) => {
     }
 };
 
-const get_record = (id, email) => {
+const get_record = async (id, email) => {
     const timestamp = getCurrentTime();
 
     const params = new URLSearchParams({
@@ -107,12 +107,12 @@ const get_record = (id, email) => {
 
     const signature = await window.electron.ipcRenderer.invoke('sign', [
         {
-            endpoint: "GET record",
+            endpoint: 'GET record',
             patient_id: id,
             issuer_email: email,
-            timestamp: timestamp
+            timestamp: timestamp,
         },
-        "physician",
+        'physician',
         email,
     ]);
 
@@ -136,6 +136,6 @@ const get_record = (id, email) => {
     } catch (error) {
         console.error('Error:', error);
     }
-}
+};
 
 export { add_patient, get_patient, get_record };

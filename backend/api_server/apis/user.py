@@ -2,6 +2,10 @@ from flask import Flask, Blueprint, jsonify
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 
+import base64
+
+from xmpp import register_xmpp
+
 import inspect
 
 from grpc_client.grpc_api import GRPC_API
@@ -37,9 +41,16 @@ class register(Resource):
         self.parser.add_argument(
             "Department", type=str, help="Phone Number", required=False
         )
+        self.parser.add_argument(
+            "Password", type=str, help="Password", required=False
+        )
 
     def post(self):
         args = self.parser.parse_args()
+
+        password = args["Password"]
+        del args["Password"]
+
         if args["Account_Type"] == "admin" and not hasattr(args, "Age"):
             return jsonify({"message": f"Missing Fields"})
 
@@ -53,6 +64,10 @@ class register(Resource):
             return jsonify({"message": f"failed!"})
 
         print(response)
+
+        username = args["Account_Type"] + "_" + args["Email"]
+
+        register_xmpp(base64.b64encode(username.encode('utf-8')).decode('utf-8'), password)
 
         return jsonify({"message": f"success!"})
 

@@ -1,22 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import styles from './Form.module.scss';
 import Button from './Button';
 
-const Form = (props) => {
-    const [inputs, setInputs] = useState(
-        useMemo(() => {
-            return Object.keys(props.content).reduce((acc, key) => {
-                let content = '';
-                if (typeof props.content[key] !== 'string')
-                    content = props.content[key].content[0];
+const init = (contents) => {
+    return Object.keys(contents).reduce((acc, key) => {
+        let content = '';
+        if (typeof contents[key] !== 'string')
+            content = contents[key].content[0];
 
-                return {
-                    ...acc,
-                    [key]: content,
-                };
-            }, {});
-        }, [props.content]),
-    );
+        return {
+            ...acc,
+            [key]: content,
+        };
+    }, {});
+};
+
+const Form = (props) => {
+    const [inputs, setInputs] = useState(init(props.content));
 
     const handleInputChange = (key, e) => {
         // console.log(key, e);
@@ -26,7 +26,12 @@ const Form = (props) => {
         });
     };
 
+    useEffect(() => {
+        setInputs(init(props.content));
+    }, [props.content]);
+
     const onSubmitHandler = () => {
+        console.log(inputs);
         for (const [key, value] of Object.entries(inputs)) {
             if (value === '') return;
         }

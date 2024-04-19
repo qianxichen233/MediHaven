@@ -4,6 +4,7 @@ import Form from '../UI/Form';
 import { useState } from 'react';
 import { login } from '../../api/account';
 import { useNavigate } from 'react-router-dom';
+import { useMyContext } from '../MyContext';
 
 const inputFields = {
     administrator: {
@@ -19,6 +20,7 @@ const inputFields = {
 
 const LoginForm = (props) => {
     const navigate = useNavigate();
+    const { user, setUser } = useMyContext();
 
     const [account_type, set_account_type] = useState(
         props.account_type || 'physician',
@@ -31,6 +33,10 @@ const LoginForm = (props) => {
                 account_type,
                 form.Email,
             ]);
+            setUser({
+                role: account_type,
+                email: form.Email,
+            });
             navigate('/main', { state: { type: account_type } });
         }
         // console.log(form);

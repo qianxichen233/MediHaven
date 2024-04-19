@@ -60,17 +60,13 @@ ipcMain.handle('get_password', async (event, arg) => {
 
 ipcMain.handle('connect', async (event, arg) => {
     const password = await get_password(...arg);
-    const username = toBase64(arg[0] + '_' + arg[1]);
+    const username = toBase64(arg[0] + '_' + arg[1]).replace(/=+$/, '');
+    console.log(username, password);
 
     xmpp.on('online', (data: any) => {
         console.log('Hey you are online! ');
         console.log(`Connected as ${data.jid.user}`);
-        // send();
     });
-    function send() {
-        setTimeout(send, 5000);
-        xmpp.send('admin@localhost', `hi! ${Date.now()}`);
-    }
     xmpp.on('error', (error: string) =>
         console.log(`something went wrong!${error} `),
     );
