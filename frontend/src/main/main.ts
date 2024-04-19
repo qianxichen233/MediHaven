@@ -17,7 +17,14 @@ import { resolveHtmlPath } from './util';
 
 const xmpp = require('simple-xmpp');
 
-import { create_key, remove_key, get_public_key, sign } from './key_manager';
+import {
+    create_key,
+    remove_key,
+    get_public_key,
+    sign,
+    get_password,
+} from './key_manager';
+import { toBase64 } from './utility';
 
 class AppUpdater {
   constructor() {
@@ -47,14 +54,19 @@ ipcMain.handle('get_public_key', async (event, arg) => {
 ipcMain.handle('sign', async (event, arg) => {
   return sign(...arg);
 });
+ipcMain.handle('get_password', async (event, arg) => {
+    return get_password(...arg);
+});
 
 ipcMain.handle('connect', async (event, arg) => {
+    const password = await get_password(...arg);
+    const username = toBase64(arg[0] + '_' + arg[1]);
+
     xmpp.on('online', (data: any) => {
         console.log('Hey you are online! ');
         console.log(`Connected as ${data.jid.user}`);
         // send();
     });
-
     function send() {
         setTimeout(send, 5000);
         xmpp.send('admin@localhost', `hi! ${Date.now()}`);
@@ -62,17 +74,22 @@ ipcMain.handle('connect', async (event, arg) => {
     xmpp.on('error', (error: string) =>
         console.log(`something went wrong!${error} `),
     );
-
     xmpp.on('chat', (from: string, message: String) => {
         console.log(`Got a message! ${message} from ${from}`);
     });
-
     xmpp.connect({
-        jid: 'admin@localhost',
-        password: 'password',
+        jid: `${username}@localhost`,
+        password: password,
         host: '172.210.68.64',
         port: 5222,
     });
+});
+
+ipcMain.handle('send', async (event, arg) => {
+    const [role, email, message] = arg;
+    const username = toBase64(role + '_' + email);
+
+    xmpp.send(`${username}@localhost`, message);
 });
 
 if (process.env.NODE_ENV === 'production') {

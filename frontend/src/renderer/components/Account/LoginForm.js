@@ -3,6 +3,7 @@ import styles from './RegisterForm.module.scss';
 import Form from '../UI/Form';
 import { useState } from 'react';
 import { login } from '../../api/account';
+import { useNavigate } from 'react-router-dom';
 
 const inputFields = {
     administrator: {
@@ -17,12 +18,21 @@ const inputFields = {
 };
 
 const LoginForm = (props) => {
+    const navigate = useNavigate();
+
     const [account_type, set_account_type] = useState(
         props.account_type || 'physician',
     );
 
     const onSubmit = async (form) => {
-        await login(account_type, form.Email);
+        const result = await login(account_type, form.Email);
+        if (result) {
+            await window.electron.ipcRenderer.invoke('connect', [
+                account_type,
+                form.Email,
+            ]);
+            navigate('/main', { state: { type: account_type } });
+        }
         // console.log(form);
     };
 

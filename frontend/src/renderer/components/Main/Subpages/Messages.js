@@ -35,6 +35,14 @@ const Messages = (props) => {
         });
     };
 
+    const onAddHandler = async () => {
+        await window.electron.ipcRenderer.invoke('send', [
+            'physician',
+            'alice@test.com',
+            'hello!',
+        ]);
+    };
+
     return (
         <div className={styles.container}>
             <MessageList
@@ -43,7 +51,12 @@ const Messages = (props) => {
                 onSelect={onSetect}
             />
             <div className={styles.buttons}>
-                <button style={{ backgroundColor: '#45e4ab' }}>Add New</button>
+                <button
+                    style={{ backgroundColor: '#45e4ab' }}
+                    onClick={onAddHandler}
+                >
+                    Add New
+                </button>
                 <button style={{ backgroundColor: '#F77' }}>Delete</button>
             </div>
         </div>

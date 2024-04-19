@@ -3,6 +3,7 @@ import styles from './RegisterForm.module.scss';
 import Form from '../UI/Form';
 import { useState } from 'react';
 import { register } from '../../api/account';
+import { useNavigate } from 'react-router-dom';
 
 const inputFields = {
     administrator: {
@@ -51,12 +52,22 @@ const inputFields = {
 };
 
 const RegisterForm = (props) => {
+    const navigate = useNavigate();
+
     const [account_type, set_account_type] = useState(
         props.account_type || 'physician',
     );
 
+    const [message, setMessage] = useState('');
+
     const onSubmit = async (form) => {
-        await register(account_type, form);
+        const result = await register(account_type, form);
+        if (result) {
+            setMessage('register successfully!');
+            setTimeout(() => {
+                navigate('/account', { state: { action: 'login' } });
+            }, 3000);
+        }
         // console.log(form);
     };
 
