@@ -1,0 +1,24 @@
+#!/bin/zsh
+CURRENT_DIR=`pwd`
+
+MEDIHEAVEN_BACKEND_ROOT=$(echo $CURRENT_DIR | sed 's/\(.*\)\/backend.*/\1/')
+if [[ "$MEDIHEAVEN_BACKEND_ROOT" == $CURRENT_DIR ]]; then
+    echo "Please run the script inside backend folder"
+    exit 1
+fi
+
+MEDIHEAVEN_BACKEND_ROOT="$MEDIHEAVEN_BACKEND_ROOT/backend"
+
+echo "reseting database...."
+cd "$MEDIHEAVEN_BACKEND_ROOT/api_server/"
+python3 reset_db.py || exit 1
+cd $MEDIHEAVEN_BACKEND_ROOT
+echo "done"
+
+echo "initializing keys...."
+cd "$MEDIHEAVEN_BACKEND_ROOT/sec_server/"
+cargo run --bin init-key || exit 1
+cd $MEDIHEAVEN_BACKEND_ROOT
+echo "done"
+
+cd $CURRENT_DIR

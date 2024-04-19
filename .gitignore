@@ -38,5 +38,6 @@ __pycache__/
 *.pem
 *.crt
 *.bin
+.vscode/
 
 ig_*
