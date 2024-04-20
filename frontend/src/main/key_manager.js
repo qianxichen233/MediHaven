@@ -90,7 +90,13 @@ const sign = async (data, role, email) => {
 
     // console.log(data);
 
-    const privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
+    let privateKeyPEM;
+
+    try {
+        privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
+    } catch (error) {
+        return null;
+    }
 
     // console.log(privateKeyPEM);
 

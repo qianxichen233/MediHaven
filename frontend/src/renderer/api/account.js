@@ -72,6 +72,10 @@ const login = async (type, email) => {
         email,
     ]);
 
+    if (signature === null) {
+        return false;
+    }
+
     try {
         const response = await fetch('http://127.0.0.1:5000/api/login', {
             method: 'POST',
