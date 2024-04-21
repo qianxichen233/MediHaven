@@ -227,10 +227,9 @@ const Appointment = (props) => {
         setSelected(newstate);
     };
 
-    const onSearch = async () => {
+    const getSchedule = async (result) => {
         let physicians = [];
 
-        const result = await get_physicians(department, name);
         for (const physician of result) {
             const schedule = await get_schedule(
                 user.role,
@@ -247,6 +246,13 @@ const Appointment = (props) => {
 
         setPhysicians(physicians);
         setSelected(Array(physicians.length).fill(false));
+
+        console.log(physicians);
+    };
+
+    const onSearch = async () => {
+        const result = await get_physicians(department, name);
+        await getSchedule(result);
     };
 
     const onSelect = (index, st, ed) => {
@@ -320,6 +326,21 @@ const Appointment = (props) => {
         const result = await add_schedule(data);
 
         if (result) {
+            const schedule = await get_schedule(
+                user.role,
+                scheduleInfo.physician.email,
+                date + ' 00:00:00',
+                date + ' 23:59:00',
+                user.email,
+            );
+            setPhysicians((prev) => {
+                let index = 0;
+                for (; index < prev.length; ++index)
+                    if (prev[index].physician.ID === scheduleInfo.physician.ID)
+                        break;
+                prev[index].schedule = schedule;
+                return prev;
+            });
             onModalClose();
         } else {
             if (errorTID) clearTimeout(errorTID);
@@ -376,7 +397,7 @@ const Appointment = (props) => {
                         <div key={physician.ID}>
                             <EditableSingleSchedule
                                 physician={physician.physician}
-                                schedule={physician.schedule}
+                                schedules={physician.schedule}
                                 allowEdit={selected[index]}
                                 onSelect={onSelect.bind(this, index)}
                             />
@@ -396,7 +417,7 @@ const Appointment = (props) => {
                     );
                 })}
             </div>
-            <Modal isOpen={isModalOpen} style={modalStyle}>
+            <Modal isOpen={isModalOpen} style={modalStyle} ariaHideApp={false}>
                 <div className={styles.modal}>
                     <span>Add Appointment</span>
                     {currentPage === 'patient'

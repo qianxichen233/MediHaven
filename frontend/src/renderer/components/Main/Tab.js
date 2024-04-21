@@ -32,6 +32,7 @@ const Tab = (props) => {
                         ref={(el) => (refArray.current[index] = el)}
                         className={props.page === item ? styles.active : ''}
                         onClick={props.onChange.bind(this, item)}
+                        key={index}
                     >
                         {item}
                     </span>

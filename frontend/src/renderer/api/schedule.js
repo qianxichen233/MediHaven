@@ -74,7 +74,7 @@ const get_schedule = async (type, email, st, ed, issuer_email) => {
             timestamp: timestamp,
         },
         type,
-        email,
+        issuer_email,
     ]);
 
     try {

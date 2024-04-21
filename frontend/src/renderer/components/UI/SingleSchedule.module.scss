@@ -1,7 +1,7 @@
 .container {
     position: relative;
 
-    width: 100%;
+    width: calc(100% - 10px);
     height: 150px;
 
     display: flex;
@@ -11,6 +11,11 @@
     background-color: white;
 
     font-family: KoHo;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 
     .info {
         position: relative;
@@ -95,6 +100,74 @@
 
         > div.highlight {
             background-color: #d9d9d9;
+        }
+
+        .now {
+            position: absolute;
+            bottom: 0;
+
+            height: calc(100% - 40px);
+            width: 0;
+
+            border: 1px dashed red;
+
+            box-sizing: border-box;
+        }
+
+        .appointment {
+            position: absolute;
+            bottom: 0;
+
+            height: calc(100% - 40px);
+
+            background-color: rgba(211, 211, 211, 0.5);
+
+            border: 1px solid grey;
+
+            box-sizing: border-box;
+
+            cursor: pointer;
+
+            z-index: 1;
+
+            > div {
+                padding-top: 5px;
+                padding-bottom: 5px;
+
+                padding-left: 10px;
+                padding-right: 10px;
+                p {
+                    text-align: center;
+                    height: 100%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                > p:first-child {
+                    font-weight: 600;
+                }
+            }
+
+            span {
+                position: absolute;
+                z-index: 2;
+
+                user-select: none;
+
+                font-weight: 600;
+            }
+
+            span:first-child {
+                left: -20px;
+                top: 0;
+            }
+
+            span:last-child {
+                right: -20px;
+                bottom: 0;
+            }
         }
     }
 }

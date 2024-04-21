@@ -10,8 +10,47 @@ const convertToTime = (posX) => {
     return `${hour}:${minute}`;
 };
 
+const convertToPosX = (timestamp) => {
+    const time = timestamp.split(' ')[1];
+    const [hour, minute, _] = time.split(':');
+    return (parseInt(hour) - 8) * 120 + parseInt(minute) * 2;
+};
+
+// if time1 > time2
+const compareTime = (time1, time2) => {
+    console.log(`time1: ${time1} time2: ${time2}`);
+    const [hour1, minute1, _] = time1.split(':');
+    const [hour2, minute2, __] = time2.split(':');
+
+    console.log(hour1, minute1, hour2, minute2);
+
+    if (parseInt(hour1) > parseInt(hour2)) return true;
+    else if (parseInt(hour1) === parseInt(hour2)) {
+        if (parseInt(minute1) > parseInt(minute2)) return true;
+    }
+
+    return false;
+};
+
 const alignToClosest = (posX) => {
     return Math.round(posX / 20) * 20;
+};
+
+const checkCollision = (selected, schedules) => {
+    for (const schedule of schedules) {
+        const schedule_left = schedule.schedule_st.split(' ')[1];
+        const schedule_right = schedule.schedule_ed.split(' ')[1];
+        if (
+            (compareTime(selected.right, schedule_left) &&
+                compareTime(schedule_right, selected.right)) ||
+            (compareTime(selected.left, schedule_left) &&
+                compareTime(schedule_right, selected.left)) ||
+            (!compareTime(schedule_right, selected.right) &&
+                !compareTime(selected.left, schedule_left))
+        )
+            return true;
+    }
+    return false;
 };
 
 const EditableSingleSchedule = ({
@@ -28,6 +67,27 @@ const EditableSingleSchedule = ({
 
     const [selectTimeLeft, setSelectTimeLeft] = useState();
     const [selectTimeRight, setSelectTimeRight] = useState();
+
+    const [isCollision, setIsCollision] = useState(false);
+
+    useEffect(() => {
+        if (
+            typeof selectTimeLeft !== 'string' ||
+            typeof selectTimeRight !== 'string'
+        )
+            return;
+
+        if (
+            checkCollision(
+                { left: selectTimeLeft, right: selectTimeRight },
+                schedules,
+            )
+        )
+            setIsCollision(true);
+        else setIsCollision(false);
+    }, [selectTimeLeft, selectTimeRight]);
+
+    console.log(isCollision);
 
     useEffect(() => {
         if (!allowEdit) setIsDragging(false);
@@ -98,6 +158,13 @@ const EditableSingleSchedule = ({
     const handleMouseUp = (e) => {
         if (!isDragging) return;
         setIsDragging(false);
+        if (isCollision) {
+            setIsCollision(false);
+            setSelectTimeLeft(null);
+            setSelectTimeRight(null);
+            return;
+        }
+        if (selectTimeLeft === selectTimeRight) return;
         if (allowEdit) onSelect(selectTimeLeft, selectTimeRight);
     };
 
@@ -138,12 +205,34 @@ const EditableSingleSchedule = ({
                                 0,
                             ),
                             width: `${Math.abs(selectRight - selectLeft)}px`,
+                            backgroundColor: isCollision
+                                ? 'rgba(255, 0, 0, 0.5)'
+                                : 'rgba(255, 165, 0, 0.5)',
+                            borderColor: isCollision
+                                ? 'rgba(255, 0, 0, 0.5)'
+                                : 'rgba(255, 165, 0, 0.5)',
                         }}
                     >
                         <span>{selectTimeLeft}</span>
                         <span>{selectTimeRight}</span>
                     </div>
                 ) : null}
+
+                {schedules.map((schedule) => {
+                    const left = convertToPosX(schedule.schedule_st);
+                    const right = convertToPosX(schedule.schedule_ed);
+
+                    return (
+                        <div
+                            key={schedule.created_at}
+                            className={_styles.appointment}
+                            style={{
+                                left: left,
+                                width: `${right - left}px`,
+                            }}
+                        ></div>
+                    );
+                })}
 
                 {Array(11)
                     .fill('')
