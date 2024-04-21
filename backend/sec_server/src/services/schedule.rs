@@ -108,10 +108,6 @@ impl Schedule for ScheduleService {
 
         match req.auth {
             Some(auth) => {
-                if req.email != auth.issuer_email {
-                    return Ok(failed_msg);
-                }
-
                 let plaintext = (
                     object! {
                     endpoint: "GET schedule",
@@ -159,6 +155,7 @@ impl Schedule for ScheduleService {
                             description: schedule.description.clone(),
                             patient_first_name: Some(schedule.patient_first_name.clone()),
                             patient_last_name: Some(schedule.patient_last_name.clone()),
+                            patient_ssn: Some(schedule.patient_SSN.clone()),
                         })
                         .collect(),
                     msg: None,

@@ -22,6 +22,7 @@ pub struct scheduleType {
     pub description: String,
     pub patient_first_name: String,
     pub patient_last_name: String,
+    pub patient_SSN: String,
 }
 
 pub struct physicianType {

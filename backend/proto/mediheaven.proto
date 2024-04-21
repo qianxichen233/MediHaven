@@ -198,6 +198,7 @@ message singleSchedule {
     string description = 6;
     optional string patient_first_name = 7;
     optional string patient_last_name = 8;
+    optional string patient_SSN = 9;
 }
 
 message addScheduleRequest {

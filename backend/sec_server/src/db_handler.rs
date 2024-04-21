@@ -879,7 +879,8 @@ impl DBHandler<'_> {
     ) -> Result<Vec<scheduleType>, Error> {
         let mut result: Vec<scheduleType> = Vec::new();
         let sql =
-            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID FROM schedule s JOIN Physician p JOIN Patient pa WHERE p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
+            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, pa.SSN, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID FROM schedule s JOIN Physician p JOIN Patient pa WHERE s.patient_ID = pa.ID AND s.physician_ID = p.ID AND p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
+        println!("{:?}", email);
         let schedules = self.select_many(sql, (
             &email.into_parameter(),
             &st.into_parameter(),
@@ -888,18 +889,18 @@ impl DBHandler<'_> {
 
         for schedule_raw in schedules.iter() {
             let enc_key_schedule = self
-                .get_enc_key(String::from_utf8(schedule_raw[9].to_vec())?.parse::<u64>()?)
+                .get_enc_key(String::from_utf8(schedule_raw[10].to_vec())?.parse::<u64>()?)
                 .unwrap();
             let cipher_schedule = ChaCha20Poly1305::new(&enc_key_schedule);
             let mut nonce_schedule: Nonce = GenericArray::default();
-            nonce_schedule.copy_from_slice(&schedule_raw[8][..]);
+            nonce_schedule.copy_from_slice(&schedule_raw[9][..]);
 
             let enc_key_patient = self
-                .get_enc_key(String::from_utf8(schedule_raw[11].to_vec())?.parse::<u64>()?)
+                .get_enc_key(String::from_utf8(schedule_raw[12].to_vec())?.parse::<u64>()?)
                 .unwrap();
             let cipher_patient = ChaCha20Poly1305::new(&enc_key_patient);
             let mut nonce_patient: Nonce = GenericArray::default();
-            nonce_patient.copy_from_slice(&schedule_raw[10][..]);
+            nonce_patient.copy_from_slice(&schedule_raw[11][..]);
 
             let description = self
                 .decrypt_column(&schedule_raw[5], &cipher_schedule, &nonce_schedule)
@@ -921,6 +922,7 @@ impl DBHandler<'_> {
                 description: description,
                 patient_first_name: patient_first_name,
                 patient_last_name: patient_last_name,
+                patient_SSN: String::from_utf8(schedule_raw[8].clone())?,
             };
             result.push(schedule);
         }
