@@ -22,7 +22,6 @@ const Tab = (props) => {
     }, [slideRef, refArray.current, props.page]);
 
     // if (refArray.current.length !== props.pagelist.length) return <></>;
-
     return (
         <div className={styles.tab}>
             <span className={styles.slide} ref={slideRef}></span>
