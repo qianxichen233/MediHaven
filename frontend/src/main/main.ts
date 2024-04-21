@@ -54,19 +54,6 @@ ipcMain.handle('get_public_key', async (event, arg) => {
 ipcMain.handle('sign', async (event, arg) => {
     return sign(...arg);
 });
-
-ipcMain.handle('create_key', async (event, arg) => {
-  return create_key(...arg);
-});
-ipcMain.handle('remove_key', async (event, arg) => {
-  return remove_key(...arg);
-});
-ipcMain.handle('get_public_key', async (event, arg) => {
-  return get_public_key(...arg);
-});
-ipcMain.handle('sign', async (event, arg) => {
-  return sign(...arg);
-});
 ipcMain.handle('get_password', async (event, arg) => {
     return get_password(...arg);
 });
