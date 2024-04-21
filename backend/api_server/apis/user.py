@@ -249,7 +249,8 @@ class patient(Resource):
         args = self.get_args()
 
         response = GRPC_API.get_patient(args)
-        if response.patient == None:
+        print(f"response: {response.patient} ---- end")
+        if response.patient.SSN == "":
             return jsonify({"message": f"failed!"})
 
         result = {}
@@ -307,6 +308,7 @@ class physician(Resource):
                     "sex": physician.sex,
                     "department": physician.department,
                     "title": physician.title,
+                    "email": physician.email,
                 }
             )
 

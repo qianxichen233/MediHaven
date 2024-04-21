@@ -155,6 +155,7 @@ message PhysicianInfo {
     string sex = 4;
     string department = 5;
     string title = 6;
+    string email = 7;
 }
 
 message PhysicianResponse {

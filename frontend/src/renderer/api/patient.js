@@ -87,7 +87,8 @@ const get_patient = async (SSN, type, email) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            return responseData;
+            if (responseData.message === 'failed') return null;
+            return responseData.patient;
         } else {
             console.error('Failed to fetch data');
         }

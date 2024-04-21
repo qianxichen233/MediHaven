@@ -441,6 +441,7 @@ impl Account for AccountService {
                             sex: physician.sex.clone(),
                             department: physician.department.clone(),
                             title: physician.title.clone(),
+                            email: physician.email.clone(),
                         })
                         .collect(),
                 };

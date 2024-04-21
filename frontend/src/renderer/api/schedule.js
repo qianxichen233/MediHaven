@@ -7,7 +7,7 @@ const add_schedule = async (data) => {
     form['physician_ID'] = data['physician_ID'];
     form['schedule_st'] = data['schedule_st'];
     form['schedule_ed'] = data['schedule_ed'];
-    form['created_at'] = data['created_at'];
+    form['created_at'] = getCurrentTime();
     form['description'] = data['description'];
 
     form['issuer_email'] = data['email'];
@@ -41,6 +41,7 @@ const add_schedule = async (data) => {
 
         if (response.ok) {
             const data = await response.json();
+            if (data.message === 'success!') return true;
             console.log('POST request successful:', data);
         } else {
             console.error('POST request failed');
@@ -48,9 +49,11 @@ const add_schedule = async (data) => {
     } catch (error) {
         console.error('Error:', error);
     }
+
+    return false;
 };
 
-const get_schedule = async (type, email, st, ed) => {
+const get_schedule = async (type, email, st, ed, issuer_email) => {
     const timestamp = getCurrentTime();
 
     const params = new URLSearchParams({
@@ -58,7 +61,7 @@ const get_schedule = async (type, email, st, ed) => {
         timestamp_st: st,
         timestamp_ed: ed,
         timestamp: timestamp,
-        issuer_email: email,
+        issuer_email: issuer_email,
     });
 
     const signature = await window.electron.ipcRenderer.invoke('sign', [
@@ -67,7 +70,7 @@ const get_schedule = async (type, email, st, ed) => {
             email: email,
             timestamp_st: st,
             timestamp_ed: ed,
-            issuer_email: email,
+            issuer_email: issuer_email,
             timestamp: timestamp,
         },
         type,
@@ -87,7 +90,7 @@ const get_schedule = async (type, email, st, ed) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            return responseData;
+            return responseData.schedules;
         } else {
             console.error('Failed to fetch data');
         }

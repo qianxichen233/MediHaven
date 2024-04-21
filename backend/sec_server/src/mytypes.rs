@@ -31,4 +31,5 @@ pub struct physicianType {
     pub sex: String,
     pub department: String,
     pub title: String,
+    pub email: String,
 }

@@ -465,7 +465,7 @@ impl DBHandler<'_> {
 
         if fields.contains_key("department") && fields.contains_key("first_name") {
             let sql =
-                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE Department = ? AND First_Name = ? AND Last_Name = ?";
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title, Email FROM Physician WHERE Department = ? AND First_Name = ? AND Last_Name = ?";
             data = self.select_many(&sql, (
                 &fields["department"].into_parameter(),
                 &fields["first_name"].into_parameter(),
@@ -473,17 +473,18 @@ impl DBHandler<'_> {
             ))?;
         } else if fields.contains_key("department") {
             let sql =
-                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE Department = ?";
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title, Email FROM Physician WHERE Department = ?";
             data = self.select_many(&sql, (&fields["department"].into_parameter(),))?;
         } else if fields.contains_key("first_name") {
             let sql =
-                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE First_Name = ? AND Last_Name = ?";
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title, Email FROM Physician WHERE First_Name = ? AND Last_Name = ?";
             data = self.select_many(&sql, (
                 &fields["first_name"].into_parameter(),
                 &fields["last_name"].into_parameter(),
             ))?;
         } else {
-            let sql = "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician";
+            let sql =
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title, Email FROM Physician";
             data = self.select_many(&sql, ())?;
         }
 
@@ -497,6 +498,7 @@ impl DBHandler<'_> {
                 sex: String::from_utf8(physician_raw[3].clone())?,
                 department: String::from_utf8(physician_raw[4].clone())?,
                 title: String::from_utf8(physician_raw[5].clone())?,
+                email: String::from_utf8(physician_raw[6].clone())?,
             };
             result.push(physician);
         }
