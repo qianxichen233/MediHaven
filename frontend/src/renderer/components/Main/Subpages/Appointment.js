@@ -46,6 +46,7 @@ const modalStyle = {
         transform: 'translate(-50%, -50%)',
         backgroundColor: 'var(--main-bg-color)',
     },
+    overlay: { zIndex: 1000 },
 };
 
 let errorTID = null;
