@@ -1,21 +1,29 @@
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Main/Header';
 import Messages from '../components/Main/Subpages/Messages';
 import Schedule from '../components/Main/Subpages/Schedule';
 import styles from './MainPage.module.scss';
 
 import { useState } from 'react';
+import PhysicianMain from './subpages/PhysicianMain';
+import ReceptionistMain from './subpages/ReceptionistMain';
+import AdminMain from './subpages/AdminMain';
 
 const MainPage = (props) => {
-    const [page, setPage] = useState('calendar');
+    const location = useLocation();
+    const type = location.state.type;
 
-    const onPageChange = (page) => {
-        setPage(page);
-    };
+    console.log(type);
 
     return (
         <div className="bg">
-            <Header page={page} onPageChange={onPageChange} />
-            {page === 'calendar' ? <Schedule /> : <Messages />}
+            {type === 'physician' ? (
+                <PhysicianMain />
+            ) : type === 'receptionist' ? (
+                <ReceptionistMain />
+            ) : (
+                <AdminMain />
+            )}
         </div>
     );
 };

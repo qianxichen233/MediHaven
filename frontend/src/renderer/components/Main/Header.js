@@ -22,7 +22,11 @@ const Header = (props) => {
                         <span>Search for patient</span>
                     </div>
                 </div>
-                <Tab page={props.page} onChange={props.onPageChange} />
+                <Tab
+                    page={props.page}
+                    onChange={props.onPageChange}
+                    pagelist={props.pagelist}
+                />
             </header>
             <div className={styles.placeholder}></div>
         </>

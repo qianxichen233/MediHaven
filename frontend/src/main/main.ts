@@ -15,7 +15,16 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
-import { create_key, remove_key, get_public_key, sign } from './key_manager';
+const xmpp = require('simple-xmpp');
+
+import {
+    create_key,
+    remove_key,
+    get_public_key,
+    sign,
+    get_password,
+} from './key_manager';
+import { toBase64 } from './utility';
 
 class AppUpdater {
     constructor() {
@@ -44,6 +53,52 @@ ipcMain.handle('get_public_key', async (event, arg) => {
 });
 ipcMain.handle('sign', async (event, arg) => {
     return sign(...arg);
+});
+
+ipcMain.handle('create_key', async (event, arg) => {
+  return create_key(...arg);
+});
+ipcMain.handle('remove_key', async (event, arg) => {
+  return remove_key(...arg);
+});
+ipcMain.handle('get_public_key', async (event, arg) => {
+  return get_public_key(...arg);
+});
+ipcMain.handle('sign', async (event, arg) => {
+  return sign(...arg);
+});
+ipcMain.handle('get_password', async (event, arg) => {
+    return get_password(...arg);
+});
+
+ipcMain.handle('connect', async (event, arg) => {
+    const password = await get_password(...arg);
+    const username = toBase64(arg[0] + '_' + arg[1]).replace(/=+$/, '');
+    console.log(username, password);
+
+    xmpp.on('online', (data: any) => {
+        console.log('Hey you are online! ');
+        console.log(`Connected as ${data.jid.user}`);
+    });
+    xmpp.on('error', (error: string) =>
+        console.log(`something went wrong!${error} `),
+    );
+    xmpp.on('chat', (from: string, message: String) => {
+        console.log(`Got a message! ${message} from ${from}`);
+    });
+    xmpp.connect({
+        jid: `${username}@localhost`,
+        password: password,
+        host: '172.210.68.64',
+        port: 5222,
+    });
+});
+
+ipcMain.handle('send', async (event, arg) => {
+    const [role, email, message] = arg;
+    const username = toBase64(role + '_' + email);
+
+    xmpp.send(`${username}@localhost`, message);
 });
 
 if (process.env.NODE_ENV === 'production') {

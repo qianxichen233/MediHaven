@@ -51,6 +51,23 @@ const remove_key = async (role, email) => {
     return true;
 };
 
+const get_password = async (role, email) => {
+    const privateKeyFilePath = get_prikey_path(
+        mediHeavenDir,
+        toBase64(role + email),
+    );
+
+    const privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
+
+    const hash = crypto.createHash('sha256');
+
+    // Update the hash object with the input string
+    hash.update(privateKeyPEM);
+
+    // Generate the hash digest in hexadecimal format
+    return hash.digest('hex').substring(0, 20);
+};
+
 const get_public_key = async (role, email) => {
     try {
         const publicKeyBase64 = fs.readFileSync(
@@ -73,7 +90,13 @@ const sign = async (data, role, email) => {
 
     // console.log(data);
 
-    const privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
+    let privateKeyPEM;
+
+    try {
+        privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
+    } catch (error) {
+        return null;
+    }
 
     // console.log(privateKeyPEM);
 
@@ -95,4 +118,5 @@ module.exports = {
     remove_key,
     get_public_key,
     sign,
+    get_password,
 };

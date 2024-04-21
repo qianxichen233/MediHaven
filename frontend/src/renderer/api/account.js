@@ -25,6 +25,11 @@ const register = async (type, data) => {
         form['Email'],
     ]);
 
+    form['Password'] = await window.electron.ipcRenderer.invoke(
+        'get_password',
+        [type, form['Email']],
+    );
+
     console.log(form);
 
     try {
@@ -39,12 +44,14 @@ const register = async (type, data) => {
         if (response.ok) {
             const data = await response.json();
             console.log('POST request successful:', data);
+            if (data.message === 'success!') return true;
         } else {
             console.error('POST request failed');
         }
     } catch (error) {
         console.error('Error:', error);
     }
+    return false;
 };
 
 const login = async (type, email) => {
@@ -65,6 +72,9 @@ const login = async (type, email) => {
         email,
     ]);
 
+    if (signature === null) {
+        return false;
+    }
     try {
         const response = await fetch('http://127.0.0.1:5000/api/login', {
             method: 'POST',
@@ -78,12 +88,15 @@ const login = async (type, email) => {
         if (response.ok) {
             const data = await response.json();
             console.log('POST request successful:', data);
+            if (data.message === 'success!') return true;
         } else {
             console.error('POST request failed');
         }
     } catch (error) {
         console.error('Error:', error);
     }
+
+    return false;
 };
 
 export { register, login };

@@ -2,6 +2,10 @@ from flask import Flask, Blueprint, jsonify
 from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 
+import base64
+
+from xmpp import register_xmpp
+
 import inspect
 
 from grpc_client.grpc_api import GRPC_API
@@ -37,9 +41,14 @@ class register(Resource):
         self.parser.add_argument(
             "Department", type=str, help="Phone Number", required=False
         )
+        self.parser.add_argument("Password", type=str, help="Password", required=False)
 
     def post(self):
         args = self.parser.parse_args()
+
+        password = args["Password"]
+        del args["Password"]
+
         if args["Account_Type"] == "admin" and not hasattr(args, "Age"):
             return jsonify({"message": f"Missing Fields"})
 
@@ -53,6 +62,12 @@ class register(Resource):
             return jsonify({"message": f"failed!"})
 
         print(response)
+
+        username = args["Account_Type"] + "_" + args["Email"]
+
+        register_xmpp(
+            base64.b64encode(username.encode("utf-8")).decode("utf-8"), password
+        )
 
         return jsonify({"message": f"success!"})
 
@@ -171,28 +186,53 @@ class code(Resource):
 
         return jsonify({"codes": result})
 
+
 class patient(Resource):
     def __init__(self):
         self.post_parser = reqparse.RequestParser()
         self.post_parser.add_argument("SSN", type=str, help="SSN", required=True)
-        self.post_parser.add_argument("First_Name", type=str, help="First Name", required=True)
-        self.post_parser.add_argument("Last_Name", type=str, help="Last Name", required=True)
-        self.post_parser.add_argument("Insurance_ID", type=str, help="Insurance ID", required=True)
+        self.post_parser.add_argument(
+            "First_Name", type=str, help="First Name", required=True
+        )
+        self.post_parser.add_argument(
+            "Last_Name", type=str, help="Last Name", required=True
+        )
+        self.post_parser.add_argument(
+            "Insurance_ID", type=str, help="Insurance ID", required=True
+        )
         self.post_parser.add_argument("Sex", type=str, help="Sex", required=True)
-        self.post_parser.add_argument("Date_Of_Birth", type=str, help="Date Of Birth", required=True)
-        self.post_parser.add_argument("Phone_Number", type=str, help="Phone Number", required=True)
+        self.post_parser.add_argument(
+            "Date_Of_Birth", type=str, help="Date Of Birth", required=True
+        )
+        self.post_parser.add_argument(
+            "Phone_Number", type=str, help="Phone Number", required=True
+        )
         self.post_parser.add_argument("Email", type=str, help="Email", required=True)
 
-        self.post_parser.add_argument("issuer_email", type=str, help="issuer email", required=True)
-        self.post_parser.add_argument("timestamp", type=str, help="timestamp", required=True)
+        self.post_parser.add_argument(
+            "issuer_email", type=str, help="issuer email", required=True
+        )
+        self.post_parser.add_argument(
+            "timestamp", type=str, help="timestamp", required=True
+        )
         self.post_parser.add_argument(
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
 
         self.get_parser = reqparse.RequestParser()
-        self.get_parser.add_argument("SSN", type=str, help="SSN", required=True, location="args")
-        self.get_parser.add_argument("issuer_email", type=str, help="issuer email", required=True, location="args")
-        self.get_parser.add_argument("timestamp", type=str, help="timestamp", required=True, location="args")
+        self.get_parser.add_argument(
+            "SSN", type=str, help="SSN", required=True, location="args"
+        )
+        self.get_parser.add_argument(
+            "issuer_email",
+            type=str,
+            help="issuer email",
+            required=True,
+            location="args",
+        )
+        self.get_parser.add_argument(
+            "timestamp", type=str, help="timestamp", required=True, location="args"
+        )
         self.get_parser.add_argument(
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
@@ -204,14 +244,15 @@ class patient(Resource):
             args.signature = args["X-Signature"]
             del args["X-Signature"]
         return args
-    
+
     def get(self):
         args = self.get_args()
 
         response = GRPC_API.get_patient(args)
-        if response.patient == None:
+        print(f"response: {response.patient} ---- end")
+        if response.patient.SSN == "":
             return jsonify({"message": f"failed!"})
-        
+
         result = {}
         result["SSN"] = response.patient.SSN
         result["First_Name"] = response.patient.First_Name
@@ -234,7 +275,48 @@ class patient(Resource):
 
         return jsonify({"message": f"success!"})
 
+
+class physician(Resource):
+    def __init__(self):
+        self.get_parser = reqparse.RequestParser()
+        self.get_parser.add_argument(
+            "department", type=str, help="department", location="args"
+        )
+        self.get_parser.add_argument("name", type=str, help="name", location="args")
+
+    def get(self):
+        args = self.get_parser.parse_args()
+
+        if args["name"] != None:
+            [first_name, last_name] = args["name"].split(" ")
+            args.first_name = first_name
+            args.last_name = last_name
+
+        del args["name"]
+
+        response = GRPC_API.get_physician(args)
+
+        print(response)
+
+        result = []
+        for physician in response.physicians:
+            result.append(
+                {
+                    "ID": physician.ID,
+                    "first_name": physician.first_name,
+                    "last_name": physician.last_name,
+                    "sex": physician.sex,
+                    "department": physician.department,
+                    "title": physician.title,
+                    "email": physician.email,
+                }
+            )
+
+        return jsonify({"physicians": result})
+
+
 api.add_resource(register, "/register")
 api.add_resource(login, "/login")
 api.add_resource(code, "/code")
 api.add_resource(patient, "/patient")
+api.add_resource(physician, "/physician")

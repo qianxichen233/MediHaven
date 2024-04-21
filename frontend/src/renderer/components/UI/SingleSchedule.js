@@ -1,8 +1,26 @@
 import { useEffect, useRef } from 'react';
 import styles from './SingleSchedule.module.scss';
+import { getCurrentTime } from '../../utils/utils';
+
+const convertToPosX = (timestamp) => {
+    const time = timestamp.split(' ')[1];
+    const [hour, minute, _] = time.split(':');
+    return (parseInt(hour) - 8) * 120 + parseInt(minute) * 2;
+};
+
+const getAppointmentColor = (left, right, now) => {
+    if (now > right) return 'rgba(211, 211, 211, 0.5)';
+    else if (now >= left && now <= right) return 'rgba(0, 0, 255, 0.3)';
+    return 'rgba(0, 128, 0, 0.5)';
+};
 
 const SingleSchedule = (props) => {
     const scheduleRef = useRef(null);
+
+    const left = convertToPosX(props.schedule.schedule_st);
+    const right = convertToPosX(props.schedule.schedule_ed);
+
+    const now = convertToPosX(getCurrentTime());
 
     useEffect(() => {
         if (!scheduleRef.current) return;
@@ -17,46 +35,57 @@ const SingleSchedule = (props) => {
                     <span className={styles.placeholder}></span>
                 </div>
                 <div>
-                    <span>Last, First</span>
+                    <span>
+                        {props.schedule.patient_first_name},{' '}
+                        {props.schedule.patient_last_name}
+                    </span>
                     <span># yr old / SEX</span>
                     <span>DOB: MM/DD/YY</span>
                     <span>MRN: #######</span>
                 </div>
             </div>
             <div ref={scheduleRef} className={styles.schedule}>
-                <div className={props.current === '8' ? styles.highlight : ''}>
-                    <span className={styles.time}>08:00</span>
+                <div
+                    className={styles.appointment}
+                    style={{
+                        left: left,
+                        width: `${right - left}px`,
+                        backgroundColor: getAppointmentColor(left, right, now),
+                    }}
+                    onClick={props.onSelect}
+                >
+                    <span>
+                        {props.schedule.schedule_st
+                            .split(' ')[1]
+                            .split(':')
+                            .slice(0, 2)
+                            .join(':')}
+                    </span>
+                    <div>
+                        <p>Appointment</p>
+                        <p>{props.schedule.description}</p>
+                    </div>
+                    <span>
+                        {props.schedule.schedule_ed
+                            .split(' ')[1]
+                            .split(':')
+                            .slice(0, 2)
+                            .join(':')}
+                    </span>
                 </div>
-                <div className={props.current === '9' ? styles.highlight : ''}>
-                    <span className={styles.time}>09:00</span>
-                </div>
-                <div className={props.current === '10' ? styles.highlight : ''}>
-                    <span className={styles.time}>10:00</span>
-                </div>
-                <div className={props.current === '11' ? styles.highlight : ''}>
-                    <span className={styles.time}>11:00</span>
-                </div>
-                <div className={props.current === '12' ? styles.highlight : ''}>
-                    <span className={styles.time}>12:00</span>
-                </div>
-                <div className={props.current === '13' ? styles.highlight : ''}>
-                    <span className={styles.time}>13:00</span>
-                </div>
-                <div className={props.current === '14' ? styles.highlight : ''}>
-                    <span className={styles.time}>14:00</span>
-                </div>
-                <div className={props.current === '15' ? styles.highlight : ''}>
-                    <span className={styles.time}>15:00</span>
-                </div>
-                <div className={props.current === '16' ? styles.highlight : ''}>
-                    <span className={styles.time}>16:00</span>
-                </div>
-                <div className={props.current === '17' ? styles.highlight : ''}>
-                    <span className={styles.time}>17:00</span>
-                </div>
-                <div className={props.current === '18' ? styles.highlight : ''}>
-                    <span className={styles.time}>18:00</span>
-                </div>
+                <span className={styles.now} style={{ left: now }}></span>
+                {Array(11)
+                    .fill('')
+                    .map((_, index) => {
+                        const time = (index + 8).toString();
+                        return (
+                            <div key={index} className={styles.box}>
+                                <span className={styles.time}>
+                                    {time.padStart(2, '0') + ':00'}
+                                </span>
+                            </div>
+                        );
+                    })}
             </div>
         </div>
     );
