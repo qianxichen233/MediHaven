@@ -1,6 +1,6 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
-use crate::mytypes::{ codeType, recordType, scheduleType };
+use crate::mytypes::{ codeType, recordType, scheduleType, physicianType };
 use rand::Rng;
 
 use odbc_api::{
@@ -455,6 +455,53 @@ impl DBHandler<'_> {
         }
 
         return Ok(Some(result));
+    }
+
+    pub fn get_physicians(
+        &self,
+        fields: &HashMap<&str, &str>
+    ) -> Result<Vec<physicianType>, Error> {
+        let data;
+
+        if fields.contains_key("department") && fields.contains_key("first_name") {
+            let sql =
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE Department = ? AND First_Name = ? AND Last_Name = ?";
+            data = self.select_many(&sql, (
+                &fields["department"].into_parameter(),
+                &fields["first_name"].into_parameter(),
+                &fields["last_name"].into_parameter(),
+            ))?;
+        } else if fields.contains_key("department") {
+            let sql =
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE Department = ?";
+            data = self.select_many(&sql, (&fields["department"].into_parameter(),))?;
+        } else if fields.contains_key("first_name") {
+            let sql =
+                "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician WHERE First_Name = ? AND Last_Name = ?";
+            data = self.select_many(&sql, (
+                &fields["first_name"].into_parameter(),
+                &fields["last_name"].into_parameter(),
+            ))?;
+        } else {
+            let sql = "SELECT ID, First_Name, Last_Name, Sex, Department, Title FROM Physician";
+            data = self.select_many(&sql, ())?;
+        }
+
+        let mut result: Vec<physicianType> = vec![];
+
+        for physician_raw in data.iter() {
+            let physician = physicianType {
+                ID: String::from_utf8(physician_raw[0].to_vec())?.parse::<i32>()?,
+                first_name: String::from_utf8(physician_raw[1].clone())?,
+                last_name: String::from_utf8(physician_raw[2].clone())?,
+                sex: String::from_utf8(physician_raw[3].clone())?,
+                department: String::from_utf8(physician_raw[4].clone())?,
+                title: String::from_utf8(physician_raw[5].clone())?,
+            };
+            result.push(physician);
+        }
+
+        return Ok(result);
     }
 
     pub fn get_receptionist(&self, email: &str) -> Result<Option<HashMap<String, String>>, Error> {

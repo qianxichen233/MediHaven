@@ -23,3 +23,12 @@ pub struct scheduleType {
     pub patient_first_name: String,
     pub patient_last_name: String,
 }
+
+pub struct physicianType {
+    pub ID: i32,
+    pub first_name: String,
+    pub last_name: String,
+    pub sex: String,
+    pub department: String,
+    pub title: String,
+}
