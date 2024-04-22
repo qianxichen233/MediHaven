@@ -99,7 +99,10 @@ impl Account for AccountService {
             }
         }
 
-        globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
+        if req.code != "dev" {
+            globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
+        }
+
         let success = SuccessResponse {
             successful: true,
             msg: None,

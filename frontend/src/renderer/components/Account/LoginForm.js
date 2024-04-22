@@ -27,17 +27,19 @@ const LoginForm = (props) => {
     );
 
     const onSubmit = async (form) => {
-        const result = await login(account_type, form.Email);
+        let type = account_type === 'administrator' ? 'admin' : account_type;
+
+        const result = await login(type, form.Email);
         if (result) {
             await window.electron.ipcRenderer.invoke('connect', [
-                account_type,
+                type,
                 form.Email,
             ]);
             setUser({
-                role: account_type,
+                role: type,
                 email: form.Email,
             });
-            navigate('/main', { state: { type: account_type } });
+            navigate('/main', { state: { type: type } });
         }
         // console.log(form);
     };

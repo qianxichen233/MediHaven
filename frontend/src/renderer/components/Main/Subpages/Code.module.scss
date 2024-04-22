@@ -1,0 +1,106 @@
+.container {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+
+    font-family: KoHo;
+    font-size: 24px;
+
+    .buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-top: 20px;
+    }
+
+    .codes {
+        width: 100%;
+
+        span {
+            min-width: 200px;
+        }
+
+        > header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding-left: 60px;
+            padding-right: 20px;
+
+            height: 50px;
+
+            font-weight: 600;
+
+            border-bottom: 1px solid black;
+
+            background: #d9d9d9;
+
+            user-select: none;
+        }
+
+        > div {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding-left: 60px;
+            padding-right: 20px;
+
+            height: 50px;
+
+            border-bottom: 1px solid black;
+
+            background: linear-gradient(0deg, #fff 0%, #fff 100%),
+                linear-gradient(0deg, #fff 0%, #fff 100%), #fff;
+
+            > input {
+                position: absolute;
+
+                left: 20px;
+
+                width: 20px;
+                height: 20px;
+
+                border-radius: 6px;
+                background: #fff;
+                box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) inset;
+
+                border: none;
+            }
+        }
+    }
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    text-align: center;
+
+    min-width: 400px;
+    min-height: 400px;
+
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+
+    .input {
+        > span {
+            font-size: 28px;
+        }
+
+        > div {
+            margin-top: 30px;
+        }
+    }
+
+    .modalButtons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

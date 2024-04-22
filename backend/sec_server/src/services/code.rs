@@ -53,8 +53,7 @@ impl Code for CodeService {
 
         let cache = globals::get_pubkey_cache().lock().unwrap();
 
-        let mut cache_key = String::from(req.account_type.clone());
-        cache_key += "_";
+        let mut cache_key = String::from("admin_");
         cache_key += &req.email;
 
         if cache.contains_key(&cache_key) {
@@ -89,6 +88,8 @@ impl Code for CodeService {
             });
 
             return Ok(success_msg);
+        } else {
+            println!("user not logged in!");
         }
 
         Ok(failed_msg)

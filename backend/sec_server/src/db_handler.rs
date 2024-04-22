@@ -304,6 +304,7 @@ impl DBHandler<'_> {
     }
 
     pub fn register_admin(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        println!("register admin: {:?}", fields);
         let sql =
             "INSERT INTO Administrator(First_Name, Last_Name, Sex, Age, Date_Of_Birth, Phone_Number, Email, Pub_key, Magic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -761,7 +762,7 @@ impl DBHandler<'_> {
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
         let sql =
             "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Issuer, Magic) VALUES (?, ?, ?, ?, ?)";
-
+        println!("fields: {:?}", fields);
         let mut magic = self
             .generate_magic(&MAGIC_KEYS["register_code"], &fields)
             .expect("generate magic failed");
