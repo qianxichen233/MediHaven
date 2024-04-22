@@ -1,10 +1,10 @@
 const {
     create_key,
     remove_key,
-    get_password,
     get_public_key,
     sign,
-} = require(''../main/key_manage'');
+    get_password,
+} = require('../main/key_manage');
 
 describe('Key Management', () => {
     it('should generate a key pair', async () => {
