@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { generateKeyPair, get_prikey_path, get_pubkey_path, strip_public_key, toBase64 } = require('./utility');
-
+const { generateKeyPair, get_prikey_path, get_pubkey_path, strip_public_key, toBase64 } = require('../../main/utility');
+.
 describe('Utility Functions', () => {
     describe('toBase64', () => {
         it('should convert string to base64', () => {
