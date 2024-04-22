@@ -4,7 +4,7 @@ const {
     get_password,
     get_public_key,
     sign,
-} = require(''../../main/key_manage'');
+} = require(''../main/key_manage'');
 
 describe('Key Management', () => {
     it('should generate a key pair', async () => {
