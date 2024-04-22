@@ -1,0 +1,32 @@
+.selected {
+    position: absolute;
+    bottom: 0;
+
+    height: calc(100% - 40px);
+
+    border: 1px solid;
+
+    box-sizing: border-box;
+
+    z-index: 1;
+
+    span {
+        user-select: none;
+    }
+
+    span:first-child {
+        position: absolute;
+        z-index: 10000;
+
+        left: -20px;
+        top: 0;
+    }
+
+    span:last-child {
+        position: absolute;
+        z-index: 10000;
+
+        right: -20px;
+        bottom: 0;
+    }
+}

@@ -1,0 +1,1 @@
+python3 -m grpc_tools.protoc -I ./proto --python_out=. --grpc_python_out=. mediheaven.proto && sed -e 's/import mediheaven_pb2 as mediheaven__pb2/from . import mediheaven_pb2 as mediheaven__pb2/g' mediheaven_pb2_grpc.py > tmp && rm mediheaven_pb2_grpc.py && mv tmp mediheaven_pb2_grpc.py

@@ -1,0 +1,219 @@
+syntax = "proto3";
+package mediheaven;
+
+service Code {
+    rpc getCode (CodeRequest) returns (CodeResponse);
+    rpc delCode (CodeDelRequest) returns (SuccessResponse);
+    rpc listCode (CodeListRequest) returns (CodeListResponse);
+}
+
+service Account {
+    rpc register (RegisterRequest) returns (SuccessResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc patient (PatientRequest) returns (SuccessResponse);
+    rpc getPatient (getPatientRequest) returns (PatientResponse);
+    rpc getPhysician (getPhysicianRequest) returns (PhysicianResponse);
+}
+
+service MedicalRecord {
+    rpc getRecord (getRecordRequest) returns (RecordResponse);
+    rpc writeRecord (writeRecordRequest) returns (SuccessResponse);
+}
+
+service Schedule {
+    rpc addSchedule (addScheduleRequest) returns (SuccessResponse);
+    rpc getSchedule (getScheduleRequest) returns (scheduleResponse);
+}
+
+message Auth {
+    string issuer_email = 1;
+    string timestamp = 2;
+    string signature = 3;
+}
+
+/*Service Code*/
+message CodeRequest {
+    string email = 1;
+    string account_type = 4;
+    string timestamp = 5;
+    string signature = 2;
+    string expiration_date = 3;
+}
+
+message CodeResponse {
+    bool successful = 1;
+    string code = 2;
+    optional string msg = 3;
+}
+
+message CodeDelRequest {
+    string email = 1;
+    string code = 2;
+    string timestamp = 3;
+    string signature = 4;
+}
+
+message CodeListRequest {
+    string email = 1;
+    string timestamp = 2;
+    string signature = 3;
+}
+
+message CodeListResponse {
+    repeated CodeMessage codes = 1;
+    optional string msg = 2;
+}
+
+message CodeMessage {
+    string account_type = 1;
+    string code = 2;
+    string expiration_date = 3;
+}
+
+/*Service Account*/
+message RegisterRequest {
+    string Code = 1;
+    string Account_Type = 2;
+    string First_Name = 3;
+    string Last_Name = 4;
+    string Sex = 5;
+    int32 Age = 6;
+    string Date_Of_Birth = 7;
+    string Phone_Number = 8;
+    string Email = 9;
+    string Pub_key = 10;
+    string Title = 11;
+    string Department = 12;
+}
+
+message SuccessResponse {
+    bool successful = 1;
+    optional string msg = 2;
+}
+
+message LoginRequest {
+    string email = 1;
+    string timestamp = 4;
+    string signature = 2;
+    string account_type = 3;
+}
+
+message LoginResponse {
+    bool successful = 1;
+    string pub_key = 2;
+    optional string msg = 3;
+}
+
+message PatientRequest {
+    string SSN = 1;
+    string First_Name = 2;
+    string Last_Name = 3;
+    string Insurance_ID = 4;
+    string Sex = 5;
+    string Date_Of_Birth = 6;
+    string Phone_Number = 7;
+    string Email = 8;
+
+    Auth auth = 9; 
+}
+
+message getPatientRequest {
+    string SSN = 1;
+    Auth auth = 2;
+}
+
+message PatientInfo {
+    string SSN = 1;
+    string First_Name = 2;
+    string Last_Name = 3;
+    string Insurance_ID = 4;
+    string Sex = 5;
+    string Date_Of_Birth = 6;
+    string Phone_Number = 7;
+    string Email = 8;
+    int32 ID = 9;
+}
+
+message PatientResponse {
+    optional PatientInfo patient = 1;
+}
+
+message getPhysicianRequest {
+    optional string department = 1;
+    optional string first_name = 2;
+    optional string last_name = 3;
+
+    // physician information should be avaliable to public
+    // so no auth is needed
+    // Auth auth = 4;
+}
+
+message PhysicianInfo {
+    int32 ID = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string sex = 4;
+    string department = 5;
+    string title = 6;
+    string email = 7;
+}
+
+message PhysicianResponse {
+    repeated PhysicianInfo physicians = 1;
+}
+
+/*Service MedicalRecord*/
+message SingleRecord {
+    int32 patient_id = 1;
+    int32 physician_id = 2;
+    repeated string medicines = 3;
+    string complete_date = 4;
+    string encounter_summary = 5;
+    string diagnosis = 6;
+}
+
+message getRecordRequest {
+    int32 patient_id = 1;
+    Auth auth = 2;
+}
+
+message RecordResponse {
+    repeated SingleRecord records = 1;
+    optional string msg = 2;
+}
+
+message writeRecordRequest{
+    string SSN = 1;
+    SingleRecord record = 2;
+    Auth auth = 3;
+}
+
+/*Service Schedule*/
+message singleSchedule {
+    int32 patient_ID = 1;
+    int32 physician_ID = 2;
+    string schedule_st = 3;
+    string schedule_ed = 4;
+    string created_at = 5;
+    string description = 6;
+    optional string patient_first_name = 7;
+    optional string patient_last_name = 8;
+    optional string patient_SSN = 9;
+}
+
+message addScheduleRequest {
+    singleSchedule schedule = 1;
+    Auth auth = 2;
+}
+
+message getScheduleRequest {
+    string email = 1;
+    string timestamp_st = 2;
+    string timestamp_ed = 3;
+    Auth auth = 4;
+}
+
+message scheduleResponse {
+    repeated singleSchedule schedules = 1;
+    optional string msg = 2;
+}
