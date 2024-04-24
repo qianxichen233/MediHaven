@@ -64,10 +64,12 @@ class register(Resource):
         print(response)
 
         username = args["Account_Type"] + "_" + args["Email"]
-
-        register_xmpp(
-            base64.b64encode(username.encode("utf-8")).decode("utf-8"), password
-        )
+        try:
+            register_xmpp(
+                base64.b64encode(username.encode("utf-8")).decode("utf-8"), password
+            )
+        except:
+            return jsonify({"message": f"xmpp failed!"})
 
         return jsonify({"message": f"success!"})
 
