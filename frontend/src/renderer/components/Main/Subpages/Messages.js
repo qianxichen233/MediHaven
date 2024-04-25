@@ -2,6 +2,8 @@ import { useState } from 'react';
 import styles from './Messages.module.scss';
 import MessageList from '../../UI/MessageList';
 import Button from '../../UI/Button';
+import { useMyContext } from '../../MyContext';
+import { encodeMessage } from '../../../utils/utils';
 
 const test = [
     {
@@ -21,6 +23,10 @@ const test = [
 ];
 
 const Messages = (props) => {
+    const { user } = useMyContext();
+
+    console.log(user.messages);
+
     const [selected, setSelected] = useState(
         new Array(test.length).fill(false),
     );
@@ -36,10 +42,13 @@ const Messages = (props) => {
     };
 
     const onAddHandler = async () => {
+        const role = 'receptionist';
+        const email = 'e@test.com';
+
         await window.electron.ipcRenderer.invoke('send', [
-            'physician',
-            'alice@test.com',
-            'hello!',
+            role,
+            email,
+            encodeMessage('message', `hello, ${email}`),
         ]);
     };
 

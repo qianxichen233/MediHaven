@@ -1,8 +1,9 @@
 const get_physicians = async (department, name) => {
+    console.log(department, name);
     const params_raw = {};
     if (!!department && department !== 'Any')
         params_raw['department'] = department;
-    if (!!name) department['name'] = name;
+    if (!!name) params_raw['name'] = name;
 
     const params = new URLSearchParams(params_raw);
 

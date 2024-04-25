@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { login } from '../../api/account';
 import { useNavigate } from 'react-router-dom';
 import { useMyContext } from '../MyContext';
+import { decodeMessage, decodeSender } from '../../utils/utils';
 
 const inputFields = {
     administrator: {
@@ -31,13 +32,36 @@ const LoginForm = (props) => {
 
         const result = await login(type, form.Email);
         if (result) {
+            const messages = [];
+            // window.electron.ipcRenderer.on('chat', (data) => {
+            //     console.log(`inside renderer: ${JSON.stringify(data)}`);
+            //     const { role, email } = decodeSender(data.message.from);
+
+            //     setUser((user) => {
+            //         const msg = [...user.messages];
+            //         msg.push({
+            //             role,
+            //             email,
+            //             ...decodeMessage(data.message.message),
+            //         });
+            //         return {
+            //             ...user,
+            //             messages: msg,
+            //         };
+            //     });
+            // });
+
             await window.electron.ipcRenderer.invoke('connect', [
                 type,
                 form.Email,
             ]);
-            setUser({
-                role: type,
-                email: form.Email,
+
+            setUser((user) => {
+                return {
+                    role: type,
+                    email: form.Email,
+                    messages: [...user.messages],
+                };
             });
             navigate('/main', { state: { type: type } });
         }

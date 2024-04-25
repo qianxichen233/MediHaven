@@ -21,4 +21,36 @@ const getCurrentDate = () => {
     return date;
 };
 
-export { getCurrentTime, getCurrentDate };
+const encodeMessage = (type, message) => {
+    const msg = {
+        type,
+        message,
+        timestamp: getCurrentTime(),
+    };
+
+    return JSON.stringify(msg);
+};
+
+const decodeMessage = (message) => {
+    return JSON.parse(message);
+};
+
+const decodeSender = (sender) => {
+    let name = sender.split('@')[0];
+    name.replace('_at_', '@');
+
+    const index = name.indexOf('_');
+
+    return {
+        role: name.substring(0, index),
+        email: name.substring(index + 1),
+    };
+};
+
+export {
+    getCurrentTime,
+    getCurrentDate,
+    encodeMessage,
+    decodeMessage,
+    decodeSender,
+};

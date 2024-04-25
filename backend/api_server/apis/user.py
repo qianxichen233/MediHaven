@@ -3,6 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from datetime import datetime, timedelta
 
 import base64
+import base36
 
 from xmpp import register_xmpp
 
@@ -12,6 +13,15 @@ from grpc_client.grpc_api import GRPC_API
 
 user_api = Blueprint("user_api", __name__)
 api = Api(user_api)
+
+
+def to_base36(value):
+    if isinstance(value, int):
+        return base36.dumps(value)
+    elif isinstance(value, str):
+        return base36.dumps(int.from_bytes(value.encode('utf-8'), 'big'))
+    else:
+        raise ValueError("Invalid input type. Expected int or str.")
 
 
 class register(Resource):
@@ -66,7 +76,7 @@ class register(Resource):
         username = args["Account_Type"] + "_" + args["Email"]
         try:
             register_xmpp(
-                base64.b64encode(username.encode("utf-8")).decode("utf-8"), password
+                username.replace("@", "_at_"), password
             )
         except:
             return jsonify({"message": f"xmpp failed!"})

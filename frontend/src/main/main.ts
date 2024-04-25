@@ -16,6 +16,7 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 const xmpp = require('simple-xmpp');
+let connected = false;
 
 import {
     create_key,
@@ -24,7 +25,7 @@ import {
     sign,
     get_password,
 } from './key_manager';
-import { toBase64 } from './utility';
+import { toBase36, toBase64 } from './utility';
 
 class AppUpdater {
     constructor() {
@@ -59,11 +60,18 @@ ipcMain.handle('get_password', async (event, arg) => {
 });
 
 ipcMain.handle('connect', async (event, arg) => {
-    const password = await get_password(...arg);
-    const username = toBase64(arg[0] + '_' + arg[1]).replace(/=+$/, '');
+    if (connected) {
+        await xmpp.disconnect();
+        connected = false;
+    }
+
+    const password = await get_password(arg[0], arg[1]);
+    let username = arg[0] + '_' + arg[1];
+    username = username.replace('@', '_at_');
     console.log(username, password);
 
     xmpp.on('online', (data: any) => {
+        connected = true;
         console.log('Hey you are online! ');
         console.log(`Connected as ${data.jid.user}`);
     });
@@ -71,6 +79,14 @@ ipcMain.handle('connect', async (event, arg) => {
         console.log(`something went wrong!${error} `),
     );
     xmpp.on('chat', (from: string, message: String) => {
+        if (!mainWindow) return;
+        // eventEmitter.fire('message', { from, message });
+        mainWindow.webContents.send('chat', {
+            message: {
+                from,
+                message,
+            },
+        });
         console.log(`Got a message! ${message} from ${from}`);
     });
     xmpp.connect({
@@ -83,7 +99,9 @@ ipcMain.handle('connect', async (event, arg) => {
 
 ipcMain.handle('send', async (event, arg) => {
     const [role, email, message] = arg;
-    const username = toBase64(role + '_' + email);
+    let username = role + '_' + email;
+    username = username.replace('@', '_at_');
+    console.log(`send to ${username}`);
 
     xmpp.send(`${username}@localhost`, message);
 });
