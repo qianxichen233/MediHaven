@@ -438,6 +438,11 @@ class ScheduleStub(object):
                 request_serializer=mediheaven__pb2.getScheduleRequest.SerializeToString,
                 response_deserializer=mediheaven__pb2.scheduleResponse.FromString,
                 )
+        self.finishSchedule = channel.unary_unary(
+                '/mediheaven.Schedule/finishSchedule',
+                request_serializer=mediheaven__pb2.finishScheduleRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.SuccessResponse.FromString,
+                )
 
 
 class ScheduleServicer(object):
@@ -455,6 +460,12 @@ class ScheduleServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def finishSchedule(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ScheduleServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -467,6 +478,11 @@ def add_ScheduleServicer_to_server(servicer, server):
                     servicer.getSchedule,
                     request_deserializer=mediheaven__pb2.getScheduleRequest.FromString,
                     response_serializer=mediheaven__pb2.scheduleResponse.SerializeToString,
+            ),
+            'finishSchedule': grpc.unary_unary_rpc_method_handler(
+                    servicer.finishSchedule,
+                    request_deserializer=mediheaven__pb2.finishScheduleRequest.FromString,
+                    response_serializer=mediheaven__pb2.SuccessResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -509,6 +525,23 @@ class Schedule(object):
         return grpc.experimental.unary_unary(request, target, '/mediheaven.Schedule/getSchedule',
             mediheaven__pb2.getScheduleRequest.SerializeToString,
             mediheaven__pb2.scheduleResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def finishSchedule(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Schedule/finishSchedule',
+            mediheaven__pb2.finishScheduleRequest.SerializeToString,
+            mediheaven__pb2.SuccessResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
