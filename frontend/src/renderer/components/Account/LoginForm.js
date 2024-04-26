@@ -32,7 +32,22 @@ const LoginForm = (props) => {
 
         const result = await login(type, form.Email);
         if (result) {
-            const messages = [];
+            const messages = (
+                await window.electron.ipcRenderer.invoke('load_msg', [
+                    type,
+                    form.Email,
+                ])
+            ).map((message) => {
+                const parsed = JSON.parse(message);
+                const { role, email } = decodeSender(parsed.from);
+                return {
+                    role,
+                    email,
+                    ...decodeMessage(parsed.message),
+                };
+            });
+
+            // console.log(`load from local db: ${messages}`);
             // window.electron.ipcRenderer.on('chat', (data) => {
             //     console.log(`inside renderer: ${JSON.stringify(data)}`);
             //     const { role, email } = decodeSender(data.message.from);
@@ -60,7 +75,7 @@ const LoginForm = (props) => {
                 return {
                     role: type,
                     email: form.Email,
-                    messages: [...user.messages],
+                    messages: messages,
                 };
             });
             navigate('/main', { state: { type: type } });

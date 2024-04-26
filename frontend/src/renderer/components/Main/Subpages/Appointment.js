@@ -70,7 +70,7 @@ const patientPage = (
                     width="250px"
                     height="40px"
                     size="24px"
-                    layout="column"
+                    // layout="column"
                 />
                 <MainButton
                     background="var(--primary-color)"

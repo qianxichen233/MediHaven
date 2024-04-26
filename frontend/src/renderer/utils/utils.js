@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 const getCurrentTime = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -26,6 +28,7 @@ const encodeMessage = (type, message) => {
         type,
         message,
         timestamp: getCurrentTime(),
+        uuid: uuidv4(),
     };
 
     return JSON.stringify(msg);
@@ -37,7 +40,7 @@ const decodeMessage = (message) => {
 
 const decodeSender = (sender) => {
     let name = sender.split('@')[0];
-    name.replace('_at_', '@');
+    name = name.replace('_at_', '@');
 
     const index = name.indexOf('_');
 

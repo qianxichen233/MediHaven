@@ -30,3 +30,97 @@
         }
     }
 }
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    font-family: KoHo;
+
+    width: 500px;
+
+    > span {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+
+        > div:first-child {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .messageInput {
+            label {
+                display: block;
+                font-size: 24px;
+            }
+            textarea {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    font-family: KoHo;
+
+    width: 500px;
+
+    > span {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        > div:not(:last-child) {
+            font-size: 20px;
+
+            display: flex;
+            justify-content: space-between;
+
+            > span:first-child {
+                font-weight: 600;
+            }
+        }
+
+        > div:last-child {
+            font-size: 20px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            > span:first-child {
+                font-weight: 600;
+            }
+        }
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
