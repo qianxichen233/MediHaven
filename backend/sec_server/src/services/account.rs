@@ -295,6 +295,8 @@ impl Account for AccountService {
                 }
                 ).dump();
 
+                println!("{:?}", plaintext);
+
                 if
                     !myutils::verify_auth(
                         &auth.issuer_email,

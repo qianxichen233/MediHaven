@@ -34,3 +34,10 @@ pub struct physicianType {
     pub title: String,
     pub email: String,
 }
+
+pub struct medicineType {
+    pub name: String,
+    pub instruction: String,
+    pub description: String,
+    pub medicine_type: String,
+}

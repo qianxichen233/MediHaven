@@ -25,6 +25,10 @@ service Schedule {
     rpc getSchedule (getScheduleRequest) returns (scheduleResponse);
 }
 
+service Misc {
+    rpc getMedicines (getMedicinesRequest) returns (MedicinesResponse);
+}
+
 message Auth {
     string issuer_email = 1;
     string timestamp = 2;
@@ -216,4 +220,20 @@ message getScheduleRequest {
 message scheduleResponse {
     repeated singleSchedule schedules = 1;
     optional string msg = 2;
+}
+
+/*Service Misc*/
+message getMedicinesRequest {
+    string type = 1;
+}
+
+message SingleMedicine {
+    string name = 1;
+    string instruction = 2;
+    string description = 3;
+    string type = 4;
+}
+
+message MedicinesResponse {
+    repeated SingleMedicine medicines = 1;
 }

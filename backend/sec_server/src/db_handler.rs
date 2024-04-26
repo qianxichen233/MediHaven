@@ -1,6 +1,6 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
-use crate::mytypes::{ codeType, recordType, scheduleType, physicianType };
+use crate::mytypes::{ codeType, medicineType, physicianType, recordType, scheduleType };
 use rand::Rng;
 
 use odbc_api::{
@@ -926,6 +926,25 @@ impl DBHandler<'_> {
                 patient_SSN: String::from_utf8(schedule_raw[8].clone())?,
             };
             result.push(schedule);
+        }
+
+        return Ok(result);
+    }
+
+    pub fn get_medicines(&self, medicine_type: &str) -> Result<Vec<medicineType>, Error> {
+        let mut result: Vec<medicineType> = Vec::new();
+        let sql = "SELECT Name, Instructions, Description, Type FROM Medicine WHERE Type = ?";
+
+        let medicines = self.select_many(sql, (&medicine_type.into_parameter(),))?;
+
+        for medicine_raw in medicines.iter() {
+            let medicine = medicineType {
+                name: String::from_utf8(medicine_raw[0].clone())?,
+                instruction: String::from_utf8(medicine_raw[1].clone())?,
+                description: String::from_utf8(medicine_raw[2].clone())?,
+                medicine_type: String::from_utf8(medicine_raw[3].clone())?,
+            };
+            result.push(medicine);
         }
 
         return Ok(result);

@@ -4,6 +4,7 @@ from flask_cors import CORS
 from apis.user import user_api
 from apis.record import record_api
 from apis.schedule import schedule_api
+from apis.medicines import medicine_api
 
 config = {
     "ORIGINS": [
@@ -19,6 +20,7 @@ CORS(app, resources={r"/*": {"origins": config["ORIGINS"]}}, supports_credential
 app.register_blueprint(user_api, url_prefix="/api")
 app.register_blueprint(record_api, url_prefix="/api")
 app.register_blueprint(schedule_api, url_prefix="/api")
+app.register_blueprint(medicine_api, url_prefix="/api")
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
