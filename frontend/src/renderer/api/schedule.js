@@ -99,4 +99,47 @@ const get_schedule = async (type, email, st, ed, issuer_email) => {
     }
 };
 
-export { add_schedule, get_schedule };
+const finish_schedule = async (id, email) => {
+    const form = {};
+
+    form['schedule_ID'] = id;
+
+    form['issuer_email'] = email;
+    form['timestamp'] = getCurrentTime();
+
+    const signature = await window.electron.ipcRenderer.invoke('sign', [
+        {
+            endpoint: 'POST schedule',
+            schedule_ID: form['schedule_ID'],
+            issuer_email: form['issuer_email'],
+            timestamp: form['timestamp'],
+        },
+        'physician',
+        form['issuer_email'],
+    ]);
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/schedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Signature': signature,
+            },
+            body: JSON.stringify(form),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.message === 'success!') return true;
+            console.log('POST request successful:', data);
+        } else {
+            console.error('POST request failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+
+    return false;
+};
+
+export { add_schedule, get_schedule, finish_schedule };

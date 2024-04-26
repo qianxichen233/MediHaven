@@ -80,16 +80,18 @@ const Schedule = (props) => {
 
     return (
         <div className={styles.container}>
-            {schedules.map((item, index) => {
-                return (
-                    <SingleSchedule
-                        current={new Date().getHours().toString()}
-                        schedule={item}
-                        key={index}
-                        onSelect={onSelect.bind(this, index)}
-                    />
-                );
-            })}
+            {schedules
+                // .filter((item) => !item.finished)
+                .map((item, index) => {
+                    return (
+                        <SingleSchedule
+                            current={new Date().getHours().toString()}
+                            schedule={item}
+                            key={index}
+                            onSelect={onSelect.bind(this, index)}
+                        />
+                    );
+                })}
             {selected !== null && (
                 <Modal
                     isOpen={isModalOpen}
