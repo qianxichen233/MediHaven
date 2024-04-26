@@ -73,7 +73,9 @@ const SingleSchedule = (props) => {
                             .join(':')}
                     </span>
                 </div>
-                <span className={styles.now} style={{ left: now }}></span>
+                {now >= 0 && now <= 1320 && (
+                    <span className={styles.now} style={{ left: now }}></span>
+                )}
                 {Array(11)
                     .fill('')
                     .map((_, index) => {

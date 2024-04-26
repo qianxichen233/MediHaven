@@ -17,4 +17,14 @@
 
         border: none;
     }
+
+    input:disabled {
+        cursor: not-allowed;
+    }
+}
+
+.input.error {
+    input {
+        outline: 2px solid red !important;
+    }
 }

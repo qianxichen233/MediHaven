@@ -26,6 +26,7 @@ const Header = (props) => {
                     page={props.page}
                     onChange={props.onPageChange}
                     pagelist={props.pagelist}
+                    hide={props.hide}
                 />
             </header>
             <div className={styles.placeholder}></div>

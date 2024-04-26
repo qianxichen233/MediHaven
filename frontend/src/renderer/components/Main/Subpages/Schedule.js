@@ -73,7 +73,9 @@ const Schedule = (props) => {
     };
 
     const onProceed = () => {
-        console.log(schedules[selected]);
+        props.onDiagnose({
+            info: schedules[selected],
+        });
     };
 
     return (

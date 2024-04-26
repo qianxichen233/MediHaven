@@ -166,7 +166,7 @@ const infoPage = (
                     <label>Description: </label>
                     <textarea
                         rows={5}
-                        cols={40}
+                        cols={35}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Enter description here..."

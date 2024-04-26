@@ -12,7 +12,7 @@ const add_patient = async (data) => {
     form['Email'] = data['Email'];
     form['Insurance_ID'] = data['Insurance_ID'];
 
-    form['issuer_email'] = data['email'];
+    form['issuer_email'] = data['issuer_email'];
     form['timestamp'] = getCurrentTime();
 
     const signature = await window.electron.ipcRenderer.invoke('sign', [
@@ -21,7 +21,7 @@ const add_patient = async (data) => {
             SSN: form['SSN'],
             First_Name: form['First_Name'],
             Last_Name: form['Last_Name'],
-            Sex: req.form['Sex'],
+            Sex: form['Sex'],
             Date_Of_Birth: form['Date_Of_Birth'],
             Phone_Number: form['Phone_Number'],
             Email: form['Email'],
@@ -30,7 +30,7 @@ const add_patient = async (data) => {
             timestamp: form['timestamp'],
         },
         'receptionist',
-        form['Email'],
+        data['issuer_email'],
     ]);
 
     try {
@@ -46,12 +46,14 @@ const add_patient = async (data) => {
         if (response.ok) {
             const data = await response.json();
             console.log('POST request successful:', data);
+            if (data.message === 'success!') return true;
         } else {
             console.error('POST request failed');
         }
     } catch (error) {
         console.error('Error:', error);
     }
+    return false;
 };
 
 const get_patient = async (SSN, type, email) => {
@@ -139,4 +141,59 @@ const get_record = async (id, email) => {
     }
 };
 
-export { add_patient, get_patient, get_record };
+const add_record = async (data) => {
+    const timestamp = getCurrentTime();
+
+    const form = {};
+
+    form['SSN'] = data['SSN'];
+    form['patient_id'] = data['patient_id'];
+    form['physician_id'] = data['physician_id'];
+    form['medicines'] = data['medicines'];
+    form['complete_date'] = timestamp;
+    form['encounter_summary'] = data['encounter_summary'];
+    form['diagnosis'] = data['diagnose'];
+    form['issuer_email'] = data['email'];
+    form['timestamp'] = timestamp;
+
+    const signature = await window.electron.ipcRenderer.invoke('sign', [
+        {
+            endpoint: 'PUT record',
+            SSN: form['SSN'],
+            patient_id: form['patient_id'],
+            physician_id: form['physician_id'],
+            medicines: form['medicines'],
+            complete_date: form['complete_date'],
+            encounter_summary: form['encounter_summary'],
+            diagnosis: form['diagnosis'],
+            issuer_email: form['issuer_email'],
+            timestamp: timestamp,
+        },
+        'physician',
+        form['issuer_email'],
+    ]);
+
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/record', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Signature': signature,
+            },
+            body: JSON.stringify(form),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('POST request successful:', data);
+            if (data.message === 'success!') return true;
+        } else {
+            console.error('POST request failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    return false;
+};
+
+export { add_patient, get_patient, get_record, add_record };
