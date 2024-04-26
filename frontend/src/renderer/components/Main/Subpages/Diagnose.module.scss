@@ -1,0 +1,236 @@
+.container {
+    width: 90%;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+
+    font-family: KoHo;
+
+    .patient {
+        width: 30%;
+    }
+
+    .panel {
+        width: 70%;
+        background-color: #f0f0f0;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        padding: 5px;
+
+        > div {
+            background-color: white;
+            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+            > div:first-child {
+                padding: 10px;
+                font-size: 24px;
+                font-weight: 500;
+
+                user-select: none;
+                cursor: pointer;
+            }
+
+            .wrapper {
+                display: grid;
+                grid-template-rows: 0fr;
+                transition: grid-template-rows 0.3s ease-in-out;
+
+                .inner {
+                    overflow: hidden;
+                    padding-left: 10px;
+                    padding-right: 10px;
+
+                    .medicineInput {
+                        margin-top: 20px;
+                        > label {
+                            display: inline-block;
+                            font-size: 20px;
+                            font-weight: 500;
+                            user-select: none;
+                            padding-bottom: 0;
+                            margin-bottom: 10px;
+                        }
+                        > div {
+                            display: flex;
+                            align-items: flex-start;
+                            justify-content: space-between;
+
+                            border: 1px solid black;
+
+                            padding: 10px;
+                            padding-bottom: 0;
+
+                            > button {
+                                margin-bottom: 10px;
+                            }
+
+                            > div {
+                                width: 75%;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 20px;
+
+                                > div:not(:last-child) {
+                                    border-bottom: 1px solid black;
+                                }
+
+                                > div {
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-between;
+
+                                    padding-bottom: 15px;
+                                    .typelist {
+                                        display: flex;
+                                        align-items: flex-start;
+                                        flex-direction: column;
+                                        gap: 10px;
+
+                                        .buttons {
+                                            width: 100%;
+
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: space-between;
+                                        }
+                                    }
+
+                                    .medicineSelect {
+                                        display: flex;
+                                        justify-items: flex-end;
+
+                                        > div {
+                                            display: flex;
+                                            flex-direction: column;
+                                            align-items: flex-end;
+                                            gap: 10px;
+
+                                            > div {
+                                                position: relative;
+
+                                                display: inline-block;
+                                                margin-left: auto;
+                                                margin-right: 0;
+
+                                                .suggestion {
+                                                    position: absolute;
+
+                                                    transform: translate(
+                                                        0,
+                                                        10px
+                                                    );
+
+                                                    width: 100%;
+
+                                                    display: flex;
+                                                    align-items: flex-start;
+                                                    justify-content: center;
+                                                    flex-direction: column;
+
+                                                    z-index: 10;
+                                                    border: 1px solid black;
+                                                    border-radius: 5px;
+
+                                                    background-color: white;
+                                                    overflow-x: hidden;
+
+                                                    > span {
+                                                        display: inline-block;
+                                                        width: 100%;
+
+                                                        padding: 10px;
+                                                        font-size: 18px;
+
+                                                        text-overflow: ellipsis;
+                                                        overflow: hidden;
+                                                        white-space: nowrap;
+
+                                                        user-select: none;
+                                                        cursor: pointer;
+                                                    }
+
+                                                    > span.notfound {
+                                                        color: red;
+                                                        cursor: auto;
+                                                        font-weight: 600;
+                                                    }
+
+                                                    > span:not(
+                                                            .notfound
+                                                        ):hover {
+                                                        background-color: lightgrey;
+                                                    }
+
+                                                    > span:not(:first-child) {
+                                                        border-top: 1px solid
+                                                            black;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            .wrapper.active {
+                grid-template-rows: 1fr;
+                border-top: 1px solid black;
+                box-sizing: border-box;
+            }
+        }
+    }
+}
+
+.textinput {
+    // width: calc(100% - 30px);
+    // margin-left: auto;
+    // margin-right: auto;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    // padding: 10px;
+
+    label {
+        display: block;
+        margin-bottom: 10px;
+        text-align: left;
+
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    textarea {
+        width: 100%;
+        font-size: 18px;
+    }
+}
+
+.lockedMedicine {
+    font-size: 24px;
+    width: 300px;
+    text-align: right;
+
+    span {
+        display: inline-block;
+        width: 100%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        font-weight: 500;
+
+        user-select: none;
+    }
+}

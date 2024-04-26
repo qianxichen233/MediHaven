@@ -161,6 +161,11 @@ class AccountStub(object):
                 request_serializer=mediheaven__pb2.getPatientRequest.SerializeToString,
                 response_deserializer=mediheaven__pb2.PatientResponse.FromString,
                 )
+        self.getPhysician = channel.unary_unary(
+                '/mediheaven.Account/getPhysician',
+                request_serializer=mediheaven__pb2.getPhysicianRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.PhysicianResponse.FromString,
+                )
 
 
 class AccountServicer(object):
@@ -190,6 +195,12 @@ class AccountServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def getPhysician(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AccountServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -212,6 +223,11 @@ def add_AccountServicer_to_server(servicer, server):
                     servicer.getPatient,
                     request_deserializer=mediheaven__pb2.getPatientRequest.FromString,
                     response_serializer=mediheaven__pb2.PatientResponse.SerializeToString,
+            ),
+            'getPhysician': grpc.unary_unary_rpc_method_handler(
+                    servicer.getPhysician,
+                    request_deserializer=mediheaven__pb2.getPhysicianRequest.FromString,
+                    response_serializer=mediheaven__pb2.PhysicianResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -288,6 +304,23 @@ class Account(object):
         return grpc.experimental.unary_unary(request, target, '/mediheaven.Account/getPatient',
             mediheaven__pb2.getPatientRequest.SerializeToString,
             mediheaven__pb2.PatientResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getPhysician(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Account/getPhysician',
+            mediheaven__pb2.getPhysicianRequest.SerializeToString,
+            mediheaven__pb2.PhysicianResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -476,5 +509,66 @@ class Schedule(object):
         return grpc.experimental.unary_unary(request, target, '/mediheaven.Schedule/getSchedule',
             mediheaven__pb2.getScheduleRequest.SerializeToString,
             mediheaven__pb2.scheduleResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class MiscStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.getMedicines = channel.unary_unary(
+                '/mediheaven.Misc/getMedicines',
+                request_serializer=mediheaven__pb2.getMedicinesRequest.SerializeToString,
+                response_deserializer=mediheaven__pb2.MedicinesResponse.FromString,
+                )
+
+
+class MiscServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def getMedicines(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MiscServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'getMedicines': grpc.unary_unary_rpc_method_handler(
+                    servicer.getMedicines,
+                    request_deserializer=mediheaven__pb2.getMedicinesRequest.FromString,
+                    response_serializer=mediheaven__pb2.MedicinesResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'mediheaven.Misc', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class Misc(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def getMedicines(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mediheaven.Misc/getMedicines',
+            mediheaven__pb2.getMedicinesRequest.SerializeToString,
+            mediheaven__pb2.MedicinesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

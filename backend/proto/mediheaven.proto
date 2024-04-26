@@ -12,6 +12,7 @@ service Account {
     rpc Login (LoginRequest) returns (LoginResponse);
     rpc patient (PatientRequest) returns (SuccessResponse);
     rpc getPatient (getPatientRequest) returns (PatientResponse);
+    rpc getPhysician (getPhysicianRequest) returns (PhysicianResponse);
 }
 
 service MedicalRecord {
@@ -22,6 +23,10 @@ service MedicalRecord {
 service Schedule {
     rpc addSchedule (addScheduleRequest) returns (SuccessResponse);
     rpc getSchedule (getScheduleRequest) returns (scheduleResponse);
+}
+
+service Misc {
+    rpc getMedicines (getMedicinesRequest) returns (MedicinesResponse);
 }
 
 message Auth {
@@ -137,6 +142,30 @@ message PatientResponse {
     optional PatientInfo patient = 1;
 }
 
+message getPhysicianRequest {
+    optional string department = 1;
+    optional string first_name = 2;
+    optional string last_name = 3;
+
+    // physician information should be avaliable to public
+    // so no auth is needed
+    // Auth auth = 4;
+}
+
+message PhysicianInfo {
+    int32 ID = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string sex = 4;
+    string department = 5;
+    string title = 6;
+    string email = 7;
+}
+
+message PhysicianResponse {
+    repeated PhysicianInfo physicians = 1;
+}
+
 /*Service MedicalRecord*/
 message SingleRecord {
     int32 patient_id = 1;
@@ -173,6 +202,7 @@ message singleSchedule {
     string description = 6;
     optional string patient_first_name = 7;
     optional string patient_last_name = 8;
+    optional string patient_SSN = 9;
 }
 
 message addScheduleRequest {
@@ -190,4 +220,20 @@ message getScheduleRequest {
 message scheduleResponse {
     repeated singleSchedule schedules = 1;
     optional string msg = 2;
+}
+
+/*Service Misc*/
+message getMedicinesRequest {
+    string type = 1;
+}
+
+message SingleMedicine {
+    string name = 1;
+    string instruction = 2;
+    string description = 3;
+    string type = 4;
+}
+
+message MedicinesResponse {
+    repeated SingleMedicine medicines = 1;
 }

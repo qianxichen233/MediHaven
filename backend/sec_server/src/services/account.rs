@@ -1,8 +1,11 @@
 use json::object;
 use crate::mediheaven::GetPatientRequest;
+use crate::mediheaven::GetPhysicianRequest;
 use crate::mediheaven::PatientInfo;
 use crate::mediheaven::PatientRequest;
 use crate::mediheaven::PatientResponse;
+use crate::mediheaven::PhysicianInfo;
+use crate::mediheaven::PhysicianResponse;
 use crate::mycrypto::MyCrypto;
 use crate::myutils;
 use crate::globals;
@@ -96,7 +99,10 @@ impl Account for AccountService {
             }
         }
 
-        globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
+        if req.code != "dev" {
+            globals::get_my_db_handler().delete_code(&req.code).expect("delete code failed!");
+        }
+
         let success = SuccessResponse {
             successful: true,
             msg: None,
@@ -135,6 +141,8 @@ impl Account for AccountService {
             timestamp: req.timestamp.clone()
         }
         ).dump();
+
+        println!("{:}", signature_plaintext);
 
         if cache.contains_key(&cache_key) {
             if
@@ -203,6 +211,7 @@ impl Account for AccountService {
                             &signature_plaintext
                         )
                     {
+                        println!("signature failed!");
                         return Ok(failed_msg);
                     }
                     cache.insert(cache_key, result["Pub_key"].clone());
@@ -285,6 +294,8 @@ impl Account for AccountService {
                     timestamp: auth.timestamp.clone()
                 }
                 ).dump();
+
+                println!("{:?}", plaintext);
 
                 if
                     !myutils::verify_auth(
@@ -395,6 +406,60 @@ impl Account for AccountService {
             Err(err) => {
                 eprintln!("Error: {}", err);
                 return Ok(failed_msg);
+            }
+        }
+    }
+
+    async fn get_physician(
+        &self,
+        request: Request<GetPhysicianRequest>
+    ) -> Result<Response<PhysicianResponse>, Status> {
+        let req = request.into_inner();
+        println!("got message: {:?}", req);
+
+        let department;
+        let first_name;
+        let last_name;
+
+        let mut fields: HashMap<&str, &str> = HashMap::new();
+        if req.department.is_some() {
+            department = req.department.unwrap();
+            fields.insert("department", &department);
+        }
+        if req.first_name.is_some() {
+            first_name = req.first_name.unwrap();
+            last_name = req.last_name.unwrap();
+
+            fields.insert("first_name", &first_name);
+            fields.insert("last_name", &last_name);
+        }
+
+        match globals::get_my_db_handler().get_physicians(&fields) {
+            Ok(result) => {
+                let reply = PhysicianResponse {
+                    physicians: result
+                        .iter()
+                        .map(|physician| PhysicianInfo {
+                            id: physician.ID,
+                            first_name: physician.first_name.clone(),
+                            last_name: physician.last_name.clone(),
+                            sex: physician.sex.clone(),
+                            department: physician.department.clone(),
+                            title: physician.title.clone(),
+                            email: physician.email.clone(),
+                        })
+                        .collect(),
+                };
+
+                return Ok(Response::new(reply));
+            }
+            Err(err) => {
+                println!("{:?}", err);
+                return Ok(
+                    Response::new(PhysicianResponse {
+                        physicians: vec![],
+                    })
+                );
             }
         }
     }

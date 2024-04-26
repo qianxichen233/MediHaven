@@ -6,9 +6,13 @@ from . import mediheaven_pb2_grpc
 class GRPC_API_Client:
     def __init__(self) -> None:
         self.channel = grpc.insecure_channel("localhost:50051")
-    
+
     def getAuth(self, request):
-        auth = mediheaven_pb2.Auth(issuer_email=request["issuer_email"], timestamp=request["timestamp"], signature=request["signature"])
+        auth = mediheaven_pb2.Auth(
+            issuer_email=request["issuer_email"],
+            timestamp=request["timestamp"],
+            signature=request["signature"],
+        )
 
         del request["issuer_email"]
         del request["timestamp"]
@@ -27,19 +31,25 @@ class GRPC_API_Client:
         request = mediheaven_pb2.LoginRequest(**request)
         response = stub.Login(request)
         return response
-    
+
     def add_patient(self, request):
         stub = mediheaven_pb2_grpc.AccountStub(self.channel)
         auth = self.getAuth(request)
         request = mediheaven_pb2.PatientRequest(**request, auth=auth)
         response = stub.patient(request)
         return response
-    
+
     def get_patient(self, request):
         stub = mediheaven_pb2_grpc.AccountStub(self.channel)
         auth = self.getAuth(request)
         request = mediheaven_pb2.getPatientRequest(**request, auth=auth)
         response = stub.getPatient(request)
+        return response
+
+    def get_physician(self, request):
+        stub = mediheaven_pb2_grpc.AccountStub(self.channel)
+        request = mediheaven_pb2.getPhysicianRequest(**request)
+        response = stub.getPhysician(request)
         return response
 
     def get_code(self, request):
@@ -59,14 +69,14 @@ class GRPC_API_Client:
         request = mediheaven_pb2.CodeListRequest(**request)
         response = stub.listCode(request)
         return response
-    
+
     def getRecord(self, request):
         stub = mediheaven_pb2_grpc.MedicalRecordStub(self.channel)
         auth = self.getAuth(request)
         request = mediheaven_pb2.getRecordRequest(**request, auth=auth)
         response = stub.getRecord(request)
         return response
-    
+
     def addRecord(self, request):
         stub = mediheaven_pb2_grpc.MedicalRecordStub(self.channel)
         auth = self.getAuth(request)
@@ -78,7 +88,7 @@ class GRPC_API_Client:
         request = mediheaven_pb2.writeRecordRequest(SSN=SSN, record=record, auth=auth)
         response = stub.writeRecord(request)
         return response
-    
+
     def addSchedule(self, request):
         stub = mediheaven_pb2_grpc.ScheduleStub(self.channel)
         auth = self.getAuth(request)
@@ -88,13 +98,20 @@ class GRPC_API_Client:
         request = mediheaven_pb2.addScheduleRequest(schedule=schedule, auth=auth)
         response = stub.addSchedule(request)
         return response
-    
+
     def getSchedule(self, request):
         stub = mediheaven_pb2_grpc.ScheduleStub(self.channel)
         auth = self.getAuth(request)
 
         request = mediheaven_pb2.getScheduleRequest(**request, auth=auth)
         response = stub.getSchedule(request)
+        return response
+
+    def getMedicines(self, request):
+        stub = mediheaven_pb2_grpc.MiscStub(self.channel)
+
+        request = mediheaven_pb2.getMedicinesRequest(**request)
+        response = stub.getMedicines(request)
         return response
 
     def test(self):
