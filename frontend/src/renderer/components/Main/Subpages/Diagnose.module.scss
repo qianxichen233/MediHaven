@@ -3,17 +3,14 @@
     margin-top: 100px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 100px;
 
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: space-between;
     flex-direction: row;
 
     font-family: KoHo;
-
-    .patient {
-        width: 30%;
-    }
 
     .panel {
         width: 70%;
@@ -22,7 +19,7 @@
 
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 20px;
 
         padding: 5px;
 
@@ -187,7 +184,7 @@
 
             .wrapper.active {
                 grid-template-rows: 1fr;
-                border-top: 1px solid black;
+                // border-top: 1px solid black;
                 box-sizing: border-box;
             }
         }
@@ -232,5 +229,210 @@
         font-weight: 500;
 
         user-select: none;
+    }
+}
+
+.records {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    > div {
+        border: 2px solid rgb(140, 0, 255);
+        padding: 5px;
+
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        // complete date
+        > span:nth-child(1) {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        // encounter summary
+        > div:nth-child(2) {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+
+            padding-top: 10px;
+            padding-bottom: 10px;
+
+            span {
+                display: block;
+            }
+
+            > span:first-child {
+                font-size: 24px;
+                font-weight: 500;
+            }
+
+            > span:last-child {
+                font-size: 20px;
+                font-style: italic;
+            }
+        }
+
+        // diagnose
+        > div:nth-child(3) {
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+
+            padding-top: 10px;
+            padding-bottom: 10px;
+
+            span {
+                display: block;
+            }
+
+            > span:first-child {
+                font-size: 24px;
+                font-weight: 500;
+            }
+
+            > span:last-child {
+                font-size: 20px;
+                font-style: italic;
+            }
+        }
+
+        // medicines
+        > div:nth-child(4) {
+            border-top: 1px solid black;
+
+            padding-top: 10px;
+            padding-bottom: 10px;
+
+            span {
+                display: block;
+            }
+
+            > span:first-child {
+                font-size: 24px;
+                font-weight: 500;
+            }
+
+            > span:not(:first-child) {
+                font-size: 20px;
+                font-style: italic;
+            }
+        }
+    }
+}
+
+.medicines {
+    display: flex;
+    flex-direction: column;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    > span {
+        font-size: 24px;
+        font-weight: 500;
+
+        padding-bottom: 5px;
+
+        border-bottom: 1px dashed black;
+    }
+}
+
+.collapse {
+    position: relative;
+    color: blue;
+}
+
+.collapse:hover {
+    text-decoration: underline;
+}
+
+.collapse::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    height: 2px;
+    width: 0;
+    background-color: orange;
+
+    transition: width 0.3s ease-in-out;
+}
+
+.collapse.active::after {
+    width: 100%;
+}
+
+.patient {
+    width: 20%;
+
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    background-color: #f0f0f0;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+    padding: 10px;
+
+    .placeholder {
+        background-color: lightgrey;
+        color: transparent;
+    }
+
+    // placeholder image
+    > span {
+        width: 200px;
+        height: 200px;
+        background-color: lightgrey;
+    }
+
+    > div {
+        text-align: left;
+
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        span {
+            font-size: 18px;
+        }
+
+        > div:not(:first-child) > span:first-child {
+            font-weight: 600;
+        }
+
+        // name
+        > div:nth-child(1) {
+            span {
+                font-size: 32px;
+                font-weight: 600;
+            }
+        }
+        // DOB & Age
+        > div:nth-child(2) {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            font-weight: 600;
+        }
+        // sex
+        > div:nth-child(3) {
+        }
+        // SSN
+        > div:nth-child(4) {
+        }
+        // phone number
+        > div:nth-child(5) {
+        }
+        // email
+        > div:nth-child(6) {
+        }
     }
 }

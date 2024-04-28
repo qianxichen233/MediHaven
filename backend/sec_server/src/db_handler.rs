@@ -880,7 +880,7 @@ impl DBHandler<'_> {
     ) -> Result<Vec<scheduleType>, Error> {
         let mut result: Vec<scheduleType> = Vec::new();
         let sql =
-            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, pa.SSN, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID FROM schedule s JOIN Physician p JOIN Patient pa WHERE s.patient_ID = pa.ID AND s.physician_ID = p.ID AND p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
+            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, pa.SSN, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID, s.ID, s.finished FROM schedule s JOIN Physician p JOIN Patient pa WHERE s.patient_ID = pa.ID AND s.physician_ID = p.ID AND p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
         println!("{:?}", email);
         let schedules = self.select_many(sql, (
             &email.into_parameter(),
@@ -924,11 +924,36 @@ impl DBHandler<'_> {
                 patient_first_name: patient_first_name,
                 patient_last_name: patient_last_name,
                 patient_SSN: String::from_utf8(schedule_raw[8].clone())?,
+                schedule_id: String::from_utf8(schedule_raw[13].to_vec())?.parse::<i32>()?,
+                finished: String::from_utf8(schedule_raw[14].to_vec())?.parse::<i32>()?,
             };
             result.push(schedule);
         }
 
         return Ok(result);
+    }
+
+    pub fn finish_schedule(&self, id: &i32, email: &str) -> Result<(), Error> {
+        let sql =
+            "SELECT * FROM schedule s JOIN Physician p WHERE s.physician_ID = p.ID AND p.email = ? AND s.id = ?";
+        let params = (&email.into_parameter(), &id.to_string().into_parameter());
+
+        if self.select_one(sql, params)? == None {
+            return Ok(());
+        }
+
+        let sql = "UPDATE schedule SET finished = 1 WHERE ID = ?";
+
+        let params = (&id.to_string().into_parameter(),);
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
     }
 
     pub fn get_medicines(&self, medicine_type: &str) -> Result<Vec<medicineType>, Error> {

@@ -26,6 +26,7 @@ import {
     get_password,
 } from './key_manager';
 import { toBase36, toBase64 } from './utility';
+import { check_message, get_messages, store_message } from './message_manager';
 
 class AppUpdater {
     constructor() {
@@ -78,10 +79,17 @@ ipcMain.handle('connect', async (event, arg) => {
     xmpp.on('error', (error: string) =>
         console.log(`something went wrong!${error} `),
     );
-    xmpp.on('chat', (from: string, message: String) => {
+    xmpp.on('chat', async (from: string, message: String) => {
         if (!mainWindow) return;
         // eventEmitter.fire('message', { from, message });
-        mainWindow.webContents.send('chat', {
+        if (
+            !(await store_message(arg[0], arg[1], {
+                from: from,
+                message: message,
+            }))
+        )
+            return;
+        mainWindow.webContents.send('chat_msg', {
             message: {
                 from,
                 message,
@@ -104,6 +112,14 @@ ipcMain.handle('send', async (event, arg) => {
     console.log(`send to ${username}`);
 
     xmpp.send(`${username}@localhost`, message);
+});
+
+ipcMain.handle('load_msg', async (event, arg) => {
+    const [role, email] = arg;
+
+    const result = await get_messages(role, email);
+
+    return result;
 });
 
 if (process.env.NODE_ENV === 'production') {

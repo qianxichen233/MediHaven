@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import styles from './Diagnose.module.scss';
 import { add_record, get_patient, get_record } from '../../../api/patient';
 import { useMyContext } from '../../MyContext';
@@ -6,6 +6,8 @@ import MainButton from '../../UI/MainButton';
 import Select from '../../UI/Select';
 import { get_medicines } from '../../../api/medicine';
 import Input from '../../UI/Input';
+import { finish_schedule } from '../../../api/schedule';
+import { calcAge } from '../../../utils/utils';
 
 const medicine_types = [
     'Sedatives',
@@ -63,7 +65,7 @@ const Diagnose = (props) => {
     const fetchData = async (SSN, id) => {
         const patient_result = await get_patient(SSN, user.role, user.email);
         const record_result = await get_record(id, user.email);
-        setPatient(patient_result);
+        // setPatient(patient_result);
         setRecord(record_result);
     };
 
@@ -216,17 +218,28 @@ const Diagnose = (props) => {
         };
 
         const result = await add_record(data);
+        await finish_schedule(props.info.schedule_ID, user.email);
         // console.log(data);
         props.onFinished();
     };
 
-    console.log(record);
-    // console.log(patient);
+    // console.log(record);
+    console.log(patient);
 
     // console.log(medicinesList);
     // console.log(addMedicineDisabled);
     // console.log(suggestList);
-    console.log(props.info);
+    // console.log(props.info);
+
+    let prescription = useMemo(() => {
+        if (!record) return null;
+        return [
+            ...new Set(
+                [].concat(...record.records.map((item) => item.medicines)),
+            ),
+        ];
+    }, [record]);
+    console.log(prescription);
 
     const allowSubmit =
         diagnose.diagnose !== '' &&
@@ -237,7 +250,14 @@ const Diagnose = (props) => {
         <div className={styles.container}>
             <div className={styles.panel}>
                 <div>
-                    <div onClick={onCollapse.bind(this, 0)}>
+                    <div
+                        onClick={onCollapse.bind(this, 0)}
+                        className={
+                            styles.collapse +
+                            ' ' +
+                            (tabs[0] ? styles.active : '')
+                        }
+                    >
                         Prescription History
                     </div>
                     <div
@@ -247,11 +267,25 @@ const Diagnose = (props) => {
                             (tabs[0] ? styles.active : '')
                         }
                     >
-                        <div className={styles.inner}>Content</div>
+                        <div className={styles.inner}>
+                            <div className={styles.medicines}>
+                                {prescription &&
+                                    prescription.map((medicine) => {
+                                        return <span>{medicine}</span>;
+                                    })}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
-                    <div onClick={onCollapse.bind(this, 1)}>
+                    <div
+                        onClick={onCollapse.bind(this, 1)}
+                        className={
+                            styles.collapse +
+                            ' ' +
+                            (tabs[1] ? styles.active : '')
+                        }
+                    >
                         Medical Records
                     </div>
                     <div
@@ -261,11 +295,66 @@ const Diagnose = (props) => {
                             (tabs[1] ? styles.active : '')
                         }
                     >
-                        <div className={styles.inner}>Content</div>
+                        <div className={styles.inner}>
+                            <div className={styles.records}>
+                                {record &&
+                                    record.records.map((record) => {
+                                        return (
+                                            <div key={record.complete_date}>
+                                                <span>
+                                                    Diagnose Date:{' '}
+                                                    {record.complete_date}
+                                                </span>
+                                                <div>
+                                                    <span>
+                                                        Encounter Summary:{' '}
+                                                    </span>
+                                                    <span>
+                                                        {
+                                                            record.encounter_summary
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span>Diagnose: </span>
+                                                    <span>
+                                                        {record.diagnosis}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <span>Medicines: </span>
+                                                    {record.medicines.map(
+                                                        (medicine) => {
+                                                            return (
+                                                                <span
+                                                                    key={
+                                                                        medicine
+                                                                    }
+                                                                >
+                                                                    {medicine}
+                                                                </span>
+                                                            );
+                                                        },
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
-                    <div onClick={onCollapse.bind(this, 2)}>Diagnose</div>
+                    <div
+                        onClick={onCollapse.bind(this, 2)}
+                        className={
+                            styles.collapse +
+                            ' ' +
+                            (tabs[2] ? styles.active : '')
+                        }
+                    >
+                        Diagnose
+                    </div>
                     <div
                         className={
                             styles.wrapper +
@@ -536,7 +625,87 @@ const Diagnose = (props) => {
                     </div>
                 </div>
             </div>
-            <div className={styles.patient}></div>
+            <div className={styles.patient}>
+                <span></span>
+                <div>
+                    <div>
+                        {patient ? (
+                            <span>
+                                {patient.First_Name + ' ' + patient.Last_Name}
+                            </span>
+                        ) : (
+                            <div
+                                className={styles.placeholder}
+                                style={{ marginTop: '10px', fontSize: '32px' }}
+                            >
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        {patient ? (
+                            <>
+                                <span>DOB: {patient.Date_Of_Birth}</span>
+                                <span>
+                                    Age: {calcAge(patient.Date_Of_Birth)}
+                                </span>
+                            </>
+                        ) : (
+                            <div className={styles.placeholder}>
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        {patient ? (
+                            <>
+                                <span>Sex: </span>
+                                <span>{patient.Sex}</span>
+                            </>
+                        ) : (
+                            <div className={styles.placeholder}>
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        {patient ? (
+                            <>
+                                <span>SSN: </span>
+                                <span>{patient.SSN}</span>
+                            </>
+                        ) : (
+                            <div className={styles.placeholder}>
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        {patient ? (
+                            <>
+                                <span>Phone Number: </span>
+                                <span>{patient.Phone_Number}</span>
+                            </>
+                        ) : (
+                            <div className={styles.placeholder}>
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        {patient ? (
+                            <>
+                                <span>Email: </span>
+                                <span>{patient.Email}</span>
+                            </>
+                        ) : (
+                            <div className={styles.placeholder}>
+                                placeholder
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

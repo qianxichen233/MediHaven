@@ -1,4 +1,5 @@
 use json::object;
+use crate::mediheaven::FinishScheduleRequest;
 use crate::myutils;
 use crate::globals;
 
@@ -156,6 +157,8 @@ impl Schedule for ScheduleService {
                             patient_first_name: Some(schedule.patient_first_name.clone()),
                             patient_last_name: Some(schedule.patient_last_name.clone()),
                             patient_ssn: Some(schedule.patient_SSN.clone()),
+                            schedule_id: Some(schedule.schedule_id),
+                            finished: Some(schedule.finished),
                         })
                         .collect(),
                     msg: None,
@@ -168,5 +171,64 @@ impl Schedule for ScheduleService {
                 return Ok(failed_msg);
             }
         }
+    }
+
+    async fn finish_schedule(
+        &self,
+        request: Request<FinishScheduleRequest>
+    ) -> Result<Response<SuccessResponse>, Status> {
+        println!("got message: {:?}", request);
+
+        let req = request.into_inner();
+
+        let failed_msg = Response::new(SuccessResponse {
+            successful: false,
+            msg: None,
+        });
+
+        match req.auth {
+            Some(auth) => {
+                let plaintext = (
+                    object! {
+                    endpoint: "POST schedule",
+                    schedule_ID: req.schedule_id,
+                    issuer_email: auth.issuer_email.clone(),
+                    timestamp: auth.timestamp.clone()
+                }
+                ).dump();
+
+                if
+                    !myutils::verify_auth(
+                        &auth.issuer_email,
+                        &vec!["physician"],
+                        &plaintext,
+                        &auth.signature,
+                        &auth.timestamp
+                    )
+                {
+                    println!("signature failed");
+                    return Ok(failed_msg);
+                }
+
+                if
+                    let Err(err) = globals
+                        ::get_my_db_handler()
+                        .finish_schedule(&req.schedule_id, &auth.issuer_email)
+                {
+                    eprintln!("Error: {}", err);
+                    return Ok(failed_msg);
+                }
+            }
+            None => {
+                return Ok(failed_msg);
+            }
+        }
+
+        let reply = Response::new(SuccessResponse {
+            successful: true,
+            msg: None,
+        });
+
+        Ok(reply)
     }
 }

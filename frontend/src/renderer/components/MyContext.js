@@ -13,16 +13,27 @@ export const MyContextProvider = ({ children }) => {
         messages: [],
     });
 
-    window.electron.ipcRenderer.on('chat', (data) => {
+    window.electron.ipcRenderer.on('chat_msg', (data) => {
         console.log(`inside renderer: ${JSON.stringify(data)}`);
+
         const { role, email } = decodeSender(data.message.from);
 
         setUser((user) => {
             const msg = [...user.messages];
+
+            const message_body = decodeMessage(data.message.message);
+
+            if (
+                msg.reduce((prev, cur) => {
+                    return prev || cur.uuid == message_body.uuid;
+                }, false)
+            )
+                return user;
+
             msg.push({
                 role,
                 email,
-                ...decodeMessage(data.message.message),
+                ...message_body,
             });
             return {
                 ...user,
