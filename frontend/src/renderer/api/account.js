@@ -92,6 +92,7 @@ const login = async (type, email) => {
         if (response.ok) {
             const data = await response.json();
             console.log('POST request successful:', data);
+            if (data.message === 'hacker') return 'hacker';
             if (data.message === 'success!') return true;
         } else {
             console.error('POST request failed');

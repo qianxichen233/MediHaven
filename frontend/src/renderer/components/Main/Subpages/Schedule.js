@@ -81,7 +81,7 @@ const Schedule = (props) => {
     return (
         <div className={styles.container}>
             {schedules
-                // .filter((item) => !item.finished)
+                .filter((item) => !item.finished)
                 .map((item, index) => {
                     return (
                         <SingleSchedule

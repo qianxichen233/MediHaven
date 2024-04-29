@@ -65,7 +65,7 @@ const Diagnose = (props) => {
     const fetchData = async (SSN, id) => {
         const patient_result = await get_patient(SSN, user.role, user.email);
         const record_result = await get_record(id, user.email);
-        // setPatient(patient_result);
+        setPatient(patient_result);
         setRecord(record_result);
     };
 

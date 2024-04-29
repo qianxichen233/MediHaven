@@ -192,6 +192,16 @@ impl Account for AccountService {
                     return Ok(Response::new(reply));
                 }
                 Err(err) => {
+                    if err.to_string() == "integrity check failed!" {
+                        let retval = Response::new(LoginResponse {
+                            successful: false,
+                            pub_key: String::new(),
+                            msg: Some(String::from("hacker")),
+                        });
+
+                        return Ok(retval);
+                    }
+
                     eprintln!("Error: {}", err);
                     return Ok(failed_msg);
                 }

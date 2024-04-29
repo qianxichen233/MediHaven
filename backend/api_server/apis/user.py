@@ -4,12 +4,14 @@ from datetime import datetime, timedelta
 
 import base64
 import base36
+import json
 
 from xmpp import register_xmpp
 
 import inspect
 
 from grpc_client.grpc_api import GRPC_API
+from myRedis import myRedisServer
 
 user_api = Blueprint("user_api", __name__)
 api = Api(user_api)
@@ -19,7 +21,7 @@ def to_base36(value):
     if isinstance(value, int):
         return base36.dumps(value)
     elif isinstance(value, str):
-        return base36.dumps(int.from_bytes(value.encode('utf-8'), 'big'))
+        return base36.dumps(int.from_bytes(value.encode("utf-8"), "big"))
     else:
         raise ValueError("Invalid input type. Expected int or str.")
 
@@ -75,9 +77,7 @@ class register(Resource):
 
         username = args["Account_Type"] + "_" + args["Email"]
         try:
-            register_xmpp(
-                username.replace("@", "_at_"), password
-            )
+            register_xmpp(username.replace("@", "_at_"), password)
         except:
             return jsonify({"message": f"xmpp failed!"})
 
@@ -103,6 +103,8 @@ class login(Resource):
 
         response = GRPC_API.login(args)
         if not response.successful:
+            if response.msg == "hacker":
+                return jsonify({"message": f"hacker"})
             return jsonify({"message": f"failed!"})
 
         return jsonify({"message": f"success!"})
@@ -261,7 +263,7 @@ class patient(Resource):
         args = self.get_args()
 
         response = GRPC_API.get_patient(args)
-        print(f"response: {response.patient} ---- end")
+        # print(f"response: {response.patient} ---- end")
         if response.patient.SSN == "":
             return jsonify({"message": f"failed!"})
 
@@ -299,6 +301,15 @@ class physician(Resource):
     def get(self):
         args = self.get_parser.parse_args()
 
+        key = f"{args["department"]}-{args["name"]}"
+
+        cache = myRedisServer.get(key)
+
+        if(cache != None):
+            cache = json.loads(cache)
+            print(f"cache: {cache}")
+            return jsonify({"physicians": cache})
+
         if args["name"] != None:
             [first_name, last_name] = args["name"].split(" ")
             args.first_name = first_name
@@ -323,6 +334,11 @@ class physician(Resource):
                     "email": physician.email,
                 }
             )
+
+        try:
+            myRedisServer.set(key, json.dumps(result))
+        except:
+            print("redis set failed!")
 
         return jsonify({"physicians": result})
 

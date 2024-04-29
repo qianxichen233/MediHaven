@@ -23,6 +23,8 @@ const LoginForm = (props) => {
     const navigate = useNavigate();
     const { user, setUser } = useMyContext();
 
+    const [isHacker, setIsHacker] = useState(false);
+
     const [account_type, set_account_type] = useState(
         props.account_type || 'physician',
     );
@@ -31,7 +33,9 @@ const LoginForm = (props) => {
         let type = account_type === 'administrator' ? 'admin' : account_type;
 
         const result = await login(type, form.Email);
-        if (result) {
+        if (result === 'hacker') {
+            setIsHacker(true);
+        } else if (result) {
             const messages = (
                 await window.electron.ipcRenderer.invoke('load_msg', [
                     type,
@@ -91,6 +95,9 @@ const LoginForm = (props) => {
                 onSubmit={onSubmit}
                 column={1}
             ></Form>
+            {isHacker && (
+                <div className={styles.hacker}>Get away, you damn hacker!</div>
+            )}
             <div className={styles.bookmarks}>
                 <div
                     className={`${styles.bookmark} ${
