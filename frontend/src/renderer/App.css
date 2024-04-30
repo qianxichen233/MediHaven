@@ -4,10 +4,17 @@ body {
 }
 
 :root {
-    --main-bg-color: #fff6d6;
+    --main-bg-color: #fff4ec;
     --secondary-bg-color: #2da0b9;
-    --primary-color: #45e4ab;
+    --primary-color: #ffdec8;
     --secondary-color: #f77;
+
+    --backup-color-1: #874c96;
+    --backup-color-2: #01520e;
+    --backup-color-3: rgba(248, 0, 0, 0.2);
+
+    --primary-button: #01520e;
+    --secondary-button: #b61c1c;
 }
 
 .bg {
@@ -22,4 +29,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+textarea {
+    resize: none;
 }

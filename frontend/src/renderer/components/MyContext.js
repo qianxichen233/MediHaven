@@ -1,6 +1,7 @@
 // MyContext.js
 import React, { createContext, useContext, useState } from 'react';
 import { decodeMessage, decodeSender } from '../utils/utils';
+import { MessageQueue } from '../utils/MessageQueue';
 
 // Create a context
 const MyContext = createContext();
@@ -10,7 +11,8 @@ export const MyContextProvider = ({ children }) => {
     const [user, setUser] = useState({
         role: '',
         email: '',
-        messages: [],
+        messages: new MessageQueue(),
+        update: false,
     });
 
     window.electron.ipcRenderer.on('chat_msg', (data) => {
@@ -19,25 +21,13 @@ export const MyContextProvider = ({ children }) => {
         const { role, email } = decodeSender(data.message.from);
 
         setUser((user) => {
-            const msg = [...user.messages];
-
             const message_body = decodeMessage(data.message.message);
 
-            if (
-                msg.reduce((prev, cur) => {
-                    return prev || cur.uuid == message_body.uuid;
-                }, false)
-            )
-                return user;
+            user.messages.addMessage(role, email, message_body);
 
-            msg.push({
-                role,
-                email,
-                ...message_body,
-            });
             return {
                 ...user,
-                messages: msg,
+                update: true,
             };
         });
     });

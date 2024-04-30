@@ -8,6 +8,7 @@ import Modal from 'react-modal';
 import Select from '../../UI/Select';
 import Input from '../../UI/Input';
 import MainButton from '../../UI/MainButton';
+import ChatBox from '../../Chat/ChatBox';
 
 const test = [
     {
@@ -42,7 +43,7 @@ const modalStyle = {
 const Messages = (props) => {
     const { user } = useMyContext();
 
-    console.log(user.messages);
+    // console.log(user.messages);
 
     const [selected, setSelected] = useState(
         new Array(test.length).fill(false),
@@ -105,13 +106,14 @@ const Messages = (props) => {
 
     return (
         <div className={styles.container}>
-            <MessageList
+            {/* <MessageList
                 messages={user.messages}
                 select={selected}
                 onSelect={onSetect}
                 onClick={setViewMessage}
-            />
-            <div className={styles.buttons}>
+            /> */}
+            <ChatBox />
+            {/* <div className={styles.buttons}>
                 <button
                     style={{ backgroundColor: '#45e4ab' }}
                     onClick={setIsModalOpen.bind(this, true)}
@@ -171,7 +173,7 @@ const Messages = (props) => {
                     <div className={styles.buttons}>
                         <MainButton
                             background={
-                                allowSend ? 'var(--primary-color)' : '#e0e0e0'
+                                allowSend ? 'var(--primary-button)' : '#e0e0e0'
                             }
                             color="white"
                             text="SEND"
@@ -182,7 +184,7 @@ const Messages = (props) => {
                         />
 
                         <MainButton
-                            background="var(--secondary-color)"
+                            background="var(--secondary-button)"
                             color="white"
                             text="CANCEL"
                             width="200px"
@@ -247,7 +249,7 @@ const Messages = (props) => {
                                 </div>
                                 <div className={styles.buttons}>
                                     <MainButton
-                                        background="var(--secondary-color)"
+                                        background="var(--secondary-button)"
                                         color="white"
                                         text="CANCEL"
                                         width="200px"
@@ -262,7 +264,7 @@ const Messages = (props) => {
                         );
                     })()}
                 </Modal>
-            )}
+            )} */}
         </div>
     );
 };

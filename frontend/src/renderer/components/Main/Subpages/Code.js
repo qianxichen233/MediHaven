@@ -115,7 +115,7 @@ const Code = (props) => {
             </div>
             <div className={styles.buttons}>
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="Request New Token"
                     width="200px"
@@ -124,7 +124,9 @@ const Code = (props) => {
                 />
                 <MainButton
                     background={
-                        selected !== null ? 'var(--secondary-color)' : '#e0e0e0'
+                        selected !== null
+                            ? 'var(--secondary-button)'
+                            : '#e0e0e0'
                     }
                     color="white"
                     text="Delete Token"
@@ -155,7 +157,7 @@ const Code = (props) => {
                     </div>
                     <div className={styles.modalButtons}>
                         <MainButton
-                            background="var(--primary-color)"
+                            background="var(--primary-button)"
                             color="white"
                             text="CONFIRM"
                             width="150px"
@@ -163,7 +165,7 @@ const Code = (props) => {
                             onClick={addCode}
                         />
                         <MainButton
-                            background="var(--secondary-color)"
+                            background="var(--secondary-button)"
                             color="white"
                             text="CANCEL"
                             width="150px"

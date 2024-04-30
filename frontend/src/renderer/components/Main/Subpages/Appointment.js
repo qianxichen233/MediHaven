@@ -73,7 +73,7 @@ const patientPage = (
                     // layout="column"
                 />
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="SEARCH"
                     width="200px"
@@ -106,7 +106,7 @@ const patientPage = (
             </div>
             <div className={styles.modalButtons}>
                 <MainButton
-                    background={!!patient ? 'var(--primary-color)' : '#e0e0e0'}
+                    background={!!patient ? 'var(--primary-button)' : '#e0e0e0'}
                     color="white"
                     text="PROCEED"
                     width="150px"
@@ -115,7 +115,7 @@ const patientPage = (
                     disabled={!patient}
                 />
                 <MainButton
-                    background="var(--secondary-color)"
+                    background="var(--secondary-button)"
                     color="white"
                     text="CANCEL"
                     width="150px"
@@ -176,7 +176,7 @@ const infoPage = (
             </div>
             <div className={styles.modalButtons}>
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="SUBMIT"
                     width="150px"
@@ -184,7 +184,7 @@ const infoPage = (
                     onClick={onSubmit}
                 />
                 <MainButton
-                    background="var(--secondary-color)"
+                    background="var(--secondary-button)"
                     color="white"
                     text="CANCEL"
                     width="150px"
@@ -384,7 +384,7 @@ const Appointment = (props) => {
                     />
                 </div>
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--backup-color-2)"
                     color="white"
                     text="SEARCH"
                     width="200px"
@@ -405,8 +405,8 @@ const Appointment = (props) => {
                             <MainButton
                                 background={
                                     selected[index]
-                                        ? 'var(--secondary-color)'
-                                        : 'var(--primary-color)'
+                                        ? 'var(--secondary-button)'
+                                        : 'var(--primary-button)'
                                 }
                                 color="white"
                                 text={selected[index] ? 'CANCEL' : 'ASSIGN'}

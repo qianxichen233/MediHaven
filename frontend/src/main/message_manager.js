@@ -19,11 +19,11 @@ const get_uuid = (message) => {
     return JSON.parse(message).uuid;
 };
 
-const check_message = async (message) => {
+const check_message = async (user, message) => {
     const uuid = get_uuid(message);
 
     const result = await new Promise((res, rej) => {
-        db.find({ uuid: uuid }, function (err, docs) {
+        db.find({ uuid: uuid, user: user }, function (err, docs) {
             if (err) rej(err);
             else res(docs);
         });
@@ -33,6 +33,7 @@ const check_message = async (message) => {
 };
 
 const store_message = async (role, email, messages) => {
+    console.log('store message');
     let messageList = [];
     if (Array.isArray(messages)) {
         messageList = messages;
@@ -44,7 +45,7 @@ const store_message = async (role, email, messages) => {
         let data = message;
         if (typeof message !== 'string') data = JSON.stringify(message);
 
-        if (await check_message(message.message)) return false;
+        if (await check_message(user, message.message)) return false;
         const uuid = get_uuid(message.message);
 
         await new Promise((res, rej) => {

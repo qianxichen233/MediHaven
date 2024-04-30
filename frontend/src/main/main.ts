@@ -17,6 +17,8 @@ import { resolveHtmlPath } from './util';
 
 const xmpp = require('simple-xmpp');
 let connected = false;
+let login_role = '';
+let login_email = '';
 
 import {
     create_key,
@@ -103,6 +105,9 @@ ipcMain.handle('connect', async (event, arg) => {
         host: '172.210.68.64',
         port: 5222,
     });
+
+    login_role = arg[0];
+    login_email = arg[1];
 });
 
 ipcMain.handle('send', async (event, arg) => {
@@ -112,6 +117,16 @@ ipcMain.handle('send', async (event, arg) => {
     console.log(`send to ${username}`);
 
     xmpp.send(`${username}@localhost`, message);
+
+    const payload = JSON.stringify({
+        ...JSON.parse(message),
+        send: 1,
+    });
+
+    await store_message(login_role, login_email, {
+        from: username,
+        message: payload,
+    });
 });
 
 ipcMain.handle('load_msg', async (event, arg) => {

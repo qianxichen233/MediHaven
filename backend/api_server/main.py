@@ -10,6 +10,8 @@ config = {
     "ORIGINS": [
         "http://localhost:1212",
         "http://127.0.0.1:1212",
+        "http://localhost:1213",
+        "http://127.0.0.1:1213",
     ],
 }
 

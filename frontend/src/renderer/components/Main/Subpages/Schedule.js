@@ -138,7 +138,7 @@ const Schedule = (props) => {
                         </div>
                         <div className={styles.modalButtons}>
                             <MainButton
-                                background="var(--primary-color)"
+                                background="var(--primary-button)"
                                 color="white"
                                 text="PROCEED"
                                 width="150px"
@@ -146,7 +146,7 @@ const Schedule = (props) => {
                                 onClick={onProceed}
                             />
                             <MainButton
-                                background="var(--secondary-color)"
+                                background="var(--secondary-button)"
                                 color="white"
                                 text="CANCEL"
                                 width="150px"

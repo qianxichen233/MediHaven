@@ -6,6 +6,7 @@ import { login } from '../../api/account';
 import { useNavigate } from 'react-router-dom';
 import { useMyContext } from '../MyContext';
 import { decodeMessage, decodeSender } from '../../utils/utils';
+import { MessageQueue } from '../../utils/MessageQueue';
 
 const inputFields = {
     administrator: {
@@ -41,15 +42,16 @@ const LoginForm = (props) => {
                     type,
                     form.Email,
                 ])
-            ).map((message) => {
+            ).reduce((acc, message) => {
                 const parsed = JSON.parse(message);
                 const { role, email } = decodeSender(parsed.from);
-                return {
-                    role,
-                    email,
-                    ...decodeMessage(parsed.message),
-                };
-            });
+
+                console.log(JSON.parse(parsed.message));
+
+                acc.addMessage(role, email, JSON.parse(parsed.message));
+
+                return acc;
+            }, new MessageQueue());
 
             // console.log(`load from local db: ${messages}`);
             // window.electron.ipcRenderer.on('chat', (data) => {
@@ -80,6 +82,7 @@ const LoginForm = (props) => {
                     role: type,
                     email: form.Email,
                     messages: messages,
+                    update: true,
                 };
             });
             navigate('/main', { state: { type: type } });

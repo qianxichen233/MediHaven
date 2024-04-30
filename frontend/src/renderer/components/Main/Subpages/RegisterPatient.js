@@ -124,7 +124,7 @@ const RegisterPatient = (props) => {
                     layout="column"
                 />
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="ADD PATIENT"
                     width="200px"
