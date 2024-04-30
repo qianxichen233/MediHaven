@@ -8,6 +8,7 @@ import { get_medicines } from '../../../api/medicine';
 import Input from '../../UI/Input';
 import { finish_schedule } from '../../../api/schedule';
 import { calcAge } from '../../../utils/utils';
+import { PatientIcon } from '../../UI/Icon';
 
 const medicine_types = [
     'Sedatives',
@@ -65,22 +66,6 @@ const Diagnose = (props) => {
     const fetchData = async (SSN, id) => {
         const patient_result = await get_patient(SSN, user.role, user.email);
         const record_result = await get_record(id, user.email);
-
-        record_result.records = record_result.records.sort((a, b) => {
-            const dateA = new Date(a.complete_date);
-            const dateB = new Date(b.complete_date);
-
-            if (dateA < dateB) {
-                return -1;
-            }
-            if (dateA > dateB) {
-                return 1;
-            }
-            return 0;
-        });
-
-        console.log(record_result);
-
         setPatient(patient_result);
         setRecord(record_result);
     };
@@ -386,7 +371,7 @@ const Diagnose = (props) => {
                                         background={
                                             addMedicineDisabled
                                                 ? '#e0e0e0'
-                                                : 'var(--primary-button)'
+                                                : 'var(--primary-color)'
                                         }
                                         color="white"
                                         text="Add Medicine"
@@ -433,7 +418,7 @@ const Diagnose = (props) => {
                                                                             .list
                                                                             .length ===
                                                                         0
-                                                                            ? 'var(--primary-button)'
+                                                                            ? 'var(--primary-color)'
                                                                             : 'orange'
                                                                     }
                                                                     color="white"
@@ -446,7 +431,7 @@ const Diagnose = (props) => {
                                                                     )}
                                                                 />
                                                                 <MainButton
-                                                                    background="var(--secondary-button)"
+                                                                    background="var(--secondary-color)"
                                                                     color="white"
                                                                     text="DELETE"
                                                                     width="150px"
@@ -561,8 +546,8 @@ const Diagnose = (props) => {
                                                                         0
                                                                             ? '#e0e0e0'
                                                                             : medicine.locked
-                                                                            ? 'var(--secondary-button)'
-                                                                            : 'var(--primary-button)'
+                                                                            ? 'var(--secondary-color)'
+                                                                            : 'var(--primary-color)'
                                                                     }
                                                                     color="white"
                                                                     text={
@@ -627,7 +612,7 @@ const Diagnose = (props) => {
                                     background={
                                         !allowSubmit
                                             ? '#e0e0e0'
-                                            : 'var(--primary-button)'
+                                            : 'var(--primary-color)'
                                     }
                                     color="white"
                                     text="SUBMIT"
@@ -642,7 +627,9 @@ const Diagnose = (props) => {
                 </div>
             </div>
             <div className={styles.patient}>
-                <span></span>
+                <span>
+                    <PatientIcon height="150px" width="150px" />
+                </span>
                 <div>
                     <div>
                         {patient ? (

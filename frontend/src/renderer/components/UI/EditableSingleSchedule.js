@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './EditableSingleSchedule.module.scss';
 import _styles from './SingleSchedule.module.scss';
+import { PhysicianIcon } from './Icon';
 
 const convertToTime = (posX) => {
     const hour = (Math.floor(posX / 120) + 8).toString().padStart(2, '0');
@@ -172,7 +173,9 @@ const EditableSingleSchedule = ({
         <div className={_styles.container}>
             <div className={_styles.info}>
                 <div>
-                    <span className={_styles.placeholder}></span>
+                    <div className={_styles.placeholder}>
+                        <PhysicianIcon height="80px" width="80px" />
+                    </div>
                 </div>
                 <div>
                     <span style={{ fontWeight: 600 }}>Physician Detail</span>

@@ -253,6 +253,7 @@ const Appointment = (props) => {
 
     const onSearch = async () => {
         const result = await get_physicians(department, name);
+        if (!result) return;
         await getSchedule(result);
     };
 
