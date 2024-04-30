@@ -71,7 +71,7 @@ const get_code = async (email) => {
 
         if (response.ok) {
             const responseData = await response.json();
-            return responseData;
+            return responseData.codes;
         } else {
             console.error('Failed to fetch data');
         }
@@ -80,20 +80,20 @@ const get_code = async (email) => {
     }
 };
 
-const del_code = async (email) => {
+const del_code = async (email, code) => {
     const form = {};
 
-    form['email'] = data['email'];
-    form['code'] = data['code'];
+    form['email'] = email;
+    form['code'] = code;
 
     form['timestamp'] = getCurrentTime();
 
     const signature = await window.electron.ipcRenderer.invoke('sign', [
         {
             endpoint: 'DELETE code',
-            email: req.email.clone(),
-            code: req.code.clone(),
-            timestamp: req.timestamp.clone(),
+            email: email,
+            code: code,
+            timestamp: form['timestamp'],
         },
         'admin',
         email,

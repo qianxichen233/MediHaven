@@ -138,6 +138,10 @@
                     margin-bottom: 10px;
                     text-align: left;
                 }
+
+                textarea {
+                    font-size: 18px;
+                }
             }
         }
     }
@@ -154,4 +158,12 @@
 .error {
     color: red;
     text-align: center;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 100px;
 }

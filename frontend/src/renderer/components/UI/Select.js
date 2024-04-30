@@ -9,6 +9,7 @@ const Select = ({
     layout,
     size,
     list,
+    noAny,
 }) => {
     const onChange = (e) => {
         setContent(e.target.value);
@@ -22,7 +23,7 @@ const Select = ({
                 value={content}
                 style={{ width: width, height: height, fontSize: size }}
             >
-                <option value="Any">Any</option>
+                {!noAny && <option value="Any">Any</option>}
                 {list.map((item, index) => {
                     return (
                         <option key={index} value={item}>

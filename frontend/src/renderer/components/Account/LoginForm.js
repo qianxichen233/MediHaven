@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { login } from '../../api/account';
 import { useNavigate } from 'react-router-dom';
 import { useMyContext } from '../MyContext';
+import { decodeMessage, decodeSender } from '../../utils/utils';
+import { MessageQueue } from '../../utils/MessageQueue';
 
 const inputFields = {
     administrator: {
@@ -22,22 +24,68 @@ const LoginForm = (props) => {
     const navigate = useNavigate();
     const { user, setUser } = useMyContext();
 
+    const [isHacker, setIsHacker] = useState(false);
+
     const [account_type, set_account_type] = useState(
         props.account_type || 'physician',
     );
 
     const onSubmit = async (form) => {
-        const result = await login(account_type, form.Email);
-        if (result) {
+        let type = account_type === 'administrator' ? 'admin' : account_type;
+
+        const result = await login(type, form.Email);
+        if (result === 'hacker') {
+            setIsHacker(true);
+        } else if (result) {
+            const messages = (
+                await window.electron.ipcRenderer.invoke('load_msg', [
+                    type,
+                    form.Email,
+                ])
+            ).reduce((acc, message) => {
+                const parsed = JSON.parse(message);
+                const { role, email } = decodeSender(parsed.from);
+
+                console.log(JSON.parse(parsed.message));
+
+                acc.addMessage(role, email, JSON.parse(parsed.message));
+
+                return acc;
+            }, new MessageQueue());
+
+            // console.log(`load from local db: ${messages}`);
+            // window.electron.ipcRenderer.on('chat', (data) => {
+            //     console.log(`inside renderer: ${JSON.stringify(data)}`);
+            //     const { role, email } = decodeSender(data.message.from);
+
+            //     setUser((user) => {
+            //         const msg = [...user.messages];
+            //         msg.push({
+            //             role,
+            //             email,
+            //             ...decodeMessage(data.message.message),
+            //         });
+            //         return {
+            //             ...user,
+            //             messages: msg,
+            //         };
+            //     });
+            // });
+
             await window.electron.ipcRenderer.invoke('connect', [
-                account_type,
+                type,
                 form.Email,
             ]);
-            setUser({
-                role: account_type,
-                email: form.Email,
+
+            setUser((user) => {
+                return {
+                    role: type,
+                    email: form.Email,
+                    messages: messages,
+                    update: true,
+                };
             });
-            navigate('/main', { state: { type: account_type } });
+            navigate('/main', { state: { type: type } });
         }
         // console.log(form);
     };
@@ -50,6 +98,9 @@ const LoginForm = (props) => {
                 onSubmit={onSubmit}
                 column={1}
             ></Form>
+            {isHacker && (
+                <div className={styles.hacker}>Get away, you damn hacker!</div>
+            )}
             <div className={styles.bookmarks}>
                 <div
                     className={`${styles.bookmark} ${

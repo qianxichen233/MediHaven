@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import styles from './SingleSchedule.module.scss';
 import { getCurrentTime } from '../../utils/utils';
+import { PhysicianIcon } from './Icon';
 
 const convertToPosX = (timestamp) => {
     const time = timestamp.split(' ')[1];
@@ -32,7 +33,9 @@ const SingleSchedule = (props) => {
         <div className={styles.container}>
             <div className={styles.info}>
                 <div>
-                    <span className={styles.placeholder}></span>
+                    <div className={styles.placeholder}>
+                        <PhysicianIcon height="80px" width="80px" />
+                    </div>
                 </div>
                 <div>
                     <span>
@@ -73,7 +76,9 @@ const SingleSchedule = (props) => {
                             .join(':')}
                     </span>
                 </div>
-                <span className={styles.now} style={{ left: now }}></span>
+                {now >= 0 && now <= 1320 && (
+                    <span className={styles.now} style={{ left: now }}></span>
+                )}
                 {Array(11)
                     .fill('')
                     .map((_, index) => {

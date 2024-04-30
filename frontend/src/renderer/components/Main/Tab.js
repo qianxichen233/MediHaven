@@ -1,8 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './Tab.module.scss';
 
+const getList = (pagelist, page, hide) => {
+    if (!hide) return pagelist;
+    const result = [];
+    for (const p of pagelist) {
+        if (hide.includes(p) && page !== p) continue;
+        result.push(p);
+    }
+    return result;
+};
+
 const Tab = (props) => {
-    const refArray = useRef(Array(props.pagelist.length));
+    const pagelist = getList(props.pagelist, props.page, props.hide);
+
+    const refArray = useRef(Array(pagelist.length));
 
     const slideRef = useRef(null);
 
@@ -11,8 +23,8 @@ const Tab = (props) => {
     useEffect(() => {
         if (!slideRef.current) return;
 
-        for (let i = 0; i < props.pagelist.length; ++i) {
-            if (props.page === props.pagelist[i] && !!refArray.current[i]) {
+        for (let i = 0; i < pagelist.length; ++i) {
+            if (props.page === pagelist[i] && !!refArray.current[i]) {
                 slideRef.current.style.left = `${
                     refArray.current[i].getBoundingClientRect().x
                 }px`;
@@ -21,11 +33,11 @@ const Tab = (props) => {
         }
     }, [slideRef, refArray.current, props.page]);
 
-    // if (refArray.current.length !== props.pagelist.length) return <></>;
+    // if (refArray.current.length !== pagelist.length) return <></>;
     return (
         <div className={styles.tab}>
             <span className={styles.slide} ref={slideRef}></span>
-            {props.pagelist.map((item, index) => {
+            {pagelist.map((item, index) => {
                 return (
                     <span
                         ref={(el) => (refArray.current[index] = el)}

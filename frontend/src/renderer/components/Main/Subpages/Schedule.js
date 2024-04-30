@@ -7,6 +7,7 @@ import { getCurrentDate } from '../../../utils/utils';
 
 import Modal from 'react-modal';
 import MainButton from '../../UI/MainButton';
+import { PulseLoader } from 'react-spinners';
 
 const modalStyle = {
     content: {
@@ -46,6 +47,8 @@ const Schedule = (props) => {
 
     const [selected, setSelected] = useState(null);
 
+    const [onLoading, setOnLoading] = useState(true);
+
     useEffect(() => {
         const getSchedule = async () => {
             const result = await get_schedule(
@@ -57,6 +60,7 @@ const Schedule = (props) => {
             );
             result.sort(sortSchedule);
             setSchedules(result);
+            setOnLoading(false);
         };
 
         getSchedule();
@@ -73,21 +77,30 @@ const Schedule = (props) => {
     };
 
     const onProceed = () => {
-        console.log(schedules[selected]);
+        props.onDiagnose({
+            info: schedules[selected],
+        });
     };
 
     return (
         <div className={styles.container}>
-            {schedules.map((item, index) => {
-                return (
-                    <SingleSchedule
-                        current={new Date().getHours().toString()}
-                        schedule={item}
-                        key={index}
-                        onSelect={onSelect.bind(this, index)}
-                    />
-                );
-            })}
+            {onLoading && (
+                <div className={styles.loading}>
+                    <PulseLoader color="#36d7b7" size={80} margin={20} />
+                </div>
+            )}
+            {schedules
+                .filter((item) => !item.finished)
+                .map((item, index) => {
+                    return (
+                        <SingleSchedule
+                            current={new Date().getHours().toString()}
+                            schedule={item}
+                            key={index}
+                            onSelect={onSelect.bind(this, index)}
+                        />
+                    );
+                })}
             {selected !== null && (
                 <Modal
                     isOpen={isModalOpen}
@@ -134,7 +147,7 @@ const Schedule = (props) => {
                         </div>
                         <div className={styles.modalButtons}>
                             <MainButton
-                                background="var(--primary-color)"
+                                background="var(--primary-button)"
                                 color="white"
                                 text="PROCEED"
                                 width="150px"
@@ -142,7 +155,7 @@ const Schedule = (props) => {
                                 onClick={onProceed}
                             />
                             <MainButton
-                                background="var(--secondary-color)"
+                                background="var(--secondary-button)"
                                 color="white"
                                 text="CANCEL"
                                 width="150px"

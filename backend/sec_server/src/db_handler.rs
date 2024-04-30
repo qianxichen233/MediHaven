@@ -1,6 +1,6 @@
 use crate::constants::MAGIC_KEYS;
 use crate::myutils;
-use crate::mytypes::{ codeType, recordType, scheduleType, physicianType };
+use crate::mytypes::{ codeType, medicineType, physicianType, recordType, scheduleType };
 use rand::Rng;
 
 use odbc_api::{
@@ -304,6 +304,7 @@ impl DBHandler<'_> {
     }
 
     pub fn register_admin(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
+        println!("register admin: {:?}", fields);
         let sql =
             "INSERT INTO Administrator(First_Name, Last_Name, Sex, Age, Date_Of_Birth, Phone_Number, Email, Pub_key, Magic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -761,7 +762,7 @@ impl DBHandler<'_> {
     pub fn add_code(&self, fields: &HashMap<&str, &str>) -> Result<(), Error> {
         let sql =
             "INSERT INTO register_code(CODE, Account_type, Expiration_Date, Issuer, Magic) VALUES (?, ?, ?, ?, ?)";
-
+        println!("fields: {:?}", fields);
         let mut magic = self
             .generate_magic(&MAGIC_KEYS["register_code"], &fields)
             .expect("generate magic failed");
@@ -879,7 +880,7 @@ impl DBHandler<'_> {
     ) -> Result<Vec<scheduleType>, Error> {
         let mut result: Vec<scheduleType> = Vec::new();
         let sql =
-            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, pa.SSN, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID FROM schedule s JOIN Physician p JOIN Patient pa WHERE s.patient_ID = pa.ID AND s.physician_ID = p.ID AND p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
+            "SELECT s.patient_id, s.physician_id, s.schedule_st, s.schedule_ed, s.created_at, s.description, pa.First_Name, pa.Last_Name, pa.SSN, s.nonce, s.Key_ID, pa.nonce, pa.Key_ID, s.ID, s.finished FROM schedule s JOIN Physician p JOIN Patient pa WHERE s.patient_ID = pa.ID AND s.physician_ID = p.ID AND p.Email = ? AND s.schedule_st >= ? AND s.schedule_st <= ?";
         println!("{:?}", email);
         let schedules = self.select_many(sql, (
             &email.into_parameter(),
@@ -923,8 +924,52 @@ impl DBHandler<'_> {
                 patient_first_name: patient_first_name,
                 patient_last_name: patient_last_name,
                 patient_SSN: String::from_utf8(schedule_raw[8].clone())?,
+                schedule_id: String::from_utf8(schedule_raw[13].to_vec())?.parse::<i32>()?,
+                finished: String::from_utf8(schedule_raw[14].to_vec())?.parse::<i32>()?,
             };
             result.push(schedule);
+        }
+
+        return Ok(result);
+    }
+
+    pub fn finish_schedule(&self, id: &i32, email: &str) -> Result<(), Error> {
+        let sql =
+            "SELECT * FROM schedule s JOIN Physician p WHERE s.physician_ID = p.ID AND p.email = ? AND s.id = ?";
+        let params = (&email.into_parameter(), &id.to_string().into_parameter());
+
+        if self.select_one(sql, params)? == None {
+            return Ok(());
+        }
+
+        let sql = "UPDATE schedule SET finished = 1 WHERE ID = ?";
+
+        let params = (&id.to_string().into_parameter(),);
+
+        if let Some(mut cursor) = self.connection.execute(&sql, params)? {
+            let mut row = cursor.next_row()?.unwrap();
+            let mut buf: Vec<u8> = Vec::new();
+            row.get_text(1, &mut buf)?;
+            println!("{:?}", String::from_utf8(buf));
+        }
+
+        Ok(())
+    }
+
+    pub fn get_medicines(&self, medicine_type: &str) -> Result<Vec<medicineType>, Error> {
+        let mut result: Vec<medicineType> = Vec::new();
+        let sql = "SELECT Name, Instructions, Description, Type FROM Medicine WHERE Type = ?";
+
+        let medicines = self.select_many(sql, (&medicine_type.into_parameter(),))?;
+
+        for medicine_raw in medicines.iter() {
+            let medicine = medicineType {
+                name: String::from_utf8(medicine_raw[0].clone())?,
+                instruction: String::from_utf8(medicine_raw[1].clone())?,
+                description: String::from_utf8(medicine_raw[2].clone())?,
+                medicine_type: String::from_utf8(medicine_raw[3].clone())?,
+            };
+            result.push(medicine);
         }
 
         return Ok(result);

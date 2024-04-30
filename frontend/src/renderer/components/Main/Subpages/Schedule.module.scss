@@ -1,11 +1,14 @@
 .container {
+    position: relative;
     padding-top: 100px;
 
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-direction: column;
     gap: 100px;
+
+    min-height: calc(100vh - 130px);
 }
 
 .modal {
@@ -89,4 +92,13 @@
     align-items: center;
     justify-content: space-around;
     gap: 40px;
+}
+
+.loading {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
 }

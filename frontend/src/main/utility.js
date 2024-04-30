@@ -6,6 +6,18 @@ const toBase64 = (string) => {
     return Buffer.from(string).toString('base64');
 };
 
+const toBase36 = (value) => {
+    if (typeof value === 'number' && isFinite(value)) {
+        return value.toString(36);
+    } else if (typeof value === 'string') {
+        return Array.from(value)
+            .map((char) => char.charCodeAt(0).toString(36))
+            .join('');
+    } else {
+        throw new Error('Invalid input. Expected number or string.');
+    }
+};
+
 const get_pubkey_path = (_path, identifier) => {
     return path.join(_path, `public_key_${identifier}.pem`);
 };
@@ -70,6 +82,7 @@ const generateKeyPair = async (_path, identifier, callback) => {
 
 module.exports = {
     toBase64,
+    toBase36,
     generateKeyPair,
     get_pubkey_path,
     get_prikey_path,

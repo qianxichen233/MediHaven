@@ -12,6 +12,7 @@ import EditableSingleSchedule from '../../UI/EditableSingleSchedule';
 
 import Modal from 'react-modal';
 import { get_patient } from '../../../api/patient';
+import { PulseLoader } from 'react-spinners';
 
 const departments = [
     'Internal Medicine',
@@ -70,10 +71,10 @@ const patientPage = (
                     width="250px"
                     height="40px"
                     size="24px"
-                    layout="column"
+                    // layout="column"
                 />
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="SEARCH"
                     width="200px"
@@ -106,7 +107,7 @@ const patientPage = (
             </div>
             <div className={styles.modalButtons}>
                 <MainButton
-                    background={!!patient ? 'var(--primary-color)' : '#e0e0e0'}
+                    background={!!patient ? 'var(--primary-button)' : '#e0e0e0'}
                     color="white"
                     text="PROCEED"
                     width="150px"
@@ -115,7 +116,7 @@ const patientPage = (
                     disabled={!patient}
                 />
                 <MainButton
-                    background="var(--secondary-color)"
+                    background="var(--secondary-button)"
                     color="white"
                     text="CANCEL"
                     width="150px"
@@ -166,7 +167,7 @@ const infoPage = (
                     <label>Description: </label>
                     <textarea
                         rows={5}
-                        cols={40}
+                        cols={35}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Enter description here..."
@@ -176,7 +177,7 @@ const infoPage = (
             </div>
             <div className={styles.modalButtons}>
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--primary-button)"
                     color="white"
                     text="SUBMIT"
                     width="150px"
@@ -184,7 +185,7 @@ const infoPage = (
                     onClick={onSubmit}
                 />
                 <MainButton
-                    background="var(--secondary-color)"
+                    background="var(--secondary-button)"
                     color="white"
                     text="CANCEL"
                     width="150px"
@@ -208,6 +209,8 @@ const Appointment = (props) => {
         st: '',
         ed: '',
     });
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const [name, setName] = useState('');
     const [department, setDepartment] = useState('Any');
@@ -252,8 +255,11 @@ const Appointment = (props) => {
     };
 
     const onSearch = async () => {
+        if (!!physicians) setPhysicians([]);
+        setIsLoading(true);
         const result = await get_physicians(department, name);
-        await getSchedule(result);
+        if (!!result) await getSchedule(result);
+        setIsLoading(false);
     };
 
     const onSelect = (index, st, ed) => {
@@ -384,7 +390,7 @@ const Appointment = (props) => {
                     />
                 </div>
                 <MainButton
-                    background="var(--primary-color)"
+                    background="var(--backup-color-2)"
                     color="white"
                     text="SEARCH"
                     width="200px"
@@ -392,6 +398,11 @@ const Appointment = (props) => {
                     onClick={onSearch}
                 />
             </div>
+            {isLoading && (
+                <div className={styles.loading}>
+                    <PulseLoader color="#36d7b7" size={80} margin={20} />
+                </div>
+            )}
             <div className={styles.schedule}>
                 {physicians.map((physician, index) => {
                     return (
@@ -405,8 +416,8 @@ const Appointment = (props) => {
                             <MainButton
                                 background={
                                     selected[index]
-                                        ? 'var(--secondary-color)'
-                                        : 'var(--primary-color)'
+                                        ? 'var(--secondary-button)'
+                                        : 'var(--primary-button)'
                                 }
                                 color="white"
                                 text={selected[index] ? 'CANCEL' : 'ASSIGN'}

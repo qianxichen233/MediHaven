@@ -23,6 +23,11 @@ service MedicalRecord {
 service Schedule {
     rpc addSchedule (addScheduleRequest) returns (SuccessResponse);
     rpc getSchedule (getScheduleRequest) returns (scheduleResponse);
+    rpc finishSchedule (finishScheduleRequest) returns (SuccessResponse);
+}
+
+service Misc {
+    rpc getMedicines (getMedicinesRequest) returns (MedicinesResponse);
 }
 
 message Auth {
@@ -199,6 +204,8 @@ message singleSchedule {
     optional string patient_first_name = 7;
     optional string patient_last_name = 8;
     optional string patient_SSN = 9;
+    optional int32 schedule_ID = 10;
+    optional int32 finished = 11;
 }
 
 message addScheduleRequest {
@@ -216,4 +223,26 @@ message getScheduleRequest {
 message scheduleResponse {
     repeated singleSchedule schedules = 1;
     optional string msg = 2;
+}
+
+message finishScheduleRequest {
+    int32 schedule_ID = 1;
+
+    Auth auth = 2;
+}
+
+/*Service Misc*/
+message getMedicinesRequest {
+    string type = 1;
+}
+
+message SingleMedicine {
+    string name = 1;
+    string instruction = 2;
+    string description = 3;
+    string type = 4;
+}
+
+message MedicinesResponse {
+    repeated SingleMedicine medicines = 1;
 }

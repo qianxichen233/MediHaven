@@ -15,7 +15,12 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+require('dotenv').config();
+
 const xmpp = require('simple-xmpp');
+let connected = false;
+let login_role = '';
+let login_email = '';
 
 import {
     create_key,
@@ -24,7 +29,8 @@ import {
     sign,
     get_password,
 } from './key_manager';
-import { toBase64 } from './utility';
+import { toBase36, toBase64 } from './utility';
+import { check_message, get_messages, store_message } from './message_manager';
 
 class AppUpdater {
     constructor() {
@@ -59,18 +65,40 @@ ipcMain.handle('get_password', async (event, arg) => {
 });
 
 ipcMain.handle('connect', async (event, arg) => {
-    const password = await get_password(...arg);
-    const username = toBase64(arg[0] + '_' + arg[1]).replace(/=+$/, '');
+    if (connected) {
+        await xmpp.disconnect();
+        connected = false;
+    }
+
+    const password = await get_password(arg[0], arg[1]);
+    let username = arg[0] + '_' + arg[1];
+    username = username.replace('@', '_at_');
     console.log(username, password);
 
     xmpp.on('online', (data: any) => {
+        connected = true;
         console.log('Hey you are online! ');
         console.log(`Connected as ${data.jid.user}`);
     });
     xmpp.on('error', (error: string) =>
         console.log(`something went wrong!${error} `),
     );
-    xmpp.on('chat', (from: string, message: String) => {
+    xmpp.on('chat', async (from: string, message: String) => {
+        if (!mainWindow) return;
+        // eventEmitter.fire('message', { from, message });
+        if (
+            !(await store_message(arg[0], arg[1], {
+                from: from,
+                message: message,
+            }))
+        )
+            return;
+        mainWindow.webContents.send('chat_msg', {
+            message: {
+                from,
+                message,
+            },
+        });
         console.log(`Got a message! ${message} from ${from}`);
     });
     xmpp.connect({
@@ -79,13 +107,40 @@ ipcMain.handle('connect', async (event, arg) => {
         host: '172.210.68.64',
         port: 5222,
     });
+
+    login_role = arg[0];
+    login_email = arg[1];
 });
 
 ipcMain.handle('send', async (event, arg) => {
     const [role, email, message] = arg;
-    const username = toBase64(role + '_' + email);
+    let username = role + '_' + email;
+    username = username.replace('@', '_at_');
+    console.log(`send to ${username}`);
 
     xmpp.send(`${username}@localhost`, message);
+
+    const payload = JSON.stringify({
+        ...JSON.parse(message),
+        send: 1,
+    });
+
+    await store_message(login_role, login_email, {
+        from: username,
+        message: payload,
+    });
+});
+
+ipcMain.handle('load_msg', async (event, arg) => {
+    const [role, email] = arg;
+
+    const result = await get_messages(role, email);
+
+    return result;
+});
+
+ipcMain.handle('get_api', async (event, arg) => {
+    return process.env.BACKEND_SERVER;
 });
 
 if (process.env.NODE_ENV === 'production') {

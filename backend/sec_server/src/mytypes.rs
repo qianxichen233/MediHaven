@@ -14,6 +14,7 @@ pub struct recordType {
 }
 
 pub struct scheduleType {
+    pub schedule_id: i32,
     pub patient_id: i32,
     pub physician_id: i32,
     pub schedule_st: String,
@@ -23,6 +24,7 @@ pub struct scheduleType {
     pub patient_first_name: String,
     pub patient_last_name: String,
     pub patient_SSN: String,
+    pub finished: i32,
 }
 
 pub struct physicianType {
@@ -33,4 +35,11 @@ pub struct physicianType {
     pub department: String,
     pub title: String,
     pub email: String,
+}
+
+pub struct medicineType {
+    pub name: String,
+    pub instruction: String,
+    pub description: String,
+    pub medicine_type: String,
 }

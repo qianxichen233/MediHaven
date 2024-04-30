@@ -1,6 +1,8 @@
-import { getCurrentTime } from '../utils/utils';
+import { getAPI, getCurrentTime } from '../utils/utils';
 
 const register = async (type, data) => {
+    const account_type = type === 'administrator' ? 'admin' : type;
+
     const form = {};
 
     form['Code'] = data['Code'];
@@ -11,9 +13,9 @@ const register = async (type, data) => {
     form['Phone_Number'] = data['Phone Number'];
     form['Email'] = data['Email'];
 
-    form['Account_Type'] = type;
+    form['Account_Type'] = account_type;
 
-    if (type === 'admin' || type === 'receptionist') {
+    if (account_type === 'admin' || account_type === 'receptionist') {
         form['Age'] = data['Age'];
     } else {
         form['Title'] = data['Title'];
@@ -21,13 +23,13 @@ const register = async (type, data) => {
     }
 
     form['Pub_key'] = await window.electron.ipcRenderer.invoke('create_key', [
-        type,
+        account_type,
         form['Email'],
     ]);
 
     form['Password'] = await window.electron.ipcRenderer.invoke(
         'get_password',
-        [type, form['Email']],
+        [account_type, form['Email']],
     );
 
     console.log(form);
@@ -55,8 +57,10 @@ const register = async (type, data) => {
 };
 
 const login = async (type, email) => {
+    const account_type = type === 'administrator' ? 'admin' : type;
+
     const form = {};
-    form['account_type'] = type;
+    form['account_type'] = account_type;
     form['email'] = email;
     form['timestamp'] = getCurrentTime();
 
@@ -68,15 +72,18 @@ const login = async (type, email) => {
             email: email,
             timestamp: form['timestamp'],
         },
-        type,
+        account_type,
         email,
     ]);
 
     if (signature === null) {
         return false;
     }
+
+    const baseAPI = await getAPI();
+
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/login', {
+        const response = await fetch(`http://${baseAPI}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,6 +95,7 @@ const login = async (type, email) => {
         if (response.ok) {
             const data = await response.json();
             console.log('POST request successful:', data);
+            if (data.message === 'hacker') return 'hacker';
             if (data.message === 'success!') return true;
         } else {
             console.error('POST request failed');

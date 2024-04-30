@@ -1,12 +1,14 @@
 use sec_server::services::account::AccountService;
 use sec_server::services::code::CodeService;
 use sec_server::services::medical_record::MedicalRecordService;
+use sec_server::services::misc::MiscService;
 use sec_server::services::schedule::ScheduleService;
 
 use sec_server::mediheaven::code_server::CodeServer;
 use sec_server::mediheaven::account_server::AccountServer;
 use sec_server::mediheaven::medical_record_server::MedicalRecordServer;
 use sec_server::mediheaven::schedule_server::ScheduleServer;
+use sec_server::mediheaven::misc_server::MiscServer;
 
 use tonic::transport::Server;
 
@@ -18,12 +20,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let account_service = AccountService::default();
     let medical_record_service = MedicalRecordService::default();
     let schedule_service = ScheduleService::default();
+    let misc_server = MiscService::default();
 
     Server::builder()
         .add_service(AccountServer::new(account_service))
         .add_service(CodeServer::new(code_service))
         .add_service(MedicalRecordServer::new(medical_record_service))
         .add_service(ScheduleServer::new(schedule_service))
+        .add_service(MiscServer::new(misc_server))
         .serve(addr).await?;
 
     Ok(())

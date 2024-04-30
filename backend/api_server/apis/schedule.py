@@ -65,6 +65,20 @@ class schedule(Resource):
             "X-Signature", type=str, help="signature", required=True, location="headers"
         )
 
+        self.post_parser = reqparse.RequestParser()
+        self.post_parser.add_argument(
+            "schedule_ID", type=int, help="schedule ID", required=True
+        )
+        self.post_parser.add_argument(
+            "issuer_email", type=str, help="Issuer Email", required=True
+        )
+        self.post_parser.add_argument(
+            "timestamp", type=str, help="Timestamp", required=True
+        )
+        self.post_parser.add_argument(
+            "X-Signature", type=str, help="signature", required=True, location="headers"
+        )
+
     def get_args(self):
         caller = inspect.stack()[1].function
         args = getattr(self, caller + "_parser").parse_args()
@@ -77,6 +91,15 @@ class schedule(Resource):
         args = self.get_args()
 
         response = GRPC_API.addSchedule(args)
+        if not response.successful:
+            return jsonify({"message": f"failed!"})
+
+        return jsonify({"message": f"success!"})
+
+    def post(self):
+        args = self.get_args()
+
+        response = GRPC_API.finishSchedule(args)
         if not response.successful:
             return jsonify({"message": f"failed!"})
 
@@ -100,6 +123,8 @@ class schedule(Resource):
                     "patient_first_name": schedule.patient_first_name,
                     "patient_last_name": schedule.patient_last_name,
                     "patient_SSN": schedule.patient_SSN,
+                    "schedule_ID": schedule.schedule_ID,
+                    "finished": schedule.finished,
                 }
             )
 

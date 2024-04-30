@@ -95,6 +95,7 @@ const sign = async (data, role, email) => {
     try {
         privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
     } catch (error) {
+        console.log(`${privateKeyFilePath} not found!`);
         return null;
     }
 

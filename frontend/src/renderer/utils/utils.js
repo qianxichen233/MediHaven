@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 const getCurrentTime = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -21,4 +23,61 @@ const getCurrentDate = () => {
     return date;
 };
 
-export { getCurrentTime, getCurrentDate };
+const encodeMessage = (type, message) => {
+    const msg = {
+        type,
+        message,
+        timestamp: getCurrentTime(),
+        uuid: uuidv4(),
+    };
+
+    return JSON.stringify(msg);
+};
+
+const decodeMessage = (message) => {
+    return JSON.parse(message);
+};
+
+const decodeSender = (sender) => {
+    let name = sender.split('@')[0];
+    name = name.replace('_at_', '@');
+
+    const index = name.indexOf('_');
+
+    return {
+        role: name.substring(0, index),
+        email: name.substring(index + 1),
+    };
+};
+
+const calcAge = (birthday) => {
+    const birthDate = new Date(birthday);
+
+    const currentDate = new Date();
+
+    let age = currentDate.getFullYear() - birthDate.getFullYear();
+
+    if (
+        currentDate.getMonth() < birthDate.getMonth() ||
+        (currentDate.getMonth() === birthDate.getMonth() &&
+            currentDate.getDate() < birthDate.getDate())
+    ) {
+        age--;
+    }
+
+    return age;
+};
+
+const getAPI = async () => {
+    return await window.electron.ipcRenderer.invoke('get_api', []);
+};
+
+export {
+    getCurrentTime,
+    getCurrentDate,
+    encodeMessage,
+    decodeMessage,
+    decodeSender,
+    calcAge,
+    getAPI,
+};
