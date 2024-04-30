@@ -1,33 +1,194 @@
 .container {
     width: 80%;
-    margin-top: 100px;
+    margin-top: 50px;
     margin-left: auto;
     margin-right: auto;
 
     font-family: KoHo;
 
+    margin-bottom: 50px;
+
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
     > header {
         text-align: center;
         font-size: 28px;
         font-weight: bold;
-        background: #d9d9d9;
+        background: var(--backup-color-3);
         width: 100%;
 
-        padding: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
 
     > div {
-        width: 100%;
-        background-color: #f8f9fa;
-
-        min-height: 400px;
+        position: relative;
 
         display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 20px;
+        background-color: var(--primary-color);
+        min-height: 400px;
 
-        padding: 20px;
+        width: calc(100%);
+
+        .right {
+            flex: 1;
+
+            width: 50%;
+
+            padding-top: 20px;
+            padding-bottom: 20px;
+            min-height: 400px;
+
+            > div {
+                margin-left: 20px;
+                margin-right: 20px;
+                height: 100%;
+
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                flex-direction: column;
+                gap: 30px;
+
+                > div:not(.buttons) {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    > label {
+                        font-size: 24px;
+                    }
+                }
+
+                .buttons {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                }
+            }
+        }
+
+        .left {
+            flex: 1;
+
+            width: 50%;
+
+            display: flex;
+            align-items: center;
+            // justify-content: center;
+            flex-direction: column;
+            gap: 40px;
+
+            margin-top: 20px;
+
+            > header {
+                font-size: 24px;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .notfound {
+                font-size: 24px;
+                font-weight: 600;
+                color: red;
+            }
+
+            .found {
+                font-size: 24px;
+                font-weight: 600;
+                color: var(--backup-color-2);
+            }
+        }
+
+        .cover {
+            position: absolute;
+            height: 100%;
+
+            right: 0;
+
+            z-index: 1;
+            width: 50%;
+
+            background-color: var(--primary-color);
+
+            border-left: 1px solid black;
+
+            box-sizing: border-box;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            > span {
+                font-size: 40px;
+                font-weight: bold;
+                font-style: italic;
+
+                user-select: none;
+            }
+
+            transform-origin: top left;
+        }
+
+        .cover.active {
+            animation: myflip 0.5s forwards ease-in;
+        }
+        .cover.active > span {
+            animation: myflip_text 0.5s forwards ease-in;
+        }
+
+        .cover.deactive {
+            animation: myflip_reverse 0.5s forwards ease-in;
+        }
+        .cover.deactive > span {
+            animation: myflip_text_reverse 0.5s forwards ease-in;
+        }
+    }
+}
+
+@keyframes myflip {
+    50% {
+        transform: scaleX(0) skew(0, 8deg);
+    }
+    100% {
+        transform: scaleX(-1) skew(0, 0deg);
+    }
+}
+
+@keyframes myflip_text {
+    50% {
+        transform: scaleX(0) skew(0, 8deg);
+    }
+    100% {
+        transform: scaleX(-1) skew(0, 0deg);
+    }
+}
+
+@keyframes myflip_reverse {
+    0% {
+        transform: scaleX(-1) skew(0, 0deg);
+    }
+    50% {
+        transform: scaleX(0) skew(0, 8deg);
+    }
+    100% {
+        transform: scaleX(1) skew(0, 0deg);
+    }
+}
+
+@keyframes myflip_text_reverse {
+    0% {
+        transform: scaleX(-1) skew(0, 0deg);
+    }
+    50% {
+        transform: scaleX(0) skew(0, 8deg);
+    }
+    100% {
+        transform: scaleX(1) skew(0, 0deg);
     }
 }
