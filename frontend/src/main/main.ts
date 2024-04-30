@@ -15,6 +15,8 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+require('dotenv').config();
+
 const xmpp = require('simple-xmpp');
 let connected = false;
 let login_role = '';
@@ -135,6 +137,10 @@ ipcMain.handle('load_msg', async (event, arg) => {
     const result = await get_messages(role, email);
 
     return result;
+});
+
+ipcMain.handle('get_api', async (event, arg) => {
+    return process.env.BACKEND_SERVER;
 });
 
 if (process.env.NODE_ENV === 'production') {

@@ -1,4 +1,4 @@
-import { getCurrentTime } from '../utils/utils';
+import { getAPI, getCurrentTime } from '../utils/utils';
 
 const add_schedule = async (data) => {
     const form = {};
@@ -77,9 +77,11 @@ const get_schedule = async (type, email, st, ed, issuer_email) => {
         issuer_email,
     ]);
 
+    const baseAPI = await getAPI();
+
     try {
         const response = await fetch(
-            `http://127.0.0.1:5000/api/schedule?${params}`,
+            `http://${baseAPI}/api/schedule?${params}`,
             {
                 method: 'GET',
                 headers: {

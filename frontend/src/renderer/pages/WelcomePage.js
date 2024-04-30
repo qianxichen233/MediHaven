@@ -23,13 +23,14 @@ const Welcome = () => {
                 </div>
                 <div className={style.header_text}>
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Vestibulum non tortor vel tellus condimentum elementum.
-                        Sed laoreet erat enim, ac sagittis diam scelerisque
-                        vitae. Sed blandit pellentesque lectus, a efficitur quam
-                        convallis vitae. Aenean dapibus venenatis volutpat. Ut
-                        imperdiet mauris ac lacus euismod, at commodo turpis
-                        dictum. Etiam fringilla pur
+                        Welcome to MEDIHAVEN, your all-in-one electronic medical
+                        records (EMR) solution for hospitals. Designed for
+                        seamless collaboration between administrators,
+                        physicians, and receptionists, MEDIHAVEN streamlines
+                        patient management, appointment scheduling, and
+                        diagnosis while prioritizing data security and
+                        confidentiality. Experience the future of healthcare
+                        administration with MEDIHAVEN.
                     </p>
                 </div>
                 <img src={welcome_img} className={style.cover_img} />
@@ -58,48 +59,44 @@ const Welcome = () => {
             </div>
             <div className={style.description}>
                 <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Vestibulum non tortor vel tellus condimentum elementum. Sed
-                    laoreet erat enim, ac sagittis diam scelerisque vitae. Sed
-                    blandit pellentesque lectus, a efficitur quam convallis
-                    vitae. Aenean dapibus venenatis volutpat. Ut imperdiet
-                    mauris ac lacus euismod, at commodo turpis dictum. Etiam
-                    fringilla purus accumsan interdum venenatis. Praesent vel
-                    sem vitae nunc sodales accumsan. Vestibulum neque nulla,
-                    lacinia at semper sit amet, accumsan at orci. Curabitur sit
-                    amet nulla tincidunt, condimentum eros vel, tincidunt
-                    sapien. Nam finibus leo enim, vitae porta orci sodales eget.
-                    Donec pretium eu nibh non egestas.
+                    MEDIHAVEN is a cutting-edge electronic medical record (EMR)
+                    system revolutionizing healthcare administration within
+                    hospitals. With MEDIHAVEN, we offer a comprehensive solution
+                    tailored to the intricate needs of modern healthcare
+                    environments. Our platform seamlessly integrates the core
+                    functionalities essential for efficient patient management,
+                    physician engagement, and administrative oversight. From
+                    initial patient registration to diagnosis and treatment,
+                    MEDIHAVEN facilitates a smooth and intuitive workflow for
+                    administrators, physicians, and receptionists alike.
                     <br />
                     <br />
-                    Nunc a sollicitudin nibh. Quisque ligula ligula, malesuada
-                    eu tempus et, tempus eget augue. Duis a interdum arcu.
-                    Integer ornare non purus finibus posuere. Vivamus sed justo
-                    a ex rutrum facilisis a et ipsum. Aliquam facilisis aliquam
-                    felis in suscipit. Nam eu justo sit amet dolor blandit
-                    mollis ut a lorem. Interdum et malesuada fames ac ante ipsum
-                    primis in faucibus. Mauris augue enim, tempus at
-                    sollicitudin eu, pretium in nisi. Phasellus semper dui eget
-                    eros euismod, id condimentum est consequat. Quisque pharetra
-                    consectetur bibendum. Morbi vulputate pellentesque ex ac
-                    hendrerit. Vivamus odio lectus, eleifend tristique nisl in,
-                    bibendum vulputate quam.
+                    At the heart of MEDIHAVEN is a robust user role system,
+                    empowering administrators, physicians, and receptionists
+                    with tailored access and functionalities. Administrators can
+                    effortlessly manage user accounts and permissions, ensuring
+                    seamless onboarding and streamlined user experiences.
+                    Physicians benefit from a dedicated dashboard providing
+                    real-time insights into today's schedule, patient histories,
+                    and diagnostic tools. Meanwhile, receptionists can
+                    efficiently add new patients to the system and schedule
+                    appointments with the appropriate physician, optimizing
+                    patient flow and resource allocation.
                     <br />
                     <br />
-                    Phasellus consectetur tincidunt maximus. Nunc ex tortor,
-                    consectetur quis egestas eget, elementum ac lectus.
-                    Curabitur condimentum iaculis orci vitae faucibus. Nullam
-                    luctus ante purus, a luctus est vehicula ut. Vivamus in
-                    mauris ullamcorper, dictum dui ac, ultricies dui. Maecenas
-                    dignissim eros eget orci consequat, vitae bibendum nulla
-                    congue. Nam ut pellentesque sem. Vivamus tristique cursus
-                    quam sed pharetra. Mauris interdum mattis felis at
-                    condimentum. Cras a elit eleifend, vulputate risus sit amet,
-                    venenatis metus. Aenean vel augue blandit, aliquam risus
-                    vel, luctus dui. Vivamus venenatis convallis enim et
-                    scelerisque. Vivamus eget est placerat, fermentum purus eu,
-                    pretium augue. Fusce et tempus risus. Nulla facilisi. In hac
-                    habitasse platea dictumst.
+                    In addition to its core functionalities, MEDIHAVEN
+                    prioritizes data security and confidentiality. Our platform
+                    implements state-of-the-art encryption techniques and data
+                    integrity checks to safeguard patient information against
+                    unauthorized access and breaches. With built-in chat
+                    functionality, users can securely communicate and
+                    collaborate within the system, further enhancing
+                    coordination and efficiency. Whether you're a hospital
+                    administrator seeking to optimize operations or a physician
+                    aiming to deliver exceptional patient care, MEDIHAVEN sets
+                    the standard for modern EMR systems, empowering healthcare
+                    professionals to focus on what matters most: patient
+                    well-being.
                 </p>
             </div>
         </div>

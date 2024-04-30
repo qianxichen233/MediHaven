@@ -12,6 +12,7 @@ import EditableSingleSchedule from '../../UI/EditableSingleSchedule';
 
 import Modal from 'react-modal';
 import { get_patient } from '../../../api/patient';
+import { PulseLoader } from 'react-spinners';
 
 const departments = [
     'Internal Medicine',
@@ -209,6 +210,8 @@ const Appointment = (props) => {
         ed: '',
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const [name, setName] = useState('');
     const [department, setDepartment] = useState('Any');
 
@@ -252,9 +255,11 @@ const Appointment = (props) => {
     };
 
     const onSearch = async () => {
+        if (!!physicians) setPhysicians([]);
+        setIsLoading(true);
         const result = await get_physicians(department, name);
-        if (!result) return;
-        await getSchedule(result);
+        if (!!result) await getSchedule(result);
+        setIsLoading(false);
     };
 
     const onSelect = (index, st, ed) => {
@@ -393,6 +398,11 @@ const Appointment = (props) => {
                     onClick={onSearch}
                 />
             </div>
+            {isLoading && (
+                <div className={styles.loading}>
+                    <PulseLoader color="#36d7b7" size={80} margin={20} />
+                </div>
+            )}
             <div className={styles.schedule}>
                 {physicians.map((physician, index) => {
                     return (

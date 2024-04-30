@@ -1,4 +1,4 @@
-import { getCurrentTime } from '../utils/utils';
+import { getAPI, getCurrentTime } from '../utils/utils';
 
 const register = async (type, data) => {
     const account_type = type === 'administrator' ? 'admin' : type;
@@ -79,8 +79,11 @@ const login = async (type, email) => {
     if (signature === null) {
         return false;
     }
+
+    const baseAPI = await getAPI();
+
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/login', {
+        const response = await fetch(`http://${baseAPI}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

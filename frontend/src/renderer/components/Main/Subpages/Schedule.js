@@ -7,6 +7,7 @@ import { getCurrentDate } from '../../../utils/utils';
 
 import Modal from 'react-modal';
 import MainButton from '../../UI/MainButton';
+import { PulseLoader } from 'react-spinners';
 
 const modalStyle = {
     content: {
@@ -46,6 +47,8 @@ const Schedule = (props) => {
 
     const [selected, setSelected] = useState(null);
 
+    const [onLoading, setOnLoading] = useState(true);
+
     useEffect(() => {
         const getSchedule = async () => {
             const result = await get_schedule(
@@ -57,6 +60,7 @@ const Schedule = (props) => {
             );
             result.sort(sortSchedule);
             setSchedules(result);
+            setOnLoading(false);
         };
 
         getSchedule();
@@ -80,6 +84,11 @@ const Schedule = (props) => {
 
     return (
         <div className={styles.container}>
+            {onLoading && (
+                <div className={styles.loading}>
+                    <PulseLoader color="#36d7b7" size={80} margin={20} />
+                </div>
+            )}
             {schedules
                 .filter((item) => !item.finished)
                 .map((item, index) => {

@@ -68,6 +68,10 @@ const calcAge = (birthday) => {
     return age;
 };
 
+const getAPI = async () => {
+    return await window.electron.ipcRenderer.invoke('get_api', []);
+};
+
 export {
     getCurrentTime,
     getCurrentDate,
@@ -75,4 +79,5 @@ export {
     decodeMessage,
     decodeSender,
     calcAge,
+    getAPI,
 };
