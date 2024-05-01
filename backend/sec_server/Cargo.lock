@@ -28,6 +28,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ahash"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0453232ace82dee0dd0b4c87a59bd90f7b53b314f3e0f61fe2ee7c8a16482289"
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -700,6 +706,15 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
+dependencies = [
+ "ahash",
 ]
 
 [[package]]
@@ -1621,6 +1636,7 @@ dependencies = [
  "chrono",
  "csv",
  "generic-array 1.0.0",
+ "hex",
  "json",
  "lazy_static",
  "odbc-api",
@@ -1631,6 +1647,7 @@ dependencies = [
  "rand",
  "rsa",
  "sha256",
+ "sharks",
  "tokio",
  "tokio-util",
  "tonic",
@@ -1679,6 +1696,17 @@ dependencies = [
  "hex",
  "sha2",
  "tokio",
+]
+
+[[package]]
+name = "sharks"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "902b1e955f8a2e429fb1bad49f83fb952e6195d3c360ac547ff00fb826388753"
+dependencies = [
+ "hashbrown 0.9.1",
+ "rand",
+ "zeroize",
 ]
 
 [[package]]
@@ -2462,3 +2490,17 @@ name = "zeroize"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "525b4ec142c6b68a2d10f01f7bbf6755599ca3f81ea53b8431b7dd348f5fdb2d"
+dependencies = [
+ "zeroize_derive",
+]
+
+[[package]]
+name = "zeroize_derive"
+version = "1.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
