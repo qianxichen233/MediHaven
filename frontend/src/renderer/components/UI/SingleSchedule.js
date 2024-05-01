@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import styles from './SingleSchedule.module.scss';
 import { getCurrentTime } from '../../utils/utils';
-import { PhysicianIcon } from './Icon';
+import { PatientIcon, PhysicianIcon } from './Icon';
 
 const convertToPosX = (timestamp) => {
     const time = timestamp.split(' ')[1];
@@ -29,22 +29,28 @@ const SingleSchedule = (props) => {
         scheduleRef.current.scrollLeft = 120 * (parseInt(props.current) - 8);
     }, [scheduleRef]);
 
+    console.log(props.schedule);
+
     return (
         <div className={styles.container}>
             <div className={styles.info}>
                 <div>
                     <div className={styles.placeholder}>
-                        <PhysicianIcon height="80px" width="80px" />
+                        <PatientIcon height="80px" width="80px" />
                     </div>
                 </div>
                 <div>
-                    <span>
-                        {props.schedule.patient_first_name},{' '}
+                    <span style={{ fontWeight: 800 }}>
+                        {props.schedule.patient_first_name}{' '}
                         {props.schedule.patient_last_name}
                     </span>
-                    <span># yr old / SEX</span>
+                    <span style={{ fontWeight: 600 }}>Reserved At</span>
+                    <span style={{ fontStyle: 'italic' }}>
+                        {props.schedule.created_at}
+                    </span>
+                    {/* <span># yr old / SEX</span>
                     <span>DOB: MM/DD/YY</span>
-                    <span>MRN: #######</span>
+                    <span>MRN: #######</span> */}
                 </div>
             </div>
             <div ref={scheduleRef} className={styles.schedule}>

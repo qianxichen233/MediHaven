@@ -4,6 +4,30 @@ import Form from '../UI/Form';
 import { useState } from 'react';
 import { register } from '../../api/account';
 import { useNavigate } from 'react-router-dom';
+import { AdminIcon, PhysicianIcon, ReceptionistIcon } from '../UI/Icon';
+
+const departments = [
+    'Internal Medicine',
+    'Pediatrics',
+    'Obstetrics and Gynecology (OB/GYN)',
+    'Surgery',
+    'Anesthesiology',
+    'Emergency Medicine',
+    'Radiology',
+    'Orthopedics',
+    'Neurology',
+    'Cardiology',
+    'Oncology',
+    'Dermatology',
+    'Psychiatry',
+    'Ophthalmology',
+    'Urology',
+    'Pulmonology',
+    'Endocrinology',
+    'Gastroenterology',
+    'Nephrology',
+    'Infectious Diseases',
+];
 
 const inputFields = {
     administrator: {
@@ -34,7 +58,7 @@ const inputFields = {
         Title: 'text',
         Department: {
             type: 'list',
-            content: ['Nephrology', 'test'],
+            content: departments,
         },
         // 'Generate Key Pair?': 'checkbox',
     },
@@ -42,7 +66,10 @@ const inputFields = {
         Code: 'text',
         'First Name': 'text',
         'Last Name': 'text',
-        Sex: 'text',
+        Sex: {
+            type: 'list',
+            content: ['Male', 'Female'],
+        },
         Age: 'number',
         'Date of Birth': 'date',
         'Phone Number': 'text',
@@ -81,7 +108,7 @@ const RegisterForm = (props) => {
                 onSubmit={onSubmit}
                 column={2}
             ></Form>
-            <div className={styles.bookmarks}>
+            {/* <div className={styles.bookmarks}>
                 <div
                     className={`${styles.bookmark} ${
                         account_type === 'administrator' ? styles.active : ''
@@ -105,6 +132,41 @@ const RegisterForm = (props) => {
                     onClick={set_account_type.bind(this, 'receptionist')}
                 >
                     receptionist
+                </div>
+            </div> */}
+            <div className={styles.menu}>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'administrator' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'administrator')}
+                >
+                    <div>
+                        <AdminIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>admin</span>
+                </div>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'physician' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'physician')}
+                >
+                    <div>
+                        <PhysicianIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>physician</span>
+                </div>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'receptionist' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'receptionist')}
+                >
+                    <div>
+                        <ReceptionistIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>receptionist</span>
                 </div>
             </div>
         </div>

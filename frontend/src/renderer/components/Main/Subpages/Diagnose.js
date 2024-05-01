@@ -371,7 +371,7 @@ const Diagnose = (props) => {
                                         background={
                                             addMedicineDisabled
                                                 ? '#e0e0e0'
-                                                : 'var(--primary-color)'
+                                                : 'var(--primary-button)'
                                         }
                                         color="white"
                                         text="Add Medicine"
@@ -418,7 +418,7 @@ const Diagnose = (props) => {
                                                                             .list
                                                                             .length ===
                                                                         0
-                                                                            ? 'var(--primary-color)'
+                                                                            ? 'var(--primary-button)'
                                                                             : 'orange'
                                                                     }
                                                                     color="white"
@@ -431,7 +431,7 @@ const Diagnose = (props) => {
                                                                     )}
                                                                 />
                                                                 <MainButton
-                                                                    background="var(--secondary-color)"
+                                                                    background="var(--secondary-button)"
                                                                     color="white"
                                                                     text="DELETE"
                                                                     width="150px"
@@ -546,8 +546,8 @@ const Diagnose = (props) => {
                                                                         0
                                                                             ? '#e0e0e0'
                                                                             : medicine.locked
-                                                                            ? 'var(--secondary-color)'
-                                                                            : 'var(--primary-color)'
+                                                                            ? 'var(--secondary-button)'
+                                                                            : 'var(--primary-button)'
                                                                     }
                                                                     color="white"
                                                                     text={
@@ -612,7 +612,7 @@ const Diagnose = (props) => {
                                     background={
                                         !allowSubmit
                                             ? '#e0e0e0'
-                                            : 'var(--primary-color)'
+                                            : 'var(--primary-button)'
                                     }
                                     color="white"
                                     text="SUBMIT"
