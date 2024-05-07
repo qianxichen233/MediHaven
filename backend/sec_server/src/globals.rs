@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use crate::db_handler;
+use crate::{ db_handler, myutils::get_secrets_from_env };
 
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -8,6 +8,8 @@ use chacha20poly1305::{
     aead::generic_array::{ GenericArray, typenum::{ UInt, UTerm } },
     consts::{ B0, B1 },
 };
+use sharks::{ Sharks, Share };
+
 use std::fs;
 
 type KeyType = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
@@ -16,9 +18,19 @@ lazy_static! {
     static ref MY_DB_HANDLER: db_handler::DBHandler<'static> = {
         let mut handler = db_handler::DBHandler::new().unwrap();
 
-        // currently read from file directly
-        // to-do: replace with shamir's secret sharing algorithm to get the root key
-        let data = fs::read("./root_key.bin").expect("root key does not exist!");
+        // let data = fs::read("./root_key.bin").expect("root key does not exist!");
+        // println!("{:?}", data);
+
+        let mut result = vec![];
+        get_secrets_from_env(&mut result);
+        let shares: Vec<Share> = result
+            .iter()
+            .map(|s| Share::try_from(s.as_slice()).unwrap())
+            .collect();
+
+        let sharks = Sharks(3);
+        let data = sharks.recover(shares.as_slice()).unwrap();
+        // println!("{:?}", data);
 
         let mut root_key: KeyType = GenericArray::default();
         root_key.copy_from_slice(&data[..]);

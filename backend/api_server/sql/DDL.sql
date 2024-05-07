@@ -116,13 +116,18 @@ CREATE TABLE Medicine_Treat (
 );
 
 CREATE TABLE register_code (
-    CODE VARCHAR(100),
+    ID INT NOT NULL AUTO_INCREMENT,
+    CODE VARCHAR(100) UNIQUE,
     Account_type  VARCHAR(20) NOT NULL,
     Expiration_Date DATE NOT NULL,
     Issuer VARCHAR(100) NOT NULL,
+    Prev_HASH VARCHAR(100) NOT NULL,
+    prev INT NOT NULL,
+    Action VARCHAR(20) NOT NULL,
     Magic BLOB NOT NULL,
-    PRIMARY KEY(CODE),
+    PRIMARY KEY(ID),
     FOREIGN KEY(issuer) REFERENCES Administrator(Email),
+    FOREIGN KEY(prev) REFERENCES register_code(ID),
     CHECK (
         Account_type IN ("admin", "physician", "receptionist")
     )

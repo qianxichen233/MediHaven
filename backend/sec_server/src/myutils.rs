@@ -1,5 +1,6 @@
 use chrono::{ DateTime, Local, NaiveDateTime };
 use rand::Rng;
+use std::env;
 
 use crate::globals;
 use crate::mycrypto::MyCrypto;
@@ -80,4 +81,13 @@ pub fn increment_nonce(nonce: &mut Nonce) -> &Nonce {
     }
 
     return nonce;
+}
+
+pub fn get_secrets_from_env(result: &mut Vec<Vec<u8>>) {
+    let args: Vec<String> = env::args().collect();
+
+    for (_, arg) in args.iter().enumerate().skip(1) {
+        // println!("Argument {}: {}", i, arg);
+        result.push(hex::decode(arg).unwrap());
+    }
 }
