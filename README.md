@@ -69,6 +69,7 @@ Below is the list of assumptions and corresponding measures to mitigate/prevent 
             -   **main.ts**: contains the main window script for the frontend
             -   **key_manager.js**: contains the functions to manage key pairs
             -   **message_manager.js**: contains the functions to manage chat messages
+            -   **tests/**: contains the test script for electron desktop features
         -   **renderer/**: contains the source code of the renderer written in Reactjs
 -   **backend/**: contains the main source code files for the backend
     -   **api_server/**: contains the Flask API Server implementation
