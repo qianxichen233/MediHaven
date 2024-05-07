@@ -1,7 +1,7 @@
 import pyodbc
 import re
 
-connection_string = "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven;UID=root;PWD="
+connection_string = "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven_dev;UID=root;PWD="
 
 
 def execute_sql_file(sql_file, conn):
@@ -31,7 +31,7 @@ def execute_sql_file(sql_file, conn):
 
 
 conn = pyodbc.connect(
-    "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven;UID=root;PWD="
+    "Driver={MariaDB ODBC Driver};Server=localhost;Port=3306;Database=mediheaven_dev;UID=root;PWD="
 )
 
 execute_sql_file("./sql/clear.sql", conn)

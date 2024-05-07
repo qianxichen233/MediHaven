@@ -27,8 +27,8 @@ const extract_time = (datetime) => {
 };
 
 const sortSchedule = (a, b) => {
-    const dateA = new Date(a.schedule_at);
-    const dateB = new Date(b.schedule_at);
+    const dateA = new Date(a.schedule_st);
+    const dateB = new Date(b.schedule_st);
 
     if (dateA < dateB) {
         return -1;
@@ -59,7 +59,9 @@ const Schedule = (props) => {
                 user.email,
             );
             result.sort(sortSchedule);
-            setSchedules(result);
+            console.log(result);
+            if (result.length === 0) setSchedules(false);
+            else setSchedules(result);
             setOnLoading(false);
         };
 
@@ -89,18 +91,22 @@ const Schedule = (props) => {
                     <PulseLoader color="#36d7b7" size={80} margin={20} />
                 </div>
             )}
-            {schedules
-                .filter((item) => !item.finished)
-                .map((item, index) => {
-                    return (
-                        <SingleSchedule
-                            current={new Date().getHours().toString()}
-                            schedule={item}
-                            key={index}
-                            onSelect={onSelect.bind(this, index)}
-                        />
-                    );
-                })}
+            {schedules === false ? (
+                <span className={styles.hint}>No Appointment Today</span>
+            ) : (
+                schedules
+                    .filter((item) => !item.finished)
+                    .map((item, index) => {
+                        return (
+                            <SingleSchedule
+                                current={new Date().getHours().toString()}
+                                schedule={item}
+                                key={index}
+                                onSelect={onSelect.bind(this, index)}
+                            />
+                        );
+                    })
+            )}
             {selected !== null && (
                 <Modal
                     isOpen={isModalOpen}

@@ -57,6 +57,8 @@ const get_password = async (role, email) => {
         toBase64(role + email),
     );
 
+    console.log(toBase64(role + email));
+
     const privateKeyPEM = fs.readFileSync(privateKeyFilePath, 'utf8');
 
     const hash = crypto.createHash('sha256');

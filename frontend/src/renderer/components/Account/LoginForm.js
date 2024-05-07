@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMyContext } from '../MyContext';
 import { decodeMessage, decodeSender } from '../../utils/utils';
 import { MessageQueue } from '../../utils/MessageQueue';
+import { AdminIcon, PhysicianIcon, ReceptionistIcon } from '../UI/Icon';
 
 const inputFields = {
     administrator: {
@@ -101,7 +102,7 @@ const LoginForm = (props) => {
             {isHacker && (
                 <div className={styles.hacker}>Get away, you damn hacker!</div>
             )}
-            <div className={styles.bookmarks}>
+            {/* <div className={styles.bookmarks}>
                 <div
                     className={`${styles.bookmark} ${
                         account_type === 'administrator' ? styles.active : ''
@@ -125,6 +126,41 @@ const LoginForm = (props) => {
                     onClick={set_account_type.bind(this, 'receptionist')}
                 >
                     receptionist
+                </div>
+            </div> */}
+            <div className={styles.menu}>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'administrator' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'administrator')}
+                >
+                    <div>
+                        <AdminIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>admin</span>
+                </div>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'physician' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'physician')}
+                >
+                    <div>
+                        <PhysicianIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>physician</span>
+                </div>
+                <div
+                    className={`${styles.item} ${
+                        account_type === 'receptionist' ? styles.active : ''
+                    }`}
+                    onClick={set_account_type.bind(this, 'receptionist')}
+                >
+                    <div>
+                        <ReceptionistIcon height={'30px'} width={'30px'} />
+                    </div>
+                    <span>receptionist</span>
                 </div>
             </div>
         </div>

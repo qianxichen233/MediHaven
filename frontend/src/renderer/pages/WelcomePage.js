@@ -18,7 +18,7 @@ const Welcome = () => {
             </div>
             <div className={style.header}>
                 <div className={style.title}>
-                    <MediHeavenIcon />
+                    <MediHeavenIcon height={'100px'} width={'100px'} />
                     <h1>MEDIHAVEN</h1>
                 </div>
                 <div className={style.header_text}>

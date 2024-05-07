@@ -19,7 +19,7 @@ const Header = (props) => {
                         <span>Popups</span>
                     </div>
                     <div className={styles.search}>
-                        <span>Search for patient</span>
+                        <span>Search for help</span>
                     </div>
                 </div>
                 <Tab

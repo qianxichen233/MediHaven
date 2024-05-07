@@ -12,9 +12,12 @@ config = {
         "http://127.0.0.1:1212",
         "http://localhost:1213",
         "http://127.0.0.1:1213",
-        "http://0.0.0.0:1212",
     ],
 }
+
+# config = {
+#     "ORIGINS": "*",
+# }
 
 app = Flask(__name__)
 
@@ -26,4 +29,4 @@ app.register_blueprint(schedule_api, url_prefix="/api")
 app.register_blueprint(medicine_api, url_prefix="/api")
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True, host="0.0.0.0")
+    app.run(port=5000, debug=True)
